@@ -1,0 +1,13 @@
+v0.1.0 sonrası offline geliştirme sırası:
+
+1. Para kazanma mini oyununun dokunma/seri/bonus etkileşimi.
+2. Yerel içerik kataloglarının JSON asset yerine sürümlü domain verisine taşınması.
+3. İş ilanları ve başvuru uygunluğu.
+4. Çalışma görevleri, maaş ve performans.
+5. Terfi ve kariyer yolu.
+6. Şehirler ve yaşam giderleri.
+7. Şirket, çalışanlar ve projeler.
+v0.2.0 tamamlandı: para kazanma mini oyunu, seri ve bonus sistemi eklendi.
+v0.3.0 tamamlandı: iş ilanları, başvuru uygunluğu ve aktif iş kaydı eklendi.
+
+v1.0.0 tamamlandı: tüm temel offline oyun döngüsü, kariyer, şehir, şirket ve yerel kayıt akışı hazır.

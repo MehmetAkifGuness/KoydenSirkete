@@ -1,0 +1,55 @@
+# Kariyerden Şirkete
+
+Android-first, tamamen offline kariyer ve şirket simülasyonu.
+
+## Kesin çalışma sınırı
+
+- APK kurulduktan sonra internet, hesap, Google Play Games, backend veya Docker gerekmez.
+- Uygulama uçak modunda çalışır.
+- Oyun kuralları cihazdaki Dart `domain/application` katmanında çalışır.
+- İlerleme SQLite veritabanında cihazda saklanır.
+- Android manifestinde `INTERNET` izni yoktur.
+
+## Teknoloji
+
+- Flutter + Dart
+- SQLite + sqflite
+- Material 3
+- Feature-first klasörleme
+- SOLID bağımlılık yönü: presentation → application → domain ← data adapter
+
+## v0.1.0 kapsamı
+
+- Tek oyuncu kaydı
+- Para, enerji, bilgi, tecrübe
+- Para kazanma eylemi ve günlük azalan kazanç
+- Dinlenme ve enerji yenileme
+- Ücretsiz pratik, standart kurs ve yoğun eğitim
+- Gün/saat ilerlemesi
+- Yerel kayıt ve kayıt şema sürümü
+
+## v1.0.0 kapsamı
+
+- Onboarding ve yerel yeni oyun sıfırlama
+- Dokunma mini oyunu ve performans bonusu
+- İş ilanları, çalışma görevleri, maaş ve performans
+- Kariyer yolu ve terfi
+- Şehir değişimi ve günlük yaşam giderleri
+- Şirket kurma, çalışan alma ve proje yönetimi
+- SQLite v2-v7 geriye dönük migrasyonları
+
+## Çalıştırma
+
+```powershell
+cd mobile
+flutter pub get
+flutter run
+```
+
+APK:
+
+```powershell
+flutter build apk --release
+```
+
+Mağaza dağıtımı için `mobile/android/key.properties.example` dosyasını `key.properties` olarak kopyalayıp gerçek release keystore bilgilerini girin. Bilgi yoksa release derlemesi yalnızca yerel test için debug imzasıyla oluşturulur.

@@ -1,0 +1,52 @@
+import '../entities/work_task.dart';
+
+abstract final class WorkTaskCatalog {
+  static const tasks = <WorkTask>[
+    WorkTask(
+      id: 1,
+      jobId: 1,
+      title: 'Müşteri desteği',
+      description: 'Müşterilere yardımcı ol ve iletişim becerini geliştir.',
+      energyCost: 20,
+      durationHours: 8,
+      salaryMultiplier: 1,
+      performanceGain: 5,
+      experienceGain: 4,
+    ),
+    WorkTask(
+      id: 2,
+      jobId: 1,
+      title: 'Satış hedefi',
+      description: 'Günün satış hedefini tamamla ve daha yüksek gelir kazan.',
+      energyCost: 25,
+      durationHours: 6,
+      salaryMultiplier: 1.2,
+      performanceGain: 7,
+      experienceGain: 5,
+    ),
+    WorkTask(
+      id: 3,
+      jobId: 2,
+      title: 'Vardiya planı',
+      description: 'Ekibin vardiya planını hazırla ve operasyonu düzenle.',
+      energyCost: 24,
+      durationHours: 8,
+      salaryMultiplier: 1,
+      performanceGain: 5,
+      experienceGain: 7,
+    ),
+    WorkTask(
+      id: 4,
+      jobId: 3,
+      title: 'Bölge raporu',
+      description: 'Mağaza sonuçlarını analiz et ve büyüme önerisi hazırla.',
+      energyCost: 28,
+      durationHours: 8,
+      salaryMultiplier: 1,
+      performanceGain: 4,
+      experienceGain: 9,
+    ),
+  ];
+
+  static List<WorkTask> forJob(int jobId) => tasks.where((task) => task.jobId == jobId).toList(growable: false);
+}
