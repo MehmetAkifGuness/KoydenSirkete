@@ -12,6 +12,8 @@ import '../../../cities/domain/services/city_service.dart';
 import '../../../company/domain/services/company_service.dart';
 import '../../application/game_session_application_service.dart';
 import '../../domain/entities/player_state.dart';
+import '../../../daily_goals/domain/entities/daily_goal.dart';
+import '../../../company/domain/entities/company_project.dart';
 
 class GameSessionController extends ChangeNotifier {
   GameSessionController({required GameSessionApplicationService applicationService})
@@ -46,144 +48,65 @@ class GameSessionController extends ChangeNotifier {
   Future<void> retryInitialization() => initialize();
 
   Future<String?> earnMoney({EarningPerformance performance = EarningPerformance.none}) async {
-    if (!_canExecute()) {
-      return 'Oyun henüz hazırlanıyor.';
-    }
-    _isBusy = true;
-    notifyListeners();
-    try {
-      final result = await _applicationService.earn(_state, performance: performance);
-      _state = result.state;
-      return '+₺${result.reward} kazandın. ${result.state.day}. gün, ${result.state.hour}:00';
-    } on GameRuleException catch (exception) {
-      return exception.message;
-    } catch (_) {
-      return 'İlerleme kaydedilemedi. Lütfen tekrar dene.';
-    } finally {
-      _isBusy = false;
-      notifyListeners();
-    }
+    return _execute(
+      action: (state) => _applicationService.earn(state, performance: performance),
+      stateOf: (result) => result.state,
+      message: (result) => '+₺${result.reward} kazandın. ${result.state.day}. gün, ${result.state.hour}:00',
+    );
   }
 
   Future<String?> train(Course course) async {
-    if (!_canExecute()) {
-      return 'Oyun henüz hazırlanıyor.';
-    }
-    _isBusy = true;
-    notifyListeners();
-    try {
-      final nextState = await _applicationService.train(_state, course);
-      _state = nextState;
-      return '${course.name} tamamlandı. +${course.knowledge} bilgi';
-    } on GameRuleException catch (exception) {
-      return exception.message;
-    } catch (_) {
-      return 'İlerleme kaydedilemedi. Lütfen tekrar dene.';
-    } finally {
-      _isBusy = false;
-      notifyListeners();
-    }
+    return _execute(
+      action: (state) => _applicationService.train(state, course),
+      stateOf: (result) => result,
+      message: (_) => '${course.name} tamamlandı. +${course.knowledge} bilgi',
+    );
   }
 
   Future<String?> rest() async {
-    if (!_canExecute()) {
-      return 'Oyun henüz hazırlanıyor.';
-    }
-    _isBusy = true;
-    notifyListeners();
-    try {
-      final nextState = await _applicationService.rest(_state);
-      _state = nextState;
-      return 'Dinlendin. Enerjin yenilendi.';
-    } on GameRuleException catch (exception) {
-      return exception.message;
-    } catch (_) {
-      return 'İlerleme kaydedilemedi. Lütfen tekrar dene.';
-    } finally {
-      _isBusy = false;
-      notifyListeners();
-    }
+    return _execute(
+      action: _applicationService.rest,
+      stateOf: (result) => result,
+      message: (_) => 'Dinlendin. Enerjin yenilendi.',
+    );
   }
 
   JobApplicationCheck checkJob(Job job) => _applicationService.checkJob(_state, job);
 
   Future<String?> applyForJob(Job job) async {
-    if (!_canExecute()) {
-      return 'Oyun henüz hazırlanıyor.';
-    }
-    _isBusy = true;
-    notifyListeners();
-    try {
-      _state = await _applicationService.applyForJob(_state, job);
-      return '${job.title} başvurun kabul edildi.';
-    } on GameRuleException catch (exception) {
-      return exception.message;
-    } catch (_) {
-      return 'İlerleme kaydedilemedi. Lütfen tekrar dene.';
-    } finally {
-      _isBusy = false;
-      notifyListeners();
-    }
+    return _execute(
+      action: (state) => _applicationService.applyForJob(state, job),
+      stateOf: (result) => result,
+      message: (_) => '${job.title} başvurun kabul edildi.',
+    );
   }
 
   Future<String?> work(Job job, WorkTask task) async {
-    if (!_canExecute()) {
-      return 'Oyun henüz hazırlanıyor.';
-    }
-    _isBusy = true;
-    notifyListeners();
-    try {
-      final result = await _applicationService.work(_state, job, task);
-      _state = result.state;
-      return '+₺${result.income} kazandın. Performansın: %${result.state.performance}';
-    } on GameRuleException catch (exception) {
-      return exception.message;
-    } catch (_) {
-      return 'İlerleme kaydedilemedi. Lütfen tekrar dene.';
-    } finally {
-      _isBusy = false;
-      notifyListeners();
-    }
+    return _execute(
+      action: (state) => _applicationService.work(state, job, task),
+      stateOf: (result) => result.state,
+      message: (result) => '+₺${result.income} kazandın. Performansın: %${result.state.performance}',
+    );
   }
 
   PromotionCheck checkPromotion(Job currentJob, Job? nextJob) => _applicationService.checkPromotion(_state, currentJob, nextJob);
 
   Future<String?> promote(Job currentJob, Job nextJob) async {
-    if (!_canExecute()) {
-      return 'Oyun henüz hazırlanıyor.';
-    }
-    _isBusy = true;
-    notifyListeners();
-    try {
-      _state = await _applicationService.promote(_state, currentJob, nextJob);
-      return '${nextJob.title} seviyesine terfi ettin.';
-    } on GameRuleException catch (exception) {
-      return exception.message;
-    } catch (_) {
-      return 'İlerleme kaydedilemedi. Lütfen tekrar dene.';
-    } finally {
-      _isBusy = false;
-      notifyListeners();
-    }
+    return _execute(
+      action: (state) => _applicationService.promote(state, currentJob, nextJob),
+      stateOf: (result) => result,
+      message: (_) => '${nextJob.title} seviyesine terfi ettin.',
+    );
   }
 
   CityMoveCheck checkCityMove(City city) => _applicationService.checkCityMove(_state, city);
 
   Future<String?> moveCity(City city) async {
-    if (!_canExecute()) {
-      return 'Oyun henüz hazırlanıyor.';
-    }
-    _isBusy = true;
-    notifyListeners();
-    try {
-      _state = await _applicationService.moveCity(_state, city);
-      return '${city.name} şehrine taşındın.';
-    } on GameRuleException catch (exception) {
-      return exception.message;
-    } finally {
-      _isBusy = false;
-      notifyListeners();
-    }
+    return _execute(
+      action: (state) => _applicationService.moveCity(state, city),
+      stateOf: (result) => result,
+      message: (_) => '${city.name} şehrine taşındın.',
+    );
   }
 
   Future<void> completeOnboarding() async {
@@ -218,59 +141,77 @@ class GameSessionController extends ChangeNotifier {
     }
   }
 
+  DailyGoalStatus get dailyGoalStatus => _applicationService.dailyGoalStatus(_state);
+
+  Future<String?> claimDailyGoal() async {
+    return _execute(
+      action: _applicationService.claimDailyGoal,
+      stateOf: (result) => result,
+      message: (_) => 'Günlük hedef ödülünü aldın: +₺${dailyGoalStatus.reward}.',
+    );
+  }
+
   CompanyCheck checkCompanyEstablishment() => _applicationService.checkCompanyEstablishment(_state);
 
   Future<String?> establishCompany() async {
-    if (!_canExecute()) {
-      return 'Oyun henüz hazırlanıyor.';
-    }
-    _isBusy = true;
-    notifyListeners();
-    try {
-      _state = await _applicationService.establishCompany(_state);
-      return 'Şirketin kuruldu. Artık kendi işini büyütebilirsin.';
-    } on GameRuleException catch (exception) {
-      return exception.message;
-    } catch (_) {
-      return 'İlerleme kaydedilemedi. Lütfen tekrar dene.';
-    } finally {
-      _isBusy = false;
-      notifyListeners();
-    }
+    return _execute(
+      action: _applicationService.establishCompany,
+      stateOf: (result) => result,
+      message: (_) => 'Şirketin kuruldu. Artık kendi işini büyütebilirsin.',
+    );
   }
 
   Future<String?> recruitEmployee() async {
-    if (!_canExecute()) {
-      return 'Oyun henüz hazırlanıyor.';
-    }
-    _isBusy = true;
-    notifyListeners();
-    try {
-      _state = await _applicationService.recruitEmployee(_state);
-      return 'Yeni çalışan ekibe katıldı.';
-    } on GameRuleException catch (exception) {
-      return exception.message;
-    } catch (_) {
-      return 'İlerleme kaydedilemedi. Lütfen tekrar dene.';
-    } finally {
-      _isBusy = false;
-      notifyListeners();
-    }
+    return _execute(
+      action: _applicationService.recruitEmployee,
+      stateOf: (result) => result,
+      message: (_) => 'Yeni çalışan ekibe katıldı.',
+    );
+  }
+
+  CompanyCheck checkCompanyUpgrade() => _applicationService.checkCompanyUpgrade(_state);
+
+  Future<String?> upgradeCompany() async {
+    return _execute(
+      action: _applicationService.upgradeCompany,
+      stateOf: (result) => result,
+      message: (result) => 'Şirketin seviye ${result.companyLevel} oldu.',
+    );
+  }
+
+  Future<String?> selectCompanyProject(CompanyProject project) async {
+    return _execute(
+      action: (state) => _applicationService.selectCompanyProject(state, project),
+      stateOf: (result) => result,
+      message: (_) => '${project.name} projesi seçildi.',
+    );
   }
 
   Future<String?> advanceCompanyProject() async {
+    return _execute(
+      action: _applicationService.advanceCompanyProject,
+      stateOf: (result) => result.state,
+      message: (result) => result.message,
+    );
+  }
+
+  Future<String?> _execute<T>({
+    required Future<T> Function(PlayerState state) action,
+    required PlayerState Function(T result) stateOf,
+    required String Function(T result) message,
+  }) async {
     if (!_canExecute()) {
       return 'Oyun henüz hazırlanıyor.';
     }
     _isBusy = true;
     notifyListeners();
     try {
-      final result = await _applicationService.advanceCompanyProject(_state);
-      _state = result.state;
-      return result.message;
+      final result = await action(_state);
+      _state = stateOf(result);
+      return message(result);
     } on GameRuleException catch (exception) {
       return exception.message;
-    } on Exception {
+    } catch (_) {
       return 'İlerleme kaydedilemedi. Lütfen tekrar dene.';
     } finally {
       _isBusy = false;

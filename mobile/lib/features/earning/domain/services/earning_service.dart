@@ -30,6 +30,7 @@ class EarningService {
     final progressed = state.advanceHours(durationHours);
     final nextState = progressed.copyWith(
       money: state.money + reward,
+      totalEarned: state.totalEarned + reward,
       energy: state.energy - energyCost,
       earningSessionsToday: progressed.day == state.day ? state.earningSessionsToday + 1 : 1,
     );

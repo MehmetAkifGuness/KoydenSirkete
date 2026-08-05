@@ -31,6 +31,13 @@ AppDatabase / SQLite
 
 ## Feature sırası
 
-`earning → training → jobs → career → cities → company`
+`earning → training → jobs → career → cities → company → daily_goals → progress`
 
-İlk sürüm yalnızca `earning` ve `training` özelliklerini oynanabilir hâle getirir. Diğerleri tasarımda kilitli görünür.
+## Sürüm 1.2–1.4 sınırları
+
+- `daily_goals`: günlük aksiyon hedefi ve tek seferlik ödül kuralı.
+- `progress`: kalıcı istatistik, başarı kataloğu ve ödül değerlendirmesi.
+- `company`: şirket seviyesi, kapasite ve proje kataloğu.
+- Yeni kurallar application service üzerinden persist edilir; widget'lar yalnızca state ve komut çağırır.
+
+1.4.0 itibarıyla listedeki temel özellikler offline oynanabilir durumdadır; yeni kurallar domain servislerinde, kalıcı yazma akışı application service'te tutulur.

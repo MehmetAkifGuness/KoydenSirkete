@@ -1,5 +1,21 @@
 # Sürüm durumu
 
+## 1.4.0 — Şirket derinliği
+
+- Şirket seviyesi yükseltme ve çalışan kapasitesi tamamlandı.
+- Seviye bazlı proje kataloğu eklendi.
+- Proje tamamlanma istatistikleri ve v1.3 başarı bağlantısı eklendi.
+
+## 1.3.0 — İlerleme ve başarılar
+
+- Kalıcı oyun istatistikleri eklendi.
+- Ödüllü başarılar ve profil ilerleme ekranı tamamlandı.
+
+## 1.2.0 — Günlük hedefler
+
+- Kazanç, çalışma ve eğitim aksiyonları günlük hedefe bağlandı.
+- Günlük hedef ödülü yerel SQLite kaydına eklendi.
+
 ## 0.1.0 — offline oynanabilir çekirdek
 
 Tamamlananlar:

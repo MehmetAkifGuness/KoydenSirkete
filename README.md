@@ -50,6 +50,24 @@ Android-first, tamamen offline kariyer ve şirket simülasyonu.
 - Uzmanlık eğitimi
 - Sahil kenti ve Teknoloji vadisi
 
+## v1.2.0 günlük hedefler
+
+- Her oyun gününde üç üretken aksiyonluk günlük hedef.
+- Hedef tamamlanınca cihazda saklanan ₺120 ödül.
+- Kazanç, çalışma ve eğitim aksiyonlarının günlük takibi.
+
+## v1.3.0 ilerleme sistemi
+
+- Toplam kazanç, görev, eğitim ve proje istatistikleri.
+- Tek seferlik ödüllü başarılar.
+- Profil üzerinden başarı ve ilerleme ekranı.
+
+## v1.4.0 şirket derinliği
+
+- Üç şirket seviyesi ve çalışan kapasitesi.
+- Seviye bazlı üç proje türü.
+- Proje maliyeti, ödülü, ilerleme hızı ve deneyim kazanımı.
+
 ## Çalıştırma
 
 ```powershell

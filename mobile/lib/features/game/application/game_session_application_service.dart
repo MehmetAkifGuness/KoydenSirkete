@@ -14,6 +14,9 @@ import '../../company/domain/services/company_service.dart';
 import '../domain/entities/player_state.dart';
 import '../domain/repositories/player_state_repository.dart';
 import '../domain/services/rest_service.dart';
+import '../../daily_goals/domain/entities/daily_goal.dart';
+import '../../progress/domain/services/achievement_service.dart';
+import '../../company/domain/entities/company_project.dart';
 
 class GameSessionApplicationService {
   GameSessionApplicationService({
@@ -27,6 +30,8 @@ class GameSessionApplicationService {
     CityService? cityService,
     LivingCostService? livingCostService,
     CompanyService? companyService,
+    DailyGoalService? dailyGoalService,
+    AchievementService? achievementService,
   })  : _repository = repository,
         _earningService = earningService,
         _trainingService = trainingService,
@@ -36,7 +41,9 @@ class GameSessionApplicationService {
         _careerService = careerService ?? CareerService(),
         _cityService = cityService ?? CityService(),
         _livingCostService = livingCostService ?? LivingCostService(),
-        _companyService = companyService ?? CompanyService();
+        _companyService = companyService ?? CompanyService(),
+        _dailyGoalService = dailyGoalService ?? DailyGoalService(),
+        _achievementService = achievementService ?? AchievementService();
 
   final PlayerStateRepository _repository;
   final EarningService _earningService;
@@ -48,11 +55,11 @@ class GameSessionApplicationService {
   final CityService _cityService;
   final LivingCostService _livingCostService;
   final CompanyService _companyService;
+  final DailyGoalService _dailyGoalService;
+  final AchievementService _achievementService;
 
   Future<PlayerState> load() async {
-    final saved = _livingCostService.settle(await _repository.load() ?? PlayerState.initial);
-    await _repository.save(saved);
-    return saved;
+    return _persist(await _repository.load() ?? PlayerState.initial);
   }
 
   Future<EarningResult> earn(PlayerState state, {EarningPerformance performance = EarningPerformance.none}) async {
@@ -105,6 +112,12 @@ class GameSessionApplicationService {
     return _persist(PlayerState.initial);
   }
 
+  DailyGoalStatus dailyGoalStatus(PlayerState state) => _dailyGoalService.status(state);
+
+  Future<PlayerState> claimDailyGoal(PlayerState state) async {
+    return _persist(_dailyGoalService.claim(state));
+  }
+
   CompanyCheck checkCompanyEstablishment(PlayerState state) => _companyService.checkEstablishment(state);
 
   Future<PlayerState> establishCompany(PlayerState state) async {
@@ -115,6 +128,16 @@ class GameSessionApplicationService {
     return _persist(_companyService.recruit(state));
   }
 
+  CompanyCheck checkCompanyUpgrade(PlayerState state) => _companyService.checkUpgrade(state);
+
+  Future<PlayerState> upgradeCompany(PlayerState state) async {
+    return _persist(_companyService.upgrade(state));
+  }
+
+  Future<PlayerState> selectCompanyProject(PlayerState state, CompanyProject project) async {
+    return _persist(_companyService.selectProject(state, project));
+  }
+
   Future<CompanyActionResult> advanceCompanyProject(PlayerState state) async {
     final result = _companyService.advanceProject(state);
     final nextState = await _persist(result.state);
@@ -122,8 +145,9 @@ class GameSessionApplicationService {
   }
 
   Future<PlayerState> _persist(PlayerState state) async {
-    final nextState = _livingCostService.settle(state);
-    await _repository.save(nextState);
-    return nextState;
+    final settled = _livingCostService.settle(state);
+    final evaluated = _achievementService.evaluate(settled).state;
+    await _repository.save(evaluated);
+    return evaluated;
   }
 }

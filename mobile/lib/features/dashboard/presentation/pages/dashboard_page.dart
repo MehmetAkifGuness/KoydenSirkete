@@ -5,6 +5,7 @@ import '../../../../core/widgets/feature_card.dart';
 import '../../../../core/widgets/metric_tile.dart';
 import '../../../../core/widgets/section_title.dart';
 import '../../../game/presentation/state/game_session_controller.dart';
+import '../../../daily_goals/domain/entities/daily_goal.dart';
 import '../models/dashboard_models.dart';
 import '../state/dashboard_view_model.dart';
 
@@ -39,7 +40,7 @@ class _DashboardPageState extends State<DashboardPage> {
           children: [
             _Header(state: state),
             const SizedBox(height: 24),
-            _GoalCard(goal: state.goal),
+            _GoalCard(status: widget.session.dailyGoalStatus, session: widget.session),
             const SizedBox(height: 24),
             const SectionTitle(title: 'Bugünkü durum'),
             const SizedBox(height: 12),
@@ -96,9 +97,10 @@ class _Header extends StatelessWidget {
 }
 
 class _GoalCard extends StatelessWidget {
-  const _GoalCard({required this.goal});
+  const _GoalCard({required this.status, required this.session});
 
-  final String goal;
+  final DailyGoalStatus status;
+  final GameSessionController session;
 
   @override
   Widget build(BuildContext context) {
@@ -107,18 +109,38 @@ class _GoalCard extends StatelessWidget {
       color: color.withValues(alpha: .15),
       child: Padding(
         padding: const EdgeInsets.all(18),
-        child: Row(children: [
-          Icon(Icons.flag_outlined, color: color),
-          const SizedBox(width: 14),
-          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            const Text('Aktif hedef', style: TextStyle(color: Colors.white60, fontSize: 12)),
-            const SizedBox(height: 4),
-            Text(goal, style: const TextStyle(fontWeight: FontWeight.w800)),
-          ])),
-          const Icon(Icons.chevron_right),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Row(children: [
+            Icon(Icons.flag_outlined, color: color),
+            const SizedBox(width: 14),
+            const Expanded(child: Text('Günlük hedef', style: TextStyle(color: Colors.white60, fontSize: 12))),
+            Text('₺${status.reward}', style: TextStyle(color: color, fontWeight: FontWeight.w800)),
+          ]),
+          const SizedBox(height: 8),
+          Text(status.isClaimed ? 'Bugünün ödülü alındı.' : '${status.progress}/${status.target} üretken aksiyon tamamlandı.', style: const TextStyle(fontWeight: FontWeight.w800)),
+          const SizedBox(height: 10),
+          LinearProgressIndicator(value: status.ratio),
+          if (status.isComplete && !status.isClaimed) ...[
+            const SizedBox(height: 10),
+            Align(
+              alignment: Alignment.centerRight,
+              child: FilledButton.tonal(
+                onPressed: session.isBusy ? null : () => _claim(context),
+                child: const Text('Ödülü al'),
+              ),
+            ),
+          ],
         ]),
       ),
     );
+  }
+
+  Future<void> _claim(BuildContext context) async {
+    final message = await session.claimDailyGoal();
+    if (!context.mounted || message == null) {
+      return;
+    }
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
   }
 }
 

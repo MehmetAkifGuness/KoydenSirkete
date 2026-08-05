@@ -20,6 +20,8 @@ class PlayerStateRecord {
     this.currentJobId,
     this.performance = 0,
     this.workSessionsToday = 0,
+    this.trainingSessionsToday = 0,
+    this.dailyGoalClaimedDay = 0,
     this.careerLevel = 1,
     this.currentCityId = 1,
     this.lastLivingCostDay = 1,
@@ -27,6 +29,12 @@ class PlayerStateRecord {
     this.companyFunds = 0,
     this.employeeCount = 0,
     this.projectProgress = 0,
+    this.totalEarned = 0,
+    this.totalWorkSessions = 0,
+    this.totalTrainingSessions = 0,
+    this.unlockedAchievementsMask = 0,
+    this.activeProjectId = 1,
+    this.completedProjects = 0,
     this.isOnboarded = false,
   });
 
@@ -42,6 +50,8 @@ class PlayerStateRecord {
   final int? currentJobId;
   final int performance;
   final int workSessionsToday;
+  final int trainingSessionsToday;
+  final int dailyGoalClaimedDay;
   final int careerLevel;
   final int currentCityId;
   final int lastLivingCostDay;
@@ -49,5 +59,11 @@ class PlayerStateRecord {
   final int companyFunds;
   final int employeeCount;
   final int projectProgress;
+  final int totalEarned;
+  final int totalWorkSessions;
+  final int totalTrainingSessions;
+  final int unlockedAchievementsMask;
+  final int activeProjectId;
+  final int completedProjects;
   final bool isOnboarded;
 }

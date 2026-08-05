@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../../../game/presentation/state/game_session_controller.dart';
+import '../../domain/entities/company_project.dart';
 import '../../domain/services/company_service.dart';
+import '../../domain/services/company_project_catalog.dart';
 
 class CompanyPage extends StatelessWidget {
   const CompanyPage({required this.session, super.key});
@@ -93,15 +95,34 @@ class _CompanyView extends StatelessWidget {
               children: [
                 Text('Şirket seviyesi ${state.companyLevel}', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900)),
                 const SizedBox(height: 10),
-                Text('Kasa: ₺${state.companyFunds} · Çalışan: ${state.employeeCount}'),
+                Text('Kasa: ₺${state.companyFunds} · Çalışan: ${state.employeeCount}/${CompanyService.employeeCapacity(state.companyLevel)}'),
                 const SizedBox(height: 12),
                 LinearProgressIndicator(value: state.projectProgress / 100),
                 const SizedBox(height: 6),
-                Text('Aktif proje: %${state.projectProgress}'),
+                Text('${CompanyProjectCatalog.byId(state.activeProjectId).name} · %${state.projectProgress}'),
               ],
             ),
           ),
         ),
+        if (state.companyLevel < CompanyService.maxCompanyLevel) ...[
+          const SizedBox(height: 12),
+          Builder(builder: (context) {
+            final check = session.checkCompanyUpgrade();
+            return FilledButton.tonalIcon(
+              onPressed: check.isEligible && !session.isBusy ? () => _upgrade(context) : null,
+              icon: const Icon(Icons.trending_up),
+              label: Text('Şirketi yükselt · ₺${CompanyService.upgradeCost(state.companyLevel)}'),
+            );
+          }),
+        ],
+        const SizedBox(height: 18),
+        const Text('Proje seçimi', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900)),
+        const SizedBox(height: 8),
+        for (final project in CompanyProjectCatalog.projects)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: _ProjectTile(project: project, session: session),
+          ),
         const SizedBox(height: 16),
         FilledButton.tonalIcon(
           onPressed: session.isBusy ? null : () => _recruit(context),
@@ -126,8 +147,49 @@ class _CompanyView extends StatelessWidget {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
   }
 
+  Future<void> _upgrade(BuildContext context) async {
+    final message = await session.upgradeCompany();
+    if (!context.mounted || message == null) {
+      return;
+    }
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+  }
+
   Future<void> _advance(BuildContext context) async {
     final message = await session.advanceCompanyProject();
+    if (!context.mounted || message == null) {
+      return;
+    }
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+  }
+}
+
+class _ProjectTile extends StatelessWidget {
+  const _ProjectTile({required this.project, required this.session});
+
+  final CompanyProject project;
+  final GameSessionController session;
+
+  @override
+  Widget build(BuildContext context) {
+    final state = session.state;
+    final selected = state.activeProjectId == project.id;
+    final unlocked = project.id <= state.companyLevel;
+    final selectable = unlocked && (selected || state.projectProgress == 0) && !session.isBusy;
+    return Card(
+      child: ListTile(
+        leading: Icon(selected ? Icons.radio_button_checked : Icons.radio_button_unchecked, color: selected ? Theme.of(context).colorScheme.primary : null),
+        title: Text(project.name),
+        subtitle: Text(unlocked ? '${project.description} ₺${project.cost} · ₺${project.reward}' : 'Seviye ${project.id} şirket gerekir.'),
+        trailing: selected ? const Icon(Icons.check) : null,
+        enabled: selectable,
+        onTap: selectable && !selected ? () => _select(context) : null,
+      ),
+    );
+  }
+
+  Future<void> _select(BuildContext context) async {
+    final message = await session.selectCompanyProject(project);
     if (!context.mounted || message == null) {
       return;
     }

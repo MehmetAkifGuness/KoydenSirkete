@@ -17,6 +17,8 @@ class TrainingService {
       energy: state.energy - course.energyCost,
       knowledge: state.knowledge + course.knowledge,
       experience: state.experience + course.experience,
+      trainingSessionsToday: progressed.day == state.day ? state.trainingSessionsToday + 1 : 1,
+      totalTrainingSessions: state.totalTrainingSessions + 1,
     );
   }
 }

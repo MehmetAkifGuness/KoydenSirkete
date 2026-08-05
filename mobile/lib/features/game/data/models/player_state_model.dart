@@ -14,6 +14,8 @@ class PlayerStateModel {
     this.currentJobId,
     this.performance = 0,
     this.workSessionsToday = 0,
+    this.trainingSessionsToday = 0,
+    this.dailyGoalClaimedDay = 0,
     this.careerLevel = 1,
     this.currentCityId = 1,
     this.lastLivingCostDay = 1,
@@ -21,6 +23,12 @@ class PlayerStateModel {
     this.companyFunds = 0,
     this.employeeCount = 0,
     this.projectProgress = 0,
+    this.totalEarned = 0,
+    this.totalWorkSessions = 0,
+    this.totalTrainingSessions = 0,
+    this.unlockedAchievementsMask = 0,
+    this.activeProjectId = 1,
+    this.completedProjects = 0,
     this.isOnboarded = false,
   });
 
@@ -37,6 +45,8 @@ class PlayerStateModel {
       currentJobId: record.currentJobId,
       performance: record.performance,
       workSessionsToday: record.workSessionsToday,
+      trainingSessionsToday: record.trainingSessionsToday,
+      dailyGoalClaimedDay: record.dailyGoalClaimedDay,
       careerLevel: record.careerLevel,
       currentCityId: record.currentCityId,
       lastLivingCostDay: record.lastLivingCostDay,
@@ -44,6 +54,12 @@ class PlayerStateModel {
       companyFunds: record.companyFunds,
       employeeCount: record.employeeCount,
       projectProgress: record.projectProgress,
+      totalEarned: record.totalEarned,
+      totalWorkSessions: record.totalWorkSessions,
+      totalTrainingSessions: record.totalTrainingSessions,
+      unlockedAchievementsMask: record.unlockedAchievementsMask,
+      activeProjectId: record.activeProjectId,
+      completedProjects: record.completedProjects,
       isOnboarded: record.isOnboarded,
     );
   }
@@ -59,6 +75,8 @@ class PlayerStateModel {
   final int? currentJobId;
   final int performance;
   final int workSessionsToday;
+  final int trainingSessionsToday;
+  final int dailyGoalClaimedDay;
   final int careerLevel;
   final int currentCityId;
   final int lastLivingCostDay;
@@ -66,6 +84,12 @@ class PlayerStateModel {
   final int companyFunds;
   final int employeeCount;
   final int projectProgress;
+  final int totalEarned;
+  final int totalWorkSessions;
+  final int totalTrainingSessions;
+  final int unlockedAchievementsMask;
+  final int activeProjectId;
+  final int completedProjects;
   final bool isOnboarded;
 
   factory PlayerStateModel.fromEntity(PlayerState entity) {
@@ -81,6 +105,8 @@ class PlayerStateModel {
       currentJobId: entity.currentJobId,
       performance: entity.performance,
       workSessionsToday: entity.workSessionsToday,
+      trainingSessionsToday: entity.trainingSessionsToday,
+      dailyGoalClaimedDay: entity.dailyGoalClaimedDay,
       careerLevel: entity.careerLevel,
       currentCityId: entity.currentCityId,
       lastLivingCostDay: entity.lastLivingCostDay,
@@ -88,6 +114,12 @@ class PlayerStateModel {
       companyFunds: entity.companyFunds,
       employeeCount: entity.employeeCount,
       projectProgress: entity.projectProgress,
+      totalEarned: entity.totalEarned,
+      totalWorkSessions: entity.totalWorkSessions,
+      totalTrainingSessions: entity.totalTrainingSessions,
+      unlockedAchievementsMask: entity.unlockedAchievementsMask,
+      activeProjectId: entity.activeProjectId,
+      completedProjects: entity.completedProjects,
       isOnboarded: entity.isOnboarded,
     );
   }

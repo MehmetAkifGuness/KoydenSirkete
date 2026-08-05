@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../game/presentation/state/game_session_controller.dart';
+import '../../../progress/presentation/pages/progress_page.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({required this.session, super.key});
@@ -21,6 +22,16 @@ class ProfilePage extends StatelessWidget {
               leading: const CircleAvatar(child: Icon(Icons.person_outline)),
               title: const Text('Yerel oyuncu'),
               subtitle: Text('Gün ${state.day} · ₺${state.money} · ${state.experience} tecrübe'),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.emoji_events_outlined),
+              title: const Text('İstatistikler ve başarılar'),
+              subtitle: const Text('Toplam ilerlemeni ve açılan ödülleri görüntüle.'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => ProgressPage(session: session))),
             ),
           ),
           const SizedBox(height: 12),

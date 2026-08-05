@@ -13,6 +13,8 @@ class PlayerState {
     this.currentJobId,
     this.performance = 0,
     this.workSessionsToday = 0,
+    this.trainingSessionsToday = 0,
+    this.dailyGoalClaimedDay = 0,
     this.careerLevel = 1,
     this.currentCityId = 1,
     this.lastLivingCostDay = 1,
@@ -20,11 +22,17 @@ class PlayerState {
     this.companyFunds = 0,
     this.employeeCount = 0,
     this.projectProgress = 0,
+    this.totalEarned = 0,
+    this.totalWorkSessions = 0,
+    this.totalTrainingSessions = 0,
+    this.unlockedAchievementsMask = 0,
+    this.activeProjectId = 1,
+    this.completedProjects = 0,
     this.isOnboarded = false,
   });
 
   static const initial = PlayerState(
-    schemaVersion: 7,
+    schemaVersion: 10,
     money: 240,
     energy: 100,
     knowledge: 0,
@@ -35,6 +43,8 @@ class PlayerState {
     currentJobId: null,
     performance: 0,
     workSessionsToday: 0,
+    trainingSessionsToday: 0,
+    dailyGoalClaimedDay: 0,
     careerLevel: 1,
     currentCityId: 1,
     lastLivingCostDay: 1,
@@ -42,6 +52,12 @@ class PlayerState {
     companyFunds: 0,
     employeeCount: 0,
     projectProgress: 0,
+    totalEarned: 0,
+    totalWorkSessions: 0,
+    totalTrainingSessions: 0,
+    unlockedAchievementsMask: 0,
+    activeProjectId: 1,
+    completedProjects: 0,
     isOnboarded: false,
   );
 
@@ -56,6 +72,8 @@ class PlayerState {
   final int? currentJobId;
   final int performance;
   final int workSessionsToday;
+  final int trainingSessionsToday;
+  final int dailyGoalClaimedDay;
   final int careerLevel;
   final int currentCityId;
   final int lastLivingCostDay;
@@ -63,6 +81,12 @@ class PlayerState {
   final int companyFunds;
   final int employeeCount;
   final int projectProgress;
+  final int totalEarned;
+  final int totalWorkSessions;
+  final int totalTrainingSessions;
+  final int unlockedAchievementsMask;
+  final int activeProjectId;
+  final int completedProjects;
   final bool isOnboarded;
 
   PlayerState copyWith({
@@ -77,6 +101,8 @@ class PlayerState {
     Object? currentJobId = _unset,
     int? performance,
     int? workSessionsToday,
+    int? trainingSessionsToday,
+    int? dailyGoalClaimedDay,
     int? careerLevel,
     int? currentCityId,
     int? lastLivingCostDay,
@@ -84,6 +110,12 @@ class PlayerState {
     int? companyFunds,
     int? employeeCount,
     int? projectProgress,
+    int? totalEarned,
+    int? totalWorkSessions,
+    int? totalTrainingSessions,
+    int? unlockedAchievementsMask,
+    int? activeProjectId,
+    int? completedProjects,
     bool? isOnboarded,
   }) {
     return PlayerState(
@@ -98,6 +130,8 @@ class PlayerState {
       currentJobId: identical(currentJobId, _unset) ? this.currentJobId : currentJobId as int?,
       performance: performance ?? this.performance,
       workSessionsToday: workSessionsToday ?? this.workSessionsToday,
+      trainingSessionsToday: trainingSessionsToday ?? this.trainingSessionsToday,
+      dailyGoalClaimedDay: dailyGoalClaimedDay ?? this.dailyGoalClaimedDay,
       careerLevel: careerLevel ?? this.careerLevel,
       currentCityId: currentCityId ?? this.currentCityId,
       lastLivingCostDay: lastLivingCostDay ?? this.lastLivingCostDay,
@@ -105,6 +139,12 @@ class PlayerState {
       companyFunds: companyFunds ?? this.companyFunds,
       employeeCount: employeeCount ?? this.employeeCount,
       projectProgress: projectProgress ?? this.projectProgress,
+      totalEarned: totalEarned ?? this.totalEarned,
+      totalWorkSessions: totalWorkSessions ?? this.totalWorkSessions,
+      totalTrainingSessions: totalTrainingSessions ?? this.totalTrainingSessions,
+      unlockedAchievementsMask: unlockedAchievementsMask ?? this.unlockedAchievementsMask,
+      activeProjectId: activeProjectId ?? this.activeProjectId,
+      completedProjects: completedProjects ?? this.completedProjects,
       isOnboarded: isOnboarded ?? this.isOnboarded,
     );
   }
@@ -118,6 +158,7 @@ class PlayerState {
       hour: nextHour,
       earningSessionsToday: nextDay == day ? earningSessionsToday : 0,
       workSessionsToday: nextDay == day ? workSessionsToday : 0,
+      trainingSessionsToday: nextDay == day ? trainingSessionsToday : 0,
     );
   }
 }

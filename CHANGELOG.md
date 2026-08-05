@@ -1,5 +1,23 @@
 # Changelog
 
+## 1.4.0
+
+- Şirket seviyeleri, çalışan kapasitesi ve yükseltme sistemi eklendi.
+- Üç farklı şirket projesi ve seviye bazlı proje kilitleri eklendi.
+- Tamamlanan proje sayısı ve şirket ilerleme istatistikleri kaydediliyor.
+
+## 1.3.0
+
+- Toplam kazanç, çalışma, eğitim ve proje istatistikleri eklendi.
+- Tek seferlik ödüllü başarı sistemi eklendi.
+- Profil ekranına ilerleme ve başarılar ekranı eklendi.
+
+## 1.2.0
+
+- Günlük üretkenlik hedefi eklendi.
+- Günlük hedef ödülü tek seferlik ve yerel olarak kaydediliyor.
+- Eğitim aksiyonları günlük takip sistemine bağlandı.
+
 ## 1.1.0
 
 - İkinci finans kariyer hattı ve yeni iş ilanları eklendi.

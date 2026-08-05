@@ -11,3 +11,6 @@ v0.2.0 tamamlandı: para kazanma mini oyunu, seri ve bonus sistemi eklendi.
 v0.3.0 tamamlandı: iş ilanları, başvuru uygunluğu ve aktif iş kaydı eklendi.
 
 v1.0.0 tamamlandı: tüm temel offline oyun döngüsü, kariyer, şehir, şirket ve yerel kayıt akışı hazır.
+v1.2.0 tamamlandı: günlük hedef ve üretkenlik ödülü eklendi.
+v1.3.0 tamamlandı: istatistikler ve başarı sistemi eklendi.
+v1.4.0 tamamlandı: şirket seviyeleri ve proje türleri eklendi.

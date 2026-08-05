@@ -30,6 +30,8 @@ class WorkService {
       experience: state.experience + task.experienceGain,
       performance: (state.performance + task.performanceGain).clamp(0, 100),
       workSessionsToday: progressed.day == state.day ? state.workSessionsToday + 1 : 1,
+      totalEarned: state.totalEarned + income,
+      totalWorkSessions: state.totalWorkSessions + 1,
     );
     return WorkResult(state: nextState, income: income);
   }
