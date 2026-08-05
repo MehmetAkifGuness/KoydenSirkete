@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.1
+
+- Yerel kayıt okuma hataları için tekrar deneme ekranı eklendi.
+- Oyun eylemlerindeki kayıt hataları kullanıcıya kontrollü şekilde gösteriliyor.
+- Flutter tarafından üretilen geçici dosyalar Git dışında tutuldu.
+
 ## 1.0.0
 
 - Tamamen offline oynanabilir ilk tam sürüm tamamlandı.

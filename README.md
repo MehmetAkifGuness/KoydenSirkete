@@ -38,6 +38,11 @@ Android-first, tamamen offline kariyer ve şirket simülasyonu.
 - Şirket kurma, çalışan alma ve proje yönetimi
 - SQLite v2-v7 geriye dönük migrasyonları
 
+## v1.0.1 stabilizasyonu
+
+- Yerel kayıt hatalarında tekrar deneme ekranı
+- Kontrollü kayıt hatası mesajları
+
 ## Çalıştırma
 
 ```powershell

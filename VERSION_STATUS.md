@@ -39,3 +39,8 @@ Tamamlananlar:
 - Şehirler ve günlük yaşam giderleri.
 - Şirket, çalışan ve proje sistemi.
 - Onboarding, sıfırlama ve SQLite v2-v7 migrasyonları.
+
+# 1.0.1 — Stabilizasyon
+
+- Yerel kayıt hata ekranı ve tekrar deneme akışı.
+- Oyun işlemlerinde kontrollü kayıt hatası mesajları.

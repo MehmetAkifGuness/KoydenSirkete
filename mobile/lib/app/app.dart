@@ -6,6 +6,7 @@ import '../core/database/app_database.dart';
 import '../core/database/player_state_store.dart';
 import '../core/constants/app_features.dart';
 import '../core/widgets/app_gradient_background.dart';
+import '../core/widgets/storage_error_page.dart';
 import '../features/dashboard/presentation/pages/dashboard_page.dart';
 import '../features/earning/presentation/pages/earning_page.dart';
 import '../features/profile/presentation/pages/profile_page.dart';
@@ -87,6 +88,9 @@ class _AppShellState extends State<AppShell> {
       builder: (context, _) {
         if (!_session.isReady) {
           return const Scaffold(body: Center(child: CircularProgressIndicator()));
+        }
+        if (_session.errorMessage != null) {
+          return StorageErrorPage(message: _session.errorMessage!, onRetry: _session.retryInitialization);
         }
         if (!_session.state.isOnboarded) {
           return OnboardingPage(session: _session);

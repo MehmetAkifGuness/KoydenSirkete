@@ -21,21 +21,29 @@ class GameSessionController extends ChangeNotifier {
   PlayerState _state = PlayerState.initial;
   bool _isReady = false;
   bool _isBusy = false;
+  String? _errorMessage;
 
   PlayerState get state => _state;
   bool get isReady => _isReady;
   bool get isBusy => _isBusy;
+  String? get errorMessage => _errorMessage;
 
   Future<void> initialize() async {
+    _isReady = false;
+    _errorMessage = null;
+    notifyListeners();
     try {
       _state = await _applicationService.load();
-    } on Exception {
+    } catch (_) {
       _state = PlayerState.initial;
+      _errorMessage = 'Cihazdaki ilerleme verisi okunamadı. Verilerin korunması için tekrar deneyin.';
     } finally {
       _isReady = true;
       notifyListeners();
     }
   }
+
+  Future<void> retryInitialization() => initialize();
 
   Future<String?> earnMoney({EarningPerformance performance = EarningPerformance.none}) async {
     if (!_canExecute()) {
@@ -49,6 +57,8 @@ class GameSessionController extends ChangeNotifier {
       return '+₺${result.reward} kazandın. ${result.state.day}. gün, ${result.state.hour}:00';
     } on GameRuleException catch (exception) {
       return exception.message;
+    } catch (_) {
+      return 'İlerleme kaydedilemedi. Lütfen tekrar dene.';
     } finally {
       _isBusy = false;
       notifyListeners();
@@ -67,6 +77,8 @@ class GameSessionController extends ChangeNotifier {
       return '${course.name} tamamlandı. +${course.knowledge} bilgi';
     } on GameRuleException catch (exception) {
       return exception.message;
+    } catch (_) {
+      return 'İlerleme kaydedilemedi. Lütfen tekrar dene.';
     } finally {
       _isBusy = false;
       notifyListeners();
@@ -85,6 +97,8 @@ class GameSessionController extends ChangeNotifier {
       return 'Dinlendin. Enerjin yenilendi.';
     } on GameRuleException catch (exception) {
       return exception.message;
+    } catch (_) {
+      return 'İlerleme kaydedilemedi. Lütfen tekrar dene.';
     } finally {
       _isBusy = false;
       notifyListeners();
@@ -104,6 +118,8 @@ class GameSessionController extends ChangeNotifier {
       return '${job.title} başvurun kabul edildi.';
     } on GameRuleException catch (exception) {
       return exception.message;
+    } catch (_) {
+      return 'İlerleme kaydedilemedi. Lütfen tekrar dene.';
     } finally {
       _isBusy = false;
       notifyListeners();
@@ -122,6 +138,8 @@ class GameSessionController extends ChangeNotifier {
       return '+₺${result.income} kazandın. Performansın: %${result.state.performance}';
     } on GameRuleException catch (exception) {
       return exception.message;
+    } catch (_) {
+      return 'İlerleme kaydedilemedi. Lütfen tekrar dene.';
     } finally {
       _isBusy = false;
       notifyListeners();
@@ -141,6 +159,8 @@ class GameSessionController extends ChangeNotifier {
       return '${nextJob.title} seviyesine terfi ettin.';
     } on GameRuleException catch (exception) {
       return exception.message;
+    } catch (_) {
+      return 'İlerleme kaydedilemedi. Lütfen tekrar dene.';
     } finally {
       _isBusy = false;
       notifyListeners();
@@ -174,6 +194,8 @@ class GameSessionController extends ChangeNotifier {
     notifyListeners();
     try {
       _state = await _applicationService.completeOnboarding(_state);
+    } catch (_) {
+      _errorMessage = 'Onboarding bilgisi kaydedilemedi. Lütfen tekrar dene.';
     } finally {
       _isBusy = false;
       notifyListeners();
@@ -188,6 +210,8 @@ class GameSessionController extends ChangeNotifier {
     notifyListeners();
     try {
       _state = await _applicationService.resetGame();
+    } catch (_) {
+      _errorMessage = 'Oyun sıfırlanamadı. Mevcut kayıt korunuyor.';
     } finally {
       _isBusy = false;
       notifyListeners();
@@ -207,6 +231,8 @@ class GameSessionController extends ChangeNotifier {
       return 'Şirketin kuruldu. Artık kendi işini büyütebilirsin.';
     } on GameRuleException catch (exception) {
       return exception.message;
+    } catch (_) {
+      return 'İlerleme kaydedilemedi. Lütfen tekrar dene.';
     } finally {
       _isBusy = false;
       notifyListeners();
@@ -224,6 +250,8 @@ class GameSessionController extends ChangeNotifier {
       return 'Yeni çalışan ekibe katıldı.';
     } on GameRuleException catch (exception) {
       return exception.message;
+    } catch (_) {
+      return 'İlerleme kaydedilemedi. Lütfen tekrar dene.';
     } finally {
       _isBusy = false;
       notifyListeners();
@@ -242,6 +270,8 @@ class GameSessionController extends ChangeNotifier {
       return result.message;
     } on GameRuleException catch (exception) {
       return exception.message;
+    } on Exception {
+      return 'İlerleme kaydedilemedi. Lütfen tekrar dene.';
     } finally {
       _isBusy = false;
       notifyListeners();
