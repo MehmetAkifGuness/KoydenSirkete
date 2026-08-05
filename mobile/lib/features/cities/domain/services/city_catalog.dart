@@ -1,6 +1,8 @@
 import '../entities/city.dart';
 
 abstract final class CityCatalog {
+  static const version = 2;
+
   static const cities = <City>[
     City(
       id: 1,
@@ -24,6 +26,22 @@ abstract final class CityCatalog {
       description: 'Yüksek giderli ama kariyer ve şirket fırsatları geniş şehir.',
       dailyCost: 45,
       moveCost: 300,
+      minimumCareerLevel: 2,
+    ),
+    City(
+      id: 4,
+      name: 'Sahil kenti',
+      description: 'Turizm ve ticaret fırsatları yüksek, dengeli maliyetli şehir.',
+      dailyCost: 35,
+      moveCost: 200,
+      minimumCareerLevel: 1,
+    ),
+    City(
+      id: 5,
+      name: 'Teknoloji vadisi',
+      description: 'Yüksek yaşam maliyetine karşılık uzmanlık fırsatları sunan merkez.',
+      dailyCost: 60,
+      moveCost: 400,
       minimumCareerLevel: 2,
     ),
   ];

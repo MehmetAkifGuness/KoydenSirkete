@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.1.0
+
+- İkinci finans kariyer hattı ve yeni iş ilanları eklendi.
+- Finans, lojistik ve uzmanlık görevleri eklendi.
+- Uzmanlık programı eğitimi eklendi.
+- Sahil kenti ve Teknoloji vadisi şehirleri eklendi.
+- Yerel iş, eğitim ve şehir katalogları v2 oldu.
+
 ## 1.0.1
 
 - Yerel kayıt okuma hataları için tekrar deneme ekranı eklendi.

@@ -44,3 +44,9 @@ Tamamlananlar:
 
 - Yerel kayıt hata ekranı ve tekrar deneme akışı.
 - Oyun işlemlerinde kontrollü kayıt hatası mesajları.
+
+# 1.1.0 — İçerik genişletmesi
+
+- İkinci kariyer hattı ve yeni iş ilanları.
+- Yeni iş görevleri ve uzmanlık eğitimi.
+- İki yeni şehir ve v2 yerel kataloglar.

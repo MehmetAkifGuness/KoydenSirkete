@@ -163,4 +163,14 @@ void main() {
       expect(progress.state.experience, 5);
     });
   });
+
+  test('v1.1 local catalogs expose new content', () {
+    expect(JobCatalog.version, 2);
+    expect(JobCatalog.jobs.length, 6);
+    expect(WorkTaskCatalog.forJob(4), isNotEmpty);
+    expect(TrainingCatalog.version, 2);
+    expect(TrainingCatalog.courses.length, 4);
+    expect(CityCatalog.version, 2);
+    expect(CityCatalog.cities.length, 5);
+  });
 }

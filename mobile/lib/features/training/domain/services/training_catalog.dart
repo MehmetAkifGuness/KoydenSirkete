@@ -1,6 +1,8 @@
 import '../entities/course.dart';
 
 abstract final class TrainingCatalog {
+  static const version = 2;
+
   static const courses = [
     Course(
       id: 'free-practice',
@@ -31,6 +33,16 @@ abstract final class TrainingCatalog {
       energyCost: 25,
       knowledge: 20,
       experience: 4,
+    ),
+    Course(
+      id: 'expert-course',
+      name: 'Uzmanlık programı',
+      description: 'İleri kariyer seviyeleri için kapsamlı bilgi ve tecrübe kazan.',
+      cost: 300,
+      durationHours: 8,
+      energyCost: 30,
+      knowledge: 35,
+      experience: 8,
     ),
   ];
 }

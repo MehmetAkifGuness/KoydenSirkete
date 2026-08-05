@@ -43,6 +43,13 @@ Android-first, tamamen offline kariyer ve şirket simülasyonu.
 - Yerel kayıt hatalarında tekrar deneme ekranı
 - Kontrollü kayıt hatası mesajları
 
+## v1.1.0 içerik genişletmesi
+
+- Finans kariyer hattı ve yeni iş ilanları
+- Finans/lojistik çalışma görevleri
+- Uzmanlık eğitimi
+- Sahil kenti ve Teknoloji vadisi
+
 ## Çalıştırma
 
 ```powershell

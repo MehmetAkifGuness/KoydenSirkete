@@ -1,7 +1,7 @@
 import '../entities/job.dart';
 
 abstract final class JobCatalog {
-  static const version = 1;
+  static const version = 2;
 
   static const jobs = <Job>[
     Job(
@@ -38,6 +38,42 @@ abstract final class JobCatalog {
       minimumExperience: 25,
       careerTrack: 'perakende',
       level: 3,
+      nextJobId: null,
+    ),
+    Job(
+      id: 4,
+      title: 'Muhasebe asistanı',
+      company: 'Köprü Finans',
+      description: 'Temel finans kayıtlarını düzenle ve işletmelerin nakit akışını takip et.',
+      salary: 180,
+      minimumKnowledge: 8,
+      minimumExperience: 5,
+      careerTrack: 'finans',
+      level: 1,
+      nextJobId: 5,
+    ),
+    Job(
+      id: 5,
+      title: 'Finans uzmanı',
+      company: 'Köprü Finans',
+      description: 'Bütçe analizleri hazırla ve stratejik finans kararlarına katkı sağla.',
+      salary: 320,
+      minimumKnowledge: 20,
+      minimumExperience: 20,
+      careerTrack: 'finans',
+      level: 2,
+      nextJobId: null,
+    ),
+    Job(
+      id: 6,
+      title: 'Lojistik koordinatörü',
+      company: 'Ufuk Lojistik',
+      description: 'Tedarik akışını planla ve operasyonların zamanında ilerlemesini sağla.',
+      salary: 280,
+      minimumKnowledge: 15,
+      minimumExperience: 15,
+      careerTrack: 'lojistik',
+      level: 1,
       nextJobId: null,
     ),
   ];
