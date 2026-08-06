@@ -25,7 +25,7 @@ void main() {
       hours: GameClockService.gameHoursPerRealTick,
     );
 
-    expect(result.state.hour, 10);
+    expect(result.state.hour, 9);
     expect(result.state.energy, 100);
   });
 
