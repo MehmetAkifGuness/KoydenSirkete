@@ -5,7 +5,7 @@ import '../entities/clock_tick_result.dart';
 import '../entities/player_state.dart';
 
 class GameClockService {
-  static const realSecondsPerGameHour = 20;
+  static const realTickInterval = Duration(seconds: 20);
   static const gameHoursPerRealTick = 1;
   static const hoursPerRecovery = 3;
   static const recoveryAmount = 10;

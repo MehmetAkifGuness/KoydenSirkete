@@ -1,17 +1,17 @@
 import 'dart:async';
 
 class ForegroundClockTicker {
-  ForegroundClockTicker({required this.onTick});
+  ForegroundClockTicker({required this.onTick, required this.interval});
 
-  static const tickInterval = Duration(seconds: 20);
   final Future<void> Function() onTick;
+  final Duration interval;
   Timer? _timer;
 
   void start() {
     if (_timer != null) {
       return;
     }
-    _timer = Timer.periodic(tickInterval, (_) => unawaited(onTick()));
+    _timer = Timer.periodic(interval, (_) => unawaited(onTick()));
   }
 
   void stop() {

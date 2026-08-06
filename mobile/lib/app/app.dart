@@ -73,6 +73,7 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
     );
     _clockTicker = ForegroundClockTicker(
       onTick: () => _session.tick(hours: GameClockService.gameHoursPerRealTick),
+      interval: GameClockService.realTickInterval,
     );
     _session.initialize();
     _clockTicker.start();

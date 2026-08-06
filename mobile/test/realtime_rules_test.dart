@@ -5,7 +5,6 @@ import 'package:kariyerden_sirkete/features/game/domain/services/activity_servic
 import 'package:kariyerden_sirkete/features/game/domain/services/game_clock_service.dart';
 import 'package:kariyerden_sirkete/features/earning/domain/services/earning_service.dart';
 import 'package:kariyerden_sirkete/features/sport/domain/services/sport_service.dart';
-import 'package:kariyerden_sirkete/features/game/presentation/state/foreground_clock_ticker.dart';
 
 void main() {
   test('one game-hour clock tick advances one game hour', () {
@@ -18,7 +17,7 @@ void main() {
   });
 
   test('20-second foreground tick advances one game hour', () {
-    expect(ForegroundClockTicker.tickInterval, const Duration(seconds: 20));
+    expect(GameClockService.realTickInterval, const Duration(seconds: 20));
 
     final result = GameClockService().tick(
       PlayerState.initial,
