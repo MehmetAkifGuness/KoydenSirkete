@@ -7,40 +7,26 @@ import '../../../../core/widgets/section_title.dart';
 import '../../../game/presentation/state/game_session_controller.dart';
 import '../../../daily_goals/domain/entities/daily_goal.dart';
 import '../models/dashboard_models.dart';
-import '../state/dashboard_view_model.dart';
 
-class DashboardPage extends StatefulWidget {
+class DashboardPage extends StatelessWidget {
   const DashboardPage({required this.session, required this.onFeatureTap, super.key});
 
   final GameSessionController session;
   final ValueChanged<AppFeature> onFeatureTap;
 
   @override
-  State<DashboardPage> createState() => _DashboardPageState();
-}
-
-class _DashboardPageState extends State<DashboardPage> {
-  final DashboardViewModel _viewModel = DashboardViewModel();
-
-  @override
-  void dispose() {
-    _viewModel.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
-      animation: Listenable.merge([_viewModel, widget.session]),
+      animation: session,
       builder: (context, _) {
-        final state = DashboardDesignState.fromPlayer(widget.session.state);
+        final state = DashboardDesignState.fromPlayer(session.state);
         return SafeArea(
           child: ListView(
           padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
           children: [
             _Header(state: state),
             const SizedBox(height: 24),
-            _GoalCard(status: widget.session.dailyGoalStatus, session: widget.session),
+            _GoalCard(status: session.dailyGoalStatus, session: session),
             const SizedBox(height: 24),
             const SectionTitle(title: 'Bugünkü durum'),
             const SizedBox(height: 12),
@@ -55,21 +41,47 @@ class _DashboardPageState extends State<DashboardPage> {
               },
             ),
             const SizedBox(height: 24),
-            const SectionTitle(title: 'İlk adımlar'),
-            const SizedBox(height: 12),
-            _ActionRow(viewModel: _viewModel, session: widget.session),
+            if (session.state.activeActivity != null) ...[
+              const SizedBox(height: 24),
+              const SectionTitle(title: 'Aktif aktivite'),
+              const SizedBox(height: 12),
+              _ActivityCard(session: session),
+            ],
             const SizedBox(height: 24),
             const SectionTitle(title: 'Keşfet'),
             const SizedBox(height: 12),
-            for (final feature in const [AppFeatures.earning, AppFeatures.training, AppFeatures.jobs, AppFeatures.cities])
+            for (final feature in const [AppFeatures.earning, AppFeatures.training, AppFeatures.skills, AppFeatures.sport, AppFeatures.jobs, AppFeatures.cities])
               Padding(
                 padding: const EdgeInsets.only(bottom: 10),
-                child: FeatureCard(feature: feature, onTap: () => widget.onFeatureTap(feature)),
+                child: FeatureCard(feature: feature, onTap: () => onFeatureTap(feature)),
               ),
           ],
           ),
         );
       },
+    );
+  }
+}
+
+class _ActivityCard extends StatelessWidget {
+  const _ActivityCard({required this.session});
+
+  final GameSessionController session;
+
+  @override
+  Widget build(BuildContext context) {
+    final activity = session.state.activeActivity!;
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(18),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text(activity.type.name, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
+          const SizedBox(height: 8),
+          Text('${activity.remainingHours} oyun saati kaldı.'),
+          const SizedBox(height: 10),
+          LinearProgressIndicator(value: activity.progress),
+        ]),
+      ),
     );
   }
 }
@@ -87,7 +99,7 @@ class _Header extends StatelessWidget {
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text(state.greeting, style: const TextStyle(color: Colors.white60, fontSize: 13)),
             const SizedBox(height: 4),
-            Text('Kariyerden Şirkete', style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w900)),
+            Text('Müdürüm', style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w900)),
           ]),
         ),
         const CircleAvatar(radius: 22, child: Icon(Icons.person_outline)),
@@ -141,53 +153,5 @@ class _GoalCard extends StatelessWidget {
       return;
     }
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
-  }
-}
-
-class _ActionRow extends StatelessWidget {
-  const _ActionRow({required this.viewModel, required this.session});
-
-  final DashboardViewModel viewModel;
-  final GameSessionController session;
-
-  @override
-  Widget build(BuildContext context) {
-    final selected = viewModel.selectedAction;
-    return Row(
-      children: [
-        _ActionButton(label: 'Dinlen', icon: Icons.bedtime_outlined, selected: selected == 'Dinlen', onTap: () => _rest(context)),
-        const SizedBox(width: 10),
-        _ActionButton(label: 'Planla', icon: Icons.calendar_today_outlined, selected: selected == 'Planla', onTap: () => viewModel.selectAction('Planla')),
-      ],
-    );
-  }
-
-  Future<void> _rest(BuildContext context) async {
-    viewModel.selectAction('Dinlen');
-    final message = await session.rest();
-    if (!context.mounted || message == null) {
-      return;
-    }
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
-  }
-}
-
-class _ActionButton extends StatelessWidget {
-  const _ActionButton({required this.label, required this.icon, required this.selected, required this.onTap});
-
-  final String label;
-  final IconData icon;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: FilledButton.tonalIcon(
-        onPressed: onTap,
-        icon: Icon(icon, size: 18),
-        label: Text(selected ? '$label ✓' : label),
-      ),
-    );
   }
 }

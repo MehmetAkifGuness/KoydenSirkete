@@ -17,7 +17,7 @@ class AppDatabase implements PlayerStateStore {
     final databasePath = join(await getDatabasesPath(), _databaseName);
     return _database = await openDatabase(
       databasePath,
-      version: 10,
+      version: 15,
       onCreate: (database, _) async {
         await database.execute('''
           CREATE TABLE $_tableName (
@@ -25,6 +25,17 @@ class AppDatabase implements PlayerStateStore {
             schema_version INTEGER NOT NULL,
             money INTEGER NOT NULL,
             energy INTEGER NOT NULL,
+            max_energy INTEGER NOT NULL DEFAULT 100,
+            energy_recovery_remainder INTEGER NOT NULL DEFAULT 0,
+            active_activity_json TEXT,
+            skills_json TEXT,
+            employment_json TEXT,
+            application_blocked_job_id INTEGER,
+            application_blocked_until_day INTEGER NOT NULL DEFAULT 0,
+            last_job_event TEXT,
+            job_data_version INTEGER NOT NULL DEFAULT 3,
+            task_data_version INTEGER NOT NULL DEFAULT 2,
+            dismissed_day INTEGER NOT NULL DEFAULT 0,
             knowledge INTEGER NOT NULL,
             experience INTEGER NOT NULL,
             day INTEGER NOT NULL,
@@ -90,6 +101,27 @@ class AppDatabase implements PlayerStateStore {
           await database.execute('ALTER TABLE $_tableName ADD COLUMN active_project_id INTEGER NOT NULL DEFAULT 1');
           await database.execute('ALTER TABLE $_tableName ADD COLUMN completed_projects INTEGER NOT NULL DEFAULT 0');
         }
+        if (oldVersion < 11) {
+          await database.execute('ALTER TABLE $_tableName ADD COLUMN max_energy INTEGER NOT NULL DEFAULT 100');
+          await database.execute('ALTER TABLE $_tableName ADD COLUMN energy_recovery_remainder INTEGER NOT NULL DEFAULT 0');
+          await database.execute('ALTER TABLE $_tableName ADD COLUMN active_activity_json TEXT');
+        }
+        if (oldVersion < 12) {
+          await database.execute('ALTER TABLE $_tableName ADD COLUMN skills_json TEXT');
+        }
+        if (oldVersion < 13) {
+          await database.execute('ALTER TABLE $_tableName ADD COLUMN employment_json TEXT');
+          await database.execute('ALTER TABLE $_tableName ADD COLUMN application_blocked_job_id INTEGER');
+          await database.execute('ALTER TABLE $_tableName ADD COLUMN application_blocked_until_day INTEGER NOT NULL DEFAULT 0');
+          await database.execute('ALTER TABLE $_tableName ADD COLUMN last_job_event TEXT');
+        }
+        if (oldVersion < 14) {
+          await database.execute('ALTER TABLE $_tableName ADD COLUMN job_data_version INTEGER NOT NULL DEFAULT 3');
+          await database.execute('ALTER TABLE $_tableName ADD COLUMN task_data_version INTEGER NOT NULL DEFAULT 2');
+        }
+        if (oldVersion < 15) {
+          await database.execute('ALTER TABLE $_tableName ADD COLUMN dismissed_day INTEGER NOT NULL DEFAULT 0');
+        }
       },
     );
   }
@@ -106,6 +138,17 @@ class AppDatabase implements PlayerStateStore {
       schemaVersion: row['schema_version']! as int,
       money: row['money']! as int,
       energy: row['energy']! as int,
+      maxEnergy: row['max_energy'] as int? ?? 100,
+      energyRecoveryRemainder: row['energy_recovery_remainder'] as int? ?? 0,
+      activeActivityJson: row['active_activity_json'] as String?,
+      skillsJson: row['skills_json'] as String?,
+      employmentJson: row['employment_json'] as String?,
+      applicationBlockedJobId: row['application_blocked_job_id'] as int?,
+      applicationBlockedUntilDay: row['application_blocked_until_day'] as int? ?? 0,
+      lastJobEvent: row['last_job_event'] as String?,
+      jobDataVersion: row['job_data_version'] as int? ?? 3,
+      taskDataVersion: row['task_data_version'] as int? ?? 2,
+      dismissedDay: row['dismissed_day'] as int? ?? 0,
       knowledge: row['knowledge']! as int,
       experience: row['experience']! as int,
       day: row['day']! as int,
@@ -142,6 +185,17 @@ class AppDatabase implements PlayerStateStore {
         'schema_version': record.schemaVersion,
         'money': record.money,
         'energy': record.energy,
+        'max_energy': record.maxEnergy,
+        'energy_recovery_remainder': record.energyRecoveryRemainder,
+        'active_activity_json': record.activeActivityJson,
+        'skills_json': record.skillsJson,
+        'employment_json': record.employmentJson,
+        'application_blocked_job_id': record.applicationBlockedJobId,
+        'application_blocked_until_day': record.applicationBlockedUntilDay,
+        'last_job_event': record.lastJobEvent,
+        'job_data_version': record.jobDataVersion,
+        'task_data_version': record.taskDataVersion,
+        'dismissed_day': record.dismissedDay,
         'knowledge': record.knowledge,
         'experience': record.experience,
         'day': record.day,

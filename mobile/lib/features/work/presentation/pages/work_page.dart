@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../game/presentation/state/game_session_controller.dart';
 import '../../../jobs/domain/entities/job.dart';
 import '../../domain/entities/work_task.dart';
-import '../../domain/services/work_task_catalog.dart';
+import '../../domain/services/task_efficiency_service.dart';
 
 class WorkPage extends StatelessWidget {
   const WorkPage({required this.session, required this.job, super.key});
@@ -13,7 +13,7 @@ class WorkPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tasks = WorkTaskCatalog.forJob(job.id);
+    final tasks = session.employerTasks(job);
     return Scaffold(
       appBar: AppBar(title: Text(job.title)),
       body: AnimatedBuilder(
@@ -56,8 +56,8 @@ class _WorkTaskCard extends StatelessWidget {
             Wrap(
               spacing: 8,
               children: [
-                Chip(label: Text('-${task.energyCost} enerji')),
-                Chip(label: Text('${task.durationHours} saat')),
+                Chip(label: Text('-${TaskEfficiencyService().calculate(session.state, task).energyCost} enerji')),
+                Chip(label: Text('${TaskEfficiencyService().calculate(session.state, task).durationHours} saat')),
                 Chip(label: Text('+${task.experienceGain} tecrübe')),
               ],
             ),
@@ -76,7 +76,7 @@ class _WorkTaskCard extends StatelessWidget {
   }
 
   Future<void> _work(BuildContext context) async {
-    final message = await session.work(job, task);
+    final message = await session.startWork(job, task);
     if (!context.mounted || message == null) {
       return;
     }

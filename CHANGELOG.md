@@ -1,5 +1,19 @@
 # Changelog
 
+## 2.0.0
+
+- Foreground gerçek zamanlı saat eklendi: 20 gerçek saniye = 1 oyun saati; arka planda zaman ilerlemiyor.
+- Tekil aktif aktivite, enerji yenilenmesi, spor ve 200 maksimum enerji sınırı tamamlandı.
+- Genel bilgi korunarak 10 yetenekli eğitim/verimlilik sistemi eklendi.
+- 81 Türkiye ili, şehir ekonomisi, maaş katsayısı ve fırsat kataloğu eklendi.
+- 20 rol, gizli seed tabanlı bot rekabeti ve günlük başvuru bekleme kuralı eklendi.
+- `İşim` ve `Şirketim` ekranları ayrıldı; günlük dinamik işveren görevleri ve iki günlük devamsızlıkta kovulma eklendi.
+- SQLite şeması v10'dan v15'e geriye dönük migration'larla genişletildi.
+
+## 1.5.0–1.9.0
+
+- Gerçek zamanlı aktivite temeli, spor, yetenekler, şehir ekonomisi, kariyer rolleri ve bot başvuruları aşamalı olarak uygulandı.
+
 ## 1.4.0
 
 - Şirket seviyeleri, çalışan kapasitesi ve yükseltme sistemi eklendi.

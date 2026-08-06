@@ -13,7 +13,7 @@ class CompanyPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Şirket')), 
+      appBar: AppBar(title: const Text('Şirketim')),
       body: AnimatedBuilder(
         animation: session,
         builder: (context, _) {

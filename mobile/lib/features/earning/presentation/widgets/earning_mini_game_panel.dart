@@ -61,7 +61,7 @@ class _EarningMiniGamePanelState extends State<EarningMiniGamePanel> {
         SizedBox(
           width: double.infinity,
           child: FilledButton.icon(
-            onPressed: _game.start,
+            onPressed: widget.session.isBusy || widget.session.state.activeActivity != null ? null : _game.start,
             icon: const Icon(Icons.bolt),
             label: const Text('Görevi başlat'),
           ),
@@ -114,7 +114,7 @@ class _EarningMiniGamePanelState extends State<EarningMiniGamePanel> {
         SizedBox(
           width: double.infinity,
           child: FilledButton.icon(
-            onPressed: widget.session.isBusy ? null : _collect,
+            onPressed: widget.session.isBusy || widget.session.state.activeActivity != null ? null : _collect,
             icon: const Icon(Icons.payments_outlined),
             label: const Text('Kazancı al'),
           ),

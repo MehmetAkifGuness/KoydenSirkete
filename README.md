@@ -1,4 +1,4 @@
-# Kariyerden Şirkete
+# Müdürüm
 
 Android-first, tamamen offline kariyer ve şirket simülasyonu.
 
@@ -67,6 +67,17 @@ Android-first, tamamen offline kariyer ve şirket simülasyonu.
 - Üç şirket seviyesi ve çalışan kapasitesi.
 - Seviye bazlı üç proje türü.
 - Proje maliyeti, ödülü, ilerleme hızı ve deneyim kazanımı.
+
+## v2.0.0 offline gerçek zamanlı sürüm
+
+- Yalnızca foreground'da ilerleyen oyun saati: 20 gerçek saniye = 1 oyun saati.
+- Tek aktif aktivite, 2 saatte 10 enerji yenilenmesi ve sporla 200'e kadar maksimum enerji.
+- 10 mesleki yetenek, çoklu yetenek eğitimleri ve göreve göre süre/enerji verimliliği.
+- Türkiye'nin 81 ili, ekonomik seviyeler, şehir bazlı maaş ve iş fırsatları.
+- 20 rol, cihaz içinde seed tabanlı gizli bot rekabeti ve günlük başvuru sonucu.
+- Ayrı `İşim` ve `Şirketim` ekranları; her oyun gününde değişen işveren görevleri.
+- İki oyun günü görev başlatılmadığında yalnızca foreground gün geçişinde işten çıkarılma.
+- SQLite şema v15; eski v10 kayıtları sıfırlanmadan okunur.
 
 ## Çalıştırma
 

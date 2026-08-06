@@ -14,6 +14,7 @@ import '../../application/game_session_application_service.dart';
 import '../../domain/entities/player_state.dart';
 import '../../../daily_goals/domain/entities/daily_goal.dart';
 import '../../../company/domain/entities/company_project.dart';
+import '../../../jobs/domain/entities/job_listing.dart';
 
 class GameSessionController extends ChangeNotifier {
   GameSessionController({required GameSessionApplicationService applicationService})
@@ -49,26 +50,44 @@ class GameSessionController extends ChangeNotifier {
 
   Future<String?> earnMoney({EarningPerformance performance = EarningPerformance.none}) async {
     return _execute(
-      action: (state) => _applicationService.earn(state, performance: performance),
-      stateOf: (result) => result.state,
-      message: (result) => '+₺${result.reward} kazandın. ${result.state.day}. gün, ${result.state.hour}:00',
+      action: (state) => _applicationService.startEarning(state, performance: performance),
+      stateOf: (result) => result,
+      message: (_) => 'Para kazanma aktivitesi başladı. 2 oyun saati sonra tamamlanacak.',
     );
   }
 
   Future<String?> train(Course course) async {
     return _execute(
-      action: (state) => _applicationService.train(state, course),
+      action: (state) => _applicationService.startTraining(state, course),
       stateOf: (result) => result,
-      message: (_) => '${course.name} tamamlandı. +${course.knowledge} bilgi',
+      message: (_) => '${course.name} başladı. Aktivite tamamlanınca bilgi kazanacaksın.',
     );
   }
 
-  Future<String?> rest() async {
+  Future<String?> startSport() async {
     return _execute(
-      action: _applicationService.rest,
+      action: _applicationService.startSport,
       stateOf: (result) => result,
-      message: (_) => 'Dinlendin. Enerjin yenilendi.',
+      message: (_) => 'Spor başladı. 2 oyun saati sonra maksimum enerjin artacak.',
     );
+  }
+
+  Future<String?> tick({int hours = 1}) async {
+    if (!_canExecute()) {
+      return null;
+    }
+    _isBusy = true;
+    notifyListeners();
+    try {
+      final result = await _applicationService.tick(_state, hours: hours);
+      _state = result.state;
+      return result.message;
+    } catch (_) {
+      return 'Oyun saati kaydedilemedi.';
+    } finally {
+      _isBusy = false;
+      notifyListeners();
+    }
   }
 
   JobApplicationCheck checkJob(Job job) => _applicationService.checkJob(_state, job);
@@ -81,11 +100,39 @@ class GameSessionController extends ChangeNotifier {
     );
   }
 
+  List<JobListing> get jobListings => _applicationService.jobListings(_state);
+
+  List<WorkTask> employerTasks(Job job) => _applicationService.employerTasks(_state, job);
+
+  Future<String?> applyForListing(JobListing listing) async {
+    return _execute(
+      action: (state) => _applicationService.startJobApplication(state, listing),
+      stateOf: (result) => result,
+      message: (_) => 'Başvuru karşılaşması başladı. 1 oyun saati sonra sonuçlanacak.',
+    );
+  }
+
   Future<String?> work(Job job, WorkTask task) async {
     return _execute(
       action: (state) => _applicationService.work(state, job, task),
       stateOf: (result) => result.state,
       message: (result) => '+₺${result.income} kazandın. Performansın: %${result.state.performance}',
+    );
+  }
+
+  Future<String?> startWork(Job job, WorkTask task) async {
+    return _execute(
+      action: (state) => _applicationService.startWork(state, job, task),
+      stateOf: (result) => result,
+      message: (_) => 'Görev başladı. Süre dolunca maaş ve performans işlenecek.',
+    );
+  }
+
+  Future<String?> leaveJob() async {
+    return _execute(
+      action: _applicationService.leaveJob,
+      stateOf: (result) => result,
+      message: (_) => 'İşinden ayrıldın.',
     );
   }
 

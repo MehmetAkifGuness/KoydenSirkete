@@ -21,7 +21,7 @@ class TrainingPage extends StatelessWidget {
           separatorBuilder: (_, index) => const SizedBox(height: 12),
           itemBuilder: (context, index) => _CourseCard(
             course: TrainingCatalog.courses[index],
-            enabled: !session.isBusy,
+            enabled: !session.isBusy && session.state.activeActivity == null,
             onTap: () => _train(context, TrainingCatalog.courses[index]),
           ),
         ),
@@ -64,6 +64,7 @@ class _CourseCard extends StatelessWidget {
               _Tag(icon: Icons.schedule_outlined, text: '${course.durationHours} saat'),
               _Tag(icon: Icons.bolt, text: '-${course.energyCost} enerji'),
               _Tag(icon: Icons.menu_book_outlined, text: '+${course.knowledge} bilgi'),
+              for (final entry in course.skillDeltas.entries) _Tag(icon: Icons.auto_awesome_outlined, text: '+${entry.value} ${entry.key.label}'),
             ]),
             const SizedBox(height: 14),
             SizedBox(width: double.infinity, child: FilledButton.tonal(onPressed: enabled ? onTap : null, child: const Text('Eğitime başla'))),

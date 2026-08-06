@@ -3,6 +3,9 @@ import '../../domain/entities/player_state.dart';
 import '../../domain/repositories/player_state_repository.dart';
 import '../mappers/player_state_mapper.dart';
 import '../models/player_state_model.dart';
+import '../mappers/active_activity_codec.dart';
+import '../mappers/skill_profile_codec.dart';
+import '../mappers/employment_codec.dart';
 
 class LocalPlayerStateRepository implements PlayerStateRepository {
   LocalPlayerStateRepository({
@@ -37,6 +40,17 @@ class LocalPlayerStateRepository implements PlayerStateRepository {
         day: model.day,
         hour: model.hour,
         earningSessionsToday: model.earningSessionsToday,
+        maxEnergy: model.maxEnergy,
+        energyRecoveryRemainder: model.energyRecoveryRemainder,
+        activeActivityJson: ActiveActivityCodec().encode(model.activeActivity),
+        skillsJson: SkillProfileCodec().encode(model.skills),
+        employmentJson: EmploymentCodec().encode(model.employment),
+        applicationBlockedJobId: model.applicationBlockedJobId,
+        applicationBlockedUntilDay: model.applicationBlockedUntilDay,
+        lastJobEvent: model.lastJobEvent,
+        jobDataVersion: model.jobDataVersion,
+        taskDataVersion: model.taskDataVersion,
+        dismissedDay: model.dismissedDay,
         currentJobId: model.currentJobId,
         performance: model.performance,
         workSessionsToday: model.workSessionsToday,

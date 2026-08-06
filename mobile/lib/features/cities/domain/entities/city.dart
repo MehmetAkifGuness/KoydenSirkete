@@ -1,3 +1,5 @@
+enum CityEconomicLevel { regional, developing, metropolis, economicCenter }
+
 class City {
   const City({
     required this.id,
@@ -6,6 +8,9 @@ class City {
     required this.dailyCost,
     required this.moveCost,
     required this.minimumCareerLevel,
+    this.salaryMultiplier = 1,
+    this.opportunityCount = 3,
+    this.economicLevel = CityEconomicLevel.regional,
   });
 
   final int id;
@@ -14,4 +19,7 @@ class City {
   final int dailyCost;
   final int moveCost;
   final int minimumCareerLevel;
+  final double salaryMultiplier;
+  final int opportunityCount;
+  final CityEconomicLevel economicLevel;
 }

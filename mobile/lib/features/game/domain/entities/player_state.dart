@@ -1,3 +1,7 @@
+import 'active_activity.dart';
+import '../../../skills/domain/entities/skill_profile.dart';
+import '../../../employment/domain/entities/employment.dart';
+
 class PlayerState {
   static const _unset = Object();
 
@@ -10,6 +14,17 @@ class PlayerState {
     required this.day,
     required this.hour,
     required this.earningSessionsToday,
+    this.maxEnergy = 100,
+    this.energyRecoveryRemainder = 0,
+    this.activeActivity,
+    this.skills = const SkillProfile(),
+    this.employment,
+    this.applicationBlockedJobId,
+    this.applicationBlockedUntilDay = 0,
+    this.lastJobEvent,
+    this.jobDataVersion = 3,
+    this.taskDataVersion = 2,
+    this.dismissedDay = 0,
     this.currentJobId,
     this.performance = 0,
     this.workSessionsToday = 0,
@@ -32,7 +47,7 @@ class PlayerState {
   });
 
   static const initial = PlayerState(
-    schemaVersion: 10,
+    schemaVersion: 15,
     money: 240,
     energy: 100,
     knowledge: 0,
@@ -40,6 +55,14 @@ class PlayerState {
     day: 1,
     hour: 8,
     earningSessionsToday: 0,
+    maxEnergy: 100,
+    energyRecoveryRemainder: 0,
+    activeActivity: null,
+    skills: SkillProfile.empty,
+    employment: null,
+    jobDataVersion: 3,
+    taskDataVersion: 2,
+    dismissedDay: 0,
     currentJobId: null,
     performance: 0,
     workSessionsToday: 0,
@@ -69,6 +92,17 @@ class PlayerState {
   final int day;
   final int hour;
   final int earningSessionsToday;
+  final int maxEnergy;
+  final int energyRecoveryRemainder;
+  final ActiveActivity? activeActivity;
+  final SkillProfile skills;
+  final Employment? employment;
+  final int? applicationBlockedJobId;
+  final int applicationBlockedUntilDay;
+  final String? lastJobEvent;
+  final int jobDataVersion;
+  final int taskDataVersion;
+  final int dismissedDay;
   final int? currentJobId;
   final int performance;
   final int workSessionsToday;
@@ -98,6 +132,17 @@ class PlayerState {
     int? day,
     int? hour,
     int? earningSessionsToday,
+    int? maxEnergy,
+    int? energyRecoveryRemainder,
+    Object? activeActivity = _unset,
+    SkillProfile? skills,
+    Object? employment = _unset,
+    Object? applicationBlockedJobId = _unset,
+    int? applicationBlockedUntilDay,
+    Object? lastJobEvent = _unset,
+    int? jobDataVersion,
+    int? taskDataVersion,
+    int? dismissedDay,
     Object? currentJobId = _unset,
     int? performance,
     int? workSessionsToday,
@@ -127,6 +172,17 @@ class PlayerState {
       day: day ?? this.day,
       hour: hour ?? this.hour,
       earningSessionsToday: earningSessionsToday ?? this.earningSessionsToday,
+      maxEnergy: maxEnergy ?? this.maxEnergy,
+      energyRecoveryRemainder: energyRecoveryRemainder ?? this.energyRecoveryRemainder,
+      activeActivity: identical(activeActivity, _unset) ? this.activeActivity : activeActivity as ActiveActivity?,
+      skills: skills ?? this.skills,
+      employment: identical(employment, _unset) ? this.employment : employment as Employment?,
+      applicationBlockedJobId: identical(applicationBlockedJobId, _unset) ? this.applicationBlockedJobId : applicationBlockedJobId as int?,
+      applicationBlockedUntilDay: applicationBlockedUntilDay ?? this.applicationBlockedUntilDay,
+      lastJobEvent: identical(lastJobEvent, _unset) ? this.lastJobEvent : lastJobEvent as String?,
+      jobDataVersion: jobDataVersion ?? this.jobDataVersion,
+      taskDataVersion: taskDataVersion ?? this.taskDataVersion,
+      dismissedDay: dismissedDay ?? this.dismissedDay,
       currentJobId: identical(currentJobId, _unset) ? this.currentJobId : currentJobId as int?,
       performance: performance ?? this.performance,
       workSessionsToday: workSessionsToday ?? this.workSessionsToday,
@@ -149,8 +205,8 @@ class PlayerState {
     );
   }
 
-  PlayerState advanceHours(int hours) {
-    final absoluteHour = (day - 1) * 24 + hour + hours;
+  PlayerState advanceGameHour() {
+    final absoluteHour = (day - 1) * 24 + hour + 1;
     final nextDay = absoluteHour ~/ 24 + 1;
     final nextHour = absoluteHour % 24;
     return copyWith(

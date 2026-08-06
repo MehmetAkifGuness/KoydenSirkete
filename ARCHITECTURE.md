@@ -7,7 +7,7 @@ GameSessionController / presentation state
         ↓
 GameSessionApplicationService / application
         ↓
-EarningService, TrainingService, RestService / domain
+GameClockService, ActivityService, SkillService, EmploymentService / domain
         ↓
 PlayerStateRepository / domain port
         ↓
@@ -31,7 +31,7 @@ AppDatabase / SQLite
 
 ## Feature sırası
 
-`earning → training → jobs → career → cities → company → daily_goals → progress`
+`earning → training → skills → sport → jobs → career → cities → employment → company → daily_goals → progress`
 
 ## Sürüm 1.2–1.4 sınırları
 
@@ -40,4 +40,4 @@ AppDatabase / SQLite
 - `company`: şirket seviyesi, kapasite ve proje kataloğu.
 - Yeni kurallar application service üzerinden persist edilir; widget'lar yalnızca state ve komut çağırır.
 
-1.4.0 itibarıyla listedeki temel özellikler offline oynanabilir durumdadır; yeni kurallar domain servislerinde, kalıcı yazma akışı application service'te tutulur.
+2.0.0 itibarıyla tüm oyun kuralları offline oynanabilir durumdadır. Foreground ticker yalnızca açık uygulamada saat tick'i üretir; aktif aktivite, yetenek, işveren ve istihdam verileri SQLite v15'e data katmanında JSON/alan bazlı olarak yazılır.

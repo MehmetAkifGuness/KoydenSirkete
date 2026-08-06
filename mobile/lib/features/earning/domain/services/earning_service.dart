@@ -2,6 +2,7 @@ import '../../../../core/errors/game_rule_exception.dart';
 import '../entities/earning_performance.dart';
 import 'earning_mini_game_service.dart';
 import '../../../game/domain/entities/player_state.dart';
+import '../../../game/domain/entities/active_activity.dart';
 
 class EarningResult {
   const EarningResult({required this.state, required this.reward, required this.bonusPercent});
@@ -14,25 +15,37 @@ class EarningResult {
 class EarningService {
   EarningService({EarningMiniGameService? miniGameService}) : _miniGameService = miniGameService ?? EarningMiniGameService();
 
-  static const energyCost = 15;
+  static const energyCost = 20;
   static const durationHours = 2;
   static const baseReward = 100;
 
   final EarningMiniGameService _miniGameService;
 
-  EarningResult execute(PlayerState state, {EarningPerformance performance = EarningPerformance.none}) {
+  ActiveActivity start(PlayerState state, {EarningPerformance performance = EarningPerformance.none}) {
     if (state.energy < energyCost) {
-      throw const GameRuleException('Para kazanmak için en az 15 enerji gerekir.');
+      throw const GameRuleException('Para kazanmak için en az 20 enerji gerekir.');
     }
+
+    return ActiveActivity(
+      type: ActivityType.earning,
+      sourceId: 'earning',
+      remainingHours: durationHours,
+      totalHours: durationHours,
+      energyCost: energyCost,
+      startedDay: state.day,
+      startedHour: state.hour,
+      payload: {'hits': '${performance.hits}'},
+    );
+  }
+
+  EarningResult complete(PlayerState state, {EarningPerformance performance = EarningPerformance.none}) {
 
     final dailyReward = (baseReward * _dailyMultiplier(state.earningSessionsToday)).round();
     final reward = (dailyReward * _miniGameService.rewardMultiplier(performance)).round();
-    final progressed = state.advanceHours(durationHours);
-    final nextState = progressed.copyWith(
+    final nextState = state.copyWith(
       money: state.money + reward,
       totalEarned: state.totalEarned + reward,
-      energy: state.energy - energyCost,
-      earningSessionsToday: progressed.day == state.day ? state.earningSessionsToday + 1 : 1,
+      earningSessionsToday: state.earningSessionsToday + 1,
     );
     return EarningResult(
       state: nextState,

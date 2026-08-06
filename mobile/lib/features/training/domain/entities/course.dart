@@ -1,3 +1,5 @@
+import '../../../skills/domain/entities/skill_id.dart';
+
 class Course {
   const Course({
     required this.id,
@@ -8,6 +10,7 @@ class Course {
     required this.energyCost,
     required this.knowledge,
     required this.experience,
+    this.skillDeltas = const {},
   });
 
   final String id;
@@ -18,4 +21,5 @@ class Course {
   final int energyCost;
   final int knowledge;
   final int experience;
+  final Map<SkillId, int> skillDeltas;
 }

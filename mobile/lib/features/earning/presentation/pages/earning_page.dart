@@ -19,7 +19,7 @@ class EarningPage extends StatelessWidget {
           children: [
             _EarningSummary(session: session),
             const SizedBox(height: 24),
-            const Text('Her tur 2 saat ilerletir ve 15 enerji harcar.', style: TextStyle(color: Colors.white60)),
+            const Text('Aktivite 2 oyun saati sürer ve 20 enerji harcar.', style: TextStyle(color: Colors.white60)),
             const SizedBox(height: 18),
             EarningMiniGamePanel(session: session),
           ],

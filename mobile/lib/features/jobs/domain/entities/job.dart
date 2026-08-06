@@ -1,3 +1,5 @@
+import '../../../skills/domain/entities/skill_id.dart';
+
 class Job {
   const Job({
     required this.id,
@@ -10,6 +12,9 @@ class Job {
     this.careerTrack = 'genel',
     this.level = 1,
     this.nextJobId,
+    this.cityId,
+    this.opportunityWeight = 1,
+    this.skillRequirements = const {},
   });
 
   final int id;
@@ -22,4 +27,7 @@ class Job {
   final String careerTrack;
   final int level;
   final int? nextJobId;
+  final int? cityId;
+  final int opportunityWeight;
+  final Map<SkillId, int> skillRequirements;
 }

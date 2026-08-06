@@ -15,61 +15,71 @@ import 'package:kariyerden_sirkete/features/cities/domain/services/city_catalog.
 import 'package:kariyerden_sirkete/features/cities/domain/services/city_service.dart';
 import 'package:kariyerden_sirkete/features/cities/domain/services/living_cost_service.dart';
 import 'package:kariyerden_sirkete/features/company/domain/services/company_service.dart';
+import 'package:kariyerden_sirkete/features/skills/domain/entities/skill_id.dart';
+import 'package:kariyerden_sirkete/features/skills/domain/entities/skill_profile.dart';
 
 void main() {
   group('earning rules', () {
     test('spends energy, adds reward and advances time', () {
-      final result = EarningService().execute(PlayerState.initial);
+      final service = EarningService();
+      final activity = service.start(PlayerState.initial);
+      final result = service.complete(PlayerState.initial.copyWith(energy: 80, activeActivity: activity),);
 
       expect(result.reward, 100);
       expect(result.state.money, 340);
-      expect(result.state.energy, 85);
-      expect(result.state.hour, 10);
+      expect(result.state.energy, 80);
+      expect(result.state.hour, 8);
       expect(result.state.earningSessionsToday, 1);
     });
 
     test('reduces reward after the first two daily sessions', () {
       final service = EarningService();
-      final first = service.execute(PlayerState.initial).state;
-      final second = service.execute(first).state;
-      final third = service.execute(second);
+      final first = service.complete(PlayerState.initial.copyWith(energy: 80),).state;
+      final second = service.complete(first.copyWith(energy: 60, earningSessionsToday: 1)).state;
+      final third = service.complete(second.copyWith(energy: 40, earningSessionsToday: 2));
 
       expect(third.reward, 80);
       expect(third.state.earningSessionsToday, 3);
     });
 
     test('applies mini game performance bonus without changing base rules', () {
-      final result = EarningService().execute(
-        PlayerState.initial,
+      final service = EarningService();
+      final result = service.complete(
+        PlayerState.initial.copyWith(energy: 80),
         performance: const EarningPerformance(hits: 12),
       );
 
       expect(result.reward, 135);
       expect(result.bonusPercent, 35);
-      expect(result.state.energy, 85);
+      expect(result.state.energy, 80);
     });
 
     test('rejects earning without enough energy', () {
       final state = PlayerState.initial.copyWith(energy: 14);
 
-      expect(() => EarningService().execute(state), throwsA(isA<GameRuleException>()));
+      expect(() => EarningService().start(state), throwsA(isA<GameRuleException>()));
     });
   });
 
   group('training rules', () {
     test('applies standard course cost, energy and knowledge', () {
       final course = TrainingCatalog.courses[1];
-      final result = TrainingService().execute(PlayerState.initial, course);
+      final service = TrainingService();
+      final activity = service.start(PlayerState.initial, course);
+      final result = service.complete(PlayerState.initial.copyWith(energy: 85, activeActivity: activity), course);
 
       expect(result.money, 160);
       expect(result.energy, 85);
       expect(result.knowledge, 12);
       expect(result.experience, 2);
-      expect(result.hour, 12);
+      expect(result.hour, 8);
     });
 
     test('allows free practice without money', () {
-      final result = TrainingService().execute(PlayerState.initial, TrainingCatalog.courses.first);
+      final service = TrainingService();
+      final course = TrainingCatalog.courses.first;
+      final activity = service.start(PlayerState.initial, course);
+      final result = service.complete(PlayerState.initial.copyWith(activeActivity: activity), course);
 
       expect(result.money, PlayerState.initial.money);
       expect(result.knowledge, 3);
@@ -79,7 +89,7 @@ void main() {
       final state = PlayerState.initial.copyWith(money: 10);
 
       expect(
-        () => TrainingService().execute(state, TrainingCatalog.courses[1]),
+        () => TrainingService().start(state, TrainingCatalog.courses[1]),
         throwsA(isA<GameRuleException>()),
       );
     });
@@ -128,7 +138,7 @@ void main() {
     test('promotion requires performance and progression', () {
       final current = JobCatalog.jobs.first;
       final next = JobCatalog.jobs[1];
-      final state = PlayerState.initial.copyWith(currentJobId: current.id, performance: 70, knowledge: 12, experience: 10);
+      final state = PlayerState.initial.copyWith(currentJobId: current.id, performance: 70, knowledge: 12, experience: 10, skills: SkillProfile({SkillId.sales: 20, SkillId.leadership: 12}));
       final result = CareerService().promote(state, current, next);
 
       expect(result.currentJobId, next.id);
@@ -165,12 +175,12 @@ void main() {
   });
 
   test('v1.1 local catalogs expose new content', () {
-    expect(JobCatalog.version, 2);
-    expect(JobCatalog.jobs.length, 6);
+    expect(JobCatalog.version, 3);
+    expect(JobCatalog.jobs.length, 20);
     expect(WorkTaskCatalog.forJob(4), isNotEmpty);
-    expect(TrainingCatalog.version, 2);
-    expect(TrainingCatalog.courses.length, 4);
-    expect(CityCatalog.version, 2);
-    expect(CityCatalog.cities.length, 5);
+    expect(TrainingCatalog.version, 3);
+    expect(TrainingCatalog.courses.length, greaterThanOrEqualTo(10));
+    expect(CityCatalog.version, 3);
+    expect(CityCatalog.cities.length, 81);
   });
 }

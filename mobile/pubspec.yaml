@@ -1,7 +1,7 @@
 name: kariyerden_sirkete
-description: Offline-first kariyer ve şirket simülasyonu.
+description: Müdürüm - tamamen offline kariyer ve şirket simülasyonu.
 publish_to: none
-version: 1.4.0+6
+version: 2.0.0+1
 
 environment:
   sdk: ^3.9.0

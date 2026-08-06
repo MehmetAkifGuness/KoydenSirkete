@@ -17,6 +17,17 @@ class PlayerStateRecord {
     required this.day,
     required this.hour,
     required this.earningSessionsToday,
+    this.maxEnergy = 100,
+    this.energyRecoveryRemainder = 0,
+    this.activeActivityJson,
+    this.skillsJson,
+    this.employmentJson,
+    this.applicationBlockedJobId,
+    this.applicationBlockedUntilDay = 0,
+    this.lastJobEvent,
+    this.jobDataVersion = 3,
+    this.taskDataVersion = 2,
+    this.dismissedDay = 0,
     this.currentJobId,
     this.performance = 0,
     this.workSessionsToday = 0,
@@ -47,6 +58,17 @@ class PlayerStateRecord {
   final int day;
   final int hour;
   final int earningSessionsToday;
+  final int maxEnergy;
+  final int energyRecoveryRemainder;
+  final String? activeActivityJson;
+  final String? skillsJson;
+  final String? employmentJson;
+  final int? applicationBlockedJobId;
+  final int applicationBlockedUntilDay;
+  final String? lastJobEvent;
+  final int jobDataVersion;
+  final int taskDataVersion;
+  final int dismissedDay;
   final int? currentJobId;
   final int performance;
   final int workSessionsToday;

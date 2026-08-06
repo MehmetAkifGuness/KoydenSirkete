@@ -1,3 +1,5 @@
+import '../../../skills/domain/entities/skill_id.dart';
+
 class WorkTask {
   const WorkTask({
     required this.id,
@@ -9,6 +11,7 @@ class WorkTask {
     required this.salaryMultiplier,
     required this.performanceGain,
     required this.experienceGain,
+    this.skillRequirements = const {},
   });
 
   final int id;
@@ -20,4 +23,5 @@ class WorkTask {
   final double salaryMultiplier;
   final int performanceGain;
   final int experienceGain;
+  final Map<SkillId, int> skillRequirements;
 }

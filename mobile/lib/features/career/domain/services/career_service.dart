@@ -32,6 +32,11 @@ class CareerService {
         reason: 'Terfi için en az ${nextJob.minimumExperience} tecrübe gerekiyor.',
       );
     }
+    for (final requirement in nextJob.skillRequirements.entries) {
+      if (requirement.value > 0 && state.skills[requirement.key] < requirement.value) {
+        return PromotionCheck(isEligible: false, reason: '${requirement.key.label} yeteneği en az ${requirement.value} olmalı.');
+      }
+    }
     return const PromotionCheck(isEligible: true, reason: 'Terfi için hazırsın.');
   }
 

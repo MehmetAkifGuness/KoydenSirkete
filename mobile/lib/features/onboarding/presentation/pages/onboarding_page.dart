@@ -18,7 +18,7 @@ class OnboardingPage extends StatelessWidget {
               children: [
                 const CircleAvatar(radius: 42, child: Icon(Icons.agriculture_outlined, size: 42)),
                 const SizedBox(height: 24),
-                Text('Kariyerden Şirkete', style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w900)),
+                Text('Müdürüm', style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w900)),
                 const SizedBox(height: 12),
                 const Text(
                   'Köydeki ilk adımından kendi şirketine uzanan tamamen offline bir kariyer simülasyonuna hoş geldin.',

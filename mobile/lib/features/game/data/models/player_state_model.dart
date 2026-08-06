@@ -1,5 +1,11 @@
 import '../../domain/entities/player_state.dart';
+import '../../domain/entities/active_activity.dart';
 import '../../../../core/database/player_state_store.dart';
+import '../mappers/active_activity_codec.dart';
+import '../mappers/skill_profile_codec.dart';
+import '../../../skills/domain/entities/skill_profile.dart';
+import '../../../employment/domain/entities/employment.dart';
+import '../mappers/employment_codec.dart';
 
 class PlayerStateModel {
   const PlayerStateModel({
@@ -11,6 +17,17 @@ class PlayerStateModel {
     required this.day,
     required this.hour,
     required this.earningSessionsToday,
+    this.maxEnergy = 100,
+    this.energyRecoveryRemainder = 0,
+    this.activeActivity,
+    this.skills = const SkillProfile(),
+    this.employment,
+    this.applicationBlockedJobId,
+    this.applicationBlockedUntilDay = 0,
+    this.lastJobEvent,
+    this.jobDataVersion = 3,
+    this.taskDataVersion = 2,
+    this.dismissedDay = 0,
     this.currentJobId,
     this.performance = 0,
     this.workSessionsToday = 0,
@@ -42,6 +59,17 @@ class PlayerStateModel {
       day: record.day,
       hour: record.hour,
       earningSessionsToday: record.earningSessionsToday,
+      maxEnergy: record.maxEnergy,
+      energyRecoveryRemainder: record.energyRecoveryRemainder,
+      activeActivity: ActiveActivityCodec().decode(record.activeActivityJson),
+      skills: SkillProfileCodec().decode(record.skillsJson),
+      employment: EmploymentCodec().decode(record.employmentJson),
+      applicationBlockedJobId: record.applicationBlockedJobId,
+      applicationBlockedUntilDay: record.applicationBlockedUntilDay,
+      lastJobEvent: record.lastJobEvent,
+      jobDataVersion: record.jobDataVersion,
+      taskDataVersion: record.taskDataVersion,
+      dismissedDay: record.dismissedDay,
       currentJobId: record.currentJobId,
       performance: record.performance,
       workSessionsToday: record.workSessionsToday,
@@ -72,6 +100,17 @@ class PlayerStateModel {
   final int day;
   final int hour;
   final int earningSessionsToday;
+  final int maxEnergy;
+  final int energyRecoveryRemainder;
+  final ActiveActivity? activeActivity;
+  final SkillProfile skills;
+  final Employment? employment;
+  final int? applicationBlockedJobId;
+  final int applicationBlockedUntilDay;
+  final String? lastJobEvent;
+  final int jobDataVersion;
+  final int taskDataVersion;
+  final int dismissedDay;
   final int? currentJobId;
   final int performance;
   final int workSessionsToday;
@@ -102,6 +141,17 @@ class PlayerStateModel {
       day: entity.day,
       hour: entity.hour,
       earningSessionsToday: entity.earningSessionsToday,
+      maxEnergy: entity.maxEnergy,
+      energyRecoveryRemainder: entity.energyRecoveryRemainder,
+      activeActivity: entity.activeActivity,
+      skills: entity.skills,
+      employment: entity.employment,
+      applicationBlockedJobId: entity.applicationBlockedJobId,
+      applicationBlockedUntilDay: entity.applicationBlockedUntilDay,
+      lastJobEvent: entity.lastJobEvent,
+      jobDataVersion: entity.jobDataVersion,
+      taskDataVersion: entity.taskDataVersion,
+      dismissedDay: entity.dismissedDay,
       currentJobId: entity.currentJobId,
       performance: entity.performance,
       workSessionsToday: entity.workSessionsToday,

@@ -31,6 +31,20 @@ abstract final class AppFeatures {
     color: Color(0xFF6AA9FF),
     unlocked: true,
   );
+  static const skills = AppFeature(
+    title: 'Yetenekler',
+    subtitle: 'Mesleki alanlarını geliştir',
+    icon: Icons.auto_awesome_outlined,
+    color: Color(0xFF71D3C1),
+    unlocked: true,
+  );
+  static const sport = AppFeature(
+    title: 'Spor',
+    subtitle: 'Maksimum enerjini artır',
+    icon: Icons.fitness_center_outlined,
+    color: Color(0xFFFF8A65),
+    unlocked: true,
+  );
   static const jobs = AppFeature(
     title: 'İş ilanları',
     subtitle: 'İlk fırsatını bul',

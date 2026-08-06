@@ -1,5 +1,18 @@
 # Sürüm durumu
 
+# 2.0.0 — Offline gerçek zamanlı kariyer simülasyonu
+
+Tamamlandı:
+
+- Foreground-only oyun saati ve tek aktif aktivite altyapısı.
+- Enerji yenilenmesi, spor ve maksimum enerji gelişimi.
+- 10 yetenek, çoklu yetenek eğitimleri ve görev verimliliği.
+- 81 şehir, ekonomik seviye ve deterministik şehir fırsatları.
+- 20 kariyer rolü ve gizli deterministik bot rekabeti.
+- Ayrı `İşim`/`Şirketim` alanları, dinamik görevler ve devamsızlık kovulması.
+- SQLite v11–v15 migration'ları ve geriye dönük kayıt koruması.
+- 31 Flutter/domain/widget testi ve temiz statik analiz.
+
 ## 1.4.0 — Şirket derinliği
 
 - Şirket seviyesi yükseltme ve çalışan kapasitesi tamamlandı.
