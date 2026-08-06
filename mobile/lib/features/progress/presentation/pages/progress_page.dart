@@ -17,9 +17,9 @@ class ProgressPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('İlerleme')),
       body: ListView(
-        padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
         children: [
-          const Text('İstatistikler', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900)),
+          const Text('İstatistikler', style: TextStyle(fontFamily: 'serif', fontSize: 24, fontWeight: FontWeight.w700)),
           const SizedBox(height: 12),
           Card(
             child: Padding(
@@ -37,7 +37,7 @@ class ProgressPage extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 24),
-          Text('Başarılar', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900)),
+          Text('Başarılar', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontFamily: 'serif', fontSize: 24, fontWeight: FontWeight.w700)),
           const SizedBox(height: 12),
           for (final achievement in achievements)
             Padding(

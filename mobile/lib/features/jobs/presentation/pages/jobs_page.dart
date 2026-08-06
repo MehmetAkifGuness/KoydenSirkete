@@ -17,7 +17,7 @@ class JobsPage extends StatelessWidget {
         builder: (context, _) {
           final listings = session.jobListings;
           return ListView.separated(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
             itemCount: listings.length + 1,
             separatorBuilder: (_, index) => const SizedBox(height: 12),
             itemBuilder: (context, index) {
@@ -44,11 +44,11 @@ class _JobCard extends StatelessWidget {
     final enabled = check.isEligible && !session.isBusy && session.state.activeActivity == null;
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(18),
+        padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Row(children: [
-            Expanded(child: Text(job.title, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800))),
-            Text('₺${listing.salary}', style: TextStyle(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.w800)),
+            Expanded(child: Text(job.title, style: const TextStyle(fontFamily: 'serif', fontSize: 20, fontWeight: FontWeight.w700))),
+            Container(padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7), decoration: BoxDecoration(color: const Color(0xFFDDBA3E), borderRadius: BorderRadius.circular(4)), child: Text('₺${listing.salary}', style: const TextStyle(color: Colors.black, fontWeight: FontWeight.w700))),
           ]),
           const SizedBox(height: 5),
           Text('${job.company} · ${job.careerTrack} ${job.level}. rütbe', style: TextStyle(color: Theme.of(context).colorScheme.primary)),
@@ -56,9 +56,9 @@ class _JobCard extends StatelessWidget {
           Text(job.description, style: const TextStyle(color: Colors.white70)),
           const SizedBox(height: 14),
           Wrap(spacing: 8, runSpacing: 8, children: [
-            _Requirement(label: 'Bilgi ${job.minimumKnowledge}'),
-            _Requirement(label: 'Tecrübe ${job.minimumExperience}'),
-            for (final entry in job.skillRequirements.entries) _Requirement(label: '${entry.key.label} ${entry.value}'),
+          _Requirement(label: 'BİLGİ ${job.minimumKnowledge}'),
+          _Requirement(label: 'TECRÜBE ${job.minimumExperience}'),
+          for (final entry in job.skillRequirements.entries) _Requirement(label: '${entry.key.label.toUpperCase()} ${entry.value}'),
           ]),
           const SizedBox(height: 10),
           Text(check.reason, style: TextStyle(color: check.isEligible ? Colors.greenAccent : Colors.orangeAccent, fontSize: 12)),
@@ -85,5 +85,9 @@ class _Requirement extends StatelessWidget {
   final String label;
 
   @override
-  Widget build(BuildContext context) => Chip(label: Text(label, style: const TextStyle(fontSize: 11)));
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+    decoration: BoxDecoration(border: Border.all(color: const Color(0xFFDDBA3E)), borderRadius: BorderRadius.circular(16)),
+    child: Text(label, style: const TextStyle(color: Color(0xFFDDBA3E), fontSize: 10, fontWeight: FontWeight.w700)),
+  );
 }

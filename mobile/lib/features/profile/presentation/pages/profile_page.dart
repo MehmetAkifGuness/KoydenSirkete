@@ -13,14 +13,14 @@ class ProfilePage extends StatelessWidget {
     final state = session.state;
     return SafeArea(
       child: ListView(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
         children: [
-          Text('Profil', style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w900)),
-          const SizedBox(height: 20),
+          Center(child: Text('Profil', style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontSize: 24))),
+          const SizedBox(height: 24),
           Card(
             child: ListTile(
               leading: const CircleAvatar(child: Icon(Icons.person_outline)),
-              title: const Text('Yerel oyuncu'),
+              title: const Text('Yerel oyuncu', style: TextStyle(fontFamily: 'serif', fontSize: 22, fontWeight: FontWeight.w700)),
               subtitle: Text('Gün ${state.day} · ₺${state.money} · ${state.experience} tecrübe'),
             ),
           ),
@@ -28,7 +28,7 @@ class ProfilePage extends StatelessWidget {
           Card(
             child: ListTile(
               leading: const Icon(Icons.emoji_events_outlined),
-              title: const Text('İstatistikler ve başarılar'),
+              title: const Text('İstatistikler ve başarılar', style: TextStyle(fontFamily: 'serif', fontSize: 18, fontWeight: FontWeight.w700)),
               subtitle: const Text('Toplam ilerlemeni ve açılan ödülleri görüntüle.'),
               trailing: const Icon(Icons.chevron_right),
               onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => ProgressPage(session: session))),

@@ -21,56 +21,56 @@ abstract final class AppFeatures {
     title: 'Para kazan',
     subtitle: 'İlk sermayeni oluştur',
     icon: Icons.payments_outlined,
-    color: Color(0xFF60C98A),
+    color: Color(0xFFDDBA3E),
     unlocked: true,
   );
   static const training = AppFeature(
     title: 'Eğitim',
     subtitle: 'Bilgi ve becerilerini geliştir',
     icon: Icons.school_outlined,
-    color: Color(0xFF6AA9FF),
+    color: Color(0xFFDDBA3E),
     unlocked: true,
   );
   static const skills = AppFeature(
     title: 'Yetenekler',
     subtitle: 'Mesleki alanlarını geliştir',
     icon: Icons.auto_awesome_outlined,
-    color: Color(0xFF71D3C1),
+    color: Color(0xFFDDBA3E),
     unlocked: true,
   );
   static const sport = AppFeature(
     title: 'Spor',
     subtitle: 'Maksimum enerjini artır',
     icon: Icons.fitness_center_outlined,
-    color: Color(0xFFFF8A65),
+    color: Color(0xFFDDBA3E),
     unlocked: true,
   );
   static const jobs = AppFeature(
     title: 'İş ilanları',
     subtitle: 'İlk fırsatını bul',
     icon: Icons.work_outline,
-    color: Color(0xFFBD8CFF),
+    color: Color(0xFFDDBA3E),
     unlocked: true,
   );
   static const career = AppFeature(
     title: 'Kariyer',
     subtitle: 'İlerleme yolunu gör',
     icon: Icons.trending_up,
-    color: Color(0xFFBD8CFF),
+    color: Color(0xFFDDBA3E),
     unlocked: true,
   );
   static const cities = AppFeature(
     title: 'Şehirler',
     subtitle: 'Yeni yaşam alanları',
     icon: Icons.location_city_outlined,
-    color: Color(0xFFF0B75E),
+    color: Color(0xFFDDBA3E),
     unlocked: true,
   );
   static const company = AppFeature(
     title: 'Şirket',
     subtitle: 'Geleceğin işini kur',
     icon: Icons.business_outlined,
-    color: Color(0xFFEE806E),
+    color: Color(0xFFDDBA3E),
     unlocked: true,
   );
 }

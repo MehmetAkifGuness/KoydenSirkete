@@ -22,13 +22,13 @@ class DashboardPage extends StatelessWidget {
         final state = DashboardDesignState.fromPlayer(session.state);
         return SafeArea(
           child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
           children: [
             _Header(state: state),
             const SizedBox(height: 24),
             _GoalCard(status: session.dailyGoalStatus, session: session),
             const SizedBox(height: 24),
-            const SectionTitle(title: 'Bugünkü durum'),
+            const SectionTitle(title: 'Durum'),
             const SizedBox(height: 12),
             GridView.builder(
               shrinkWrap: true,
@@ -48,7 +48,7 @@ class DashboardPage extends StatelessWidget {
               _ActivityCard(session: session),
             ],
             const SizedBox(height: 24),
-            const SectionTitle(title: 'Keşfet'),
+            const SectionTitle(title: 'Kategoriler'),
             const SizedBox(height: 12),
             for (final feature in const [AppFeatures.earning, AppFeatures.training, AppFeatures.skills, AppFeatures.sport, AppFeatures.jobs, AppFeatures.cities])
               Padding(
@@ -73,16 +73,34 @@ class _ActivityCard extends StatelessWidget {
     final activity = session.state.activeActivity!;
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(18),
+        padding: const EdgeInsets.all(16),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(activity.type.name, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
-          const SizedBox(height: 8),
-          Text('${activity.remainingHours} oyun saati kaldı.'),
-          const SizedBox(height: 10),
-          LinearProgressIndicator(value: activity.progress),
+          Row(children: [
+            Container(width: 46, height: 46, decoration: BoxDecoration(color: const Color(0xFF171A1E), borderRadius: BorderRadius.circular(8)), child: const Icon(Icons.work_outline, color: Color(0xFFDDBA3E))),
+            const SizedBox(width: 14),
+            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(_title(activity.type.name), style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
+              const SizedBox(height: 4),
+              Text('Kalan süre: ${activity.remainingHours} saat', style: const TextStyle(color: Color(0xFFB7B0A2), fontSize: 13)),
+            ])),
+            Icon(Icons.close, color: const Color(0xFF9F988B).withValues(alpha: .8)),
+          ]),
+          const SizedBox(height: 12),
+          LinearProgressIndicator(value: activity.progress, minHeight: 4, borderRadius: BorderRadius.circular(8)),
         ]),
       ),
     );
+  }
+
+  String _title(String type) {
+    return switch (type) {
+      'earning' => 'Para kazan',
+      'training' => 'Eğitim',
+      'sport' => 'Spor',
+      'work' => 'İş görevi',
+      'jobApplication' => 'İş başvurusu',
+      _ => 'Aktif işlem',
+    };
   }
 }
 
@@ -93,17 +111,13 @@ class _Header extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(state.greeting, style: const TextStyle(color: Colors.white60, fontSize: 13)),
-            const SizedBox(height: 4),
-            Text('Müdürüm', style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w900)),
-          ]),
-        ),
-        const CircleAvatar(radius: 22, child: Icon(Icons.person_outline)),
-      ],
+    return SizedBox(
+      height: 48,
+      child: Row(children: [
+        IconButton(onPressed: () { if (Navigator.canPop(context)) Navigator.pop(context); }, icon: const Icon(Icons.arrow_back)),
+        Expanded(child: Center(child: Text('Müdür', style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontSize: 24)))),
+        const SizedBox(width: 48),
+      ]),
     );
   }
 }
@@ -118,20 +132,20 @@ class _GoalCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = Theme.of(context).colorScheme.primary;
     return Card(
-      color: color.withValues(alpha: .15),
       child: Padding(
-        padding: const EdgeInsets.all(18),
+        padding: const EdgeInsets.fromLTRB(24, 22, 24, 18),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Row(children: [
-            Icon(Icons.flag_outlined, color: color),
-            const SizedBox(width: 14),
-            const Expanded(child: Text('Günlük hedef', style: TextStyle(color: Colors.white60, fontSize: 12))),
-            Text('₺${status.reward}', style: TextStyle(color: color, fontWeight: FontWeight.w800)),
+          const Text('GÜNLÜK HEDEF', style: TextStyle(color: Color(0xFF9F988B), fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: .5)),
+          const SizedBox(height: 20),
+          Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
+            Expanded(child: Text(status.isClaimed ? 'Hedef tamamlandı' : 'Aktif hedef', style: const TextStyle(fontFamily: 'serif', fontSize: 25, fontWeight: FontWeight.w700))),
+            Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
+              const Text('Ödül', style: TextStyle(color: Color(0xFF9F988B), fontSize: 12)),
+              Text('₺${status.reward}', style: TextStyle(color: color, fontFamily: 'serif', fontSize: 18, fontWeight: FontWeight.w700)),
+            ]),
           ]),
-          const SizedBox(height: 8),
-          Text(status.isClaimed ? 'Bugünün ödülü alındı.' : '${status.progress}/${status.target} üretken aksiyon tamamlandı.', style: const TextStyle(fontWeight: FontWeight.w800)),
-          const SizedBox(height: 10),
-          LinearProgressIndicator(value: status.ratio),
+          const SizedBox(height: 12),
+          LinearProgressIndicator(value: status.ratio, minHeight: 4, borderRadius: BorderRadius.circular(8)),
           if (status.isComplete && !status.isClaimed) ...[
             const SizedBox(height: 10),
             Align(

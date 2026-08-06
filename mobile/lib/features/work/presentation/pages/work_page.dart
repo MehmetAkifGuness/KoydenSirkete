@@ -19,7 +19,7 @@ class WorkPage extends StatelessWidget {
       body: AnimatedBuilder(
         animation: session,
         builder: (context, _) => ListView.separated(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
           itemCount: tasks.length + 1,
           separatorBuilder: (_, index) => const SizedBox(height: 12),
           itemBuilder: (context, index) {
@@ -49,7 +49,7 @@ class _WorkTaskCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(task.title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
+            Text(task.title, style: const TextStyle(fontFamily: 'serif', fontSize: 19, fontWeight: FontWeight.w700)),
             const SizedBox(height: 8),
             Text(task.description, style: const TextStyle(color: Colors.white70)),
             const SizedBox(height: 12),

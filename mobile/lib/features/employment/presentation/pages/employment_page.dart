@@ -22,16 +22,16 @@ class EmploymentPage extends StatelessWidget {
             return _EmptyEmployment(event: state.lastJobEvent);
           }
           return ListView(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
             children: [
               Card(child: Padding(padding: const EdgeInsets.all(20), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Text(state.employment!.company, style: const TextStyle(fontSize: 13, color: Colors.white60)),
                 const SizedBox(height: 5),
-                Text(job.title, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900)),
+                Text(job.title, style: const TextStyle(fontFamily: 'serif', fontSize: 20, fontWeight: FontWeight.w700)),
                 const SizedBox(height: 12),
                 Text('Maaş ₺${state.employment!.salary} · ${job.careerTrack} ${job.level}. rütbe'),
                 const SizedBox(height: 12),
-                LinearProgressIndicator(value: state.performance / 100),
+                LinearProgressIndicator(value: state.performance / 100, minHeight: 5, borderRadius: BorderRadius.circular(8)),
                 const SizedBox(height: 6),
                 Text('Performans %${state.performance} · Bugün ${state.workSessionsToday} görev'),
                 const SizedBox(height: 12),

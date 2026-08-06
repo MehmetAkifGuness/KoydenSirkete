@@ -1,4 +1,4 @@
-# Müdürüm
+# Müdür
 
 Android-first, tamamen offline kariyer ve şirket simülasyonu.
 

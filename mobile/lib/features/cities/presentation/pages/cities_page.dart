@@ -17,7 +17,7 @@ class CitiesPage extends StatelessWidget {
       body: AnimatedBuilder(
         animation: session,
         builder: (context, _) => ListView.separated(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
           itemCount: CityCatalog.cities.length + 1,
           separatorBuilder: (_, index) => const SizedBox(height: 12),
           itemBuilder: (context, index) {
@@ -44,14 +44,14 @@ class _CityCard extends StatelessWidget {
     final check = session.checkCityMove(city);
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                Expanded(child: Text(city.name, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800))),
-                Text('₺${city.dailyCost}/gün', style: TextStyle(color: Theme.of(context).colorScheme.primary)),
+                Expanded(child: Text(city.name, style: const TextStyle(fontFamily: 'serif', fontSize: 20, fontWeight: FontWeight.w700))),
+                Text('₺${city.dailyCost}/gün', style: TextStyle(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.w700)),
               ],
             ),
             const SizedBox(height: 8),
@@ -59,7 +59,9 @@ class _CityCard extends StatelessWidget {
             const SizedBox(height: 10),
             Text('Taşınma: ₺${city.moveCost} · Maaş x${city.salaryMultiplier.toStringAsFixed(2)} · ${city.opportunityCount} fırsat'),
             const SizedBox(height: 6),
-            Text('Ekonomik seviye: ${city.economicLevel.name} · Kariyer seviyesi: ${city.minimumCareerLevel}'),
+            _CityPill(text: 'EKONOMİK SEVİYE: ${city.economicLevel.name.toUpperCase()}'),
+            const SizedBox(height: 6),
+            _CityPill(text: 'KARİYER SEVİYESİ: ${city.minimumCareerLevel}'),
             const SizedBox(height: 10),
             Text(isCurrent ? 'Şu anda buradasın.' : check.reason, style: TextStyle(color: isCurrent || check.isEligible ? Colors.greenAccent : Colors.orangeAccent)),
             const SizedBox(height: 10),
@@ -83,4 +85,17 @@ class _CityCard extends StatelessWidget {
     }
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
   }
+}
+
+class _CityPill extends StatelessWidget {
+  const _CityPill({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+    decoration: BoxDecoration(color: const Color(0xFF0B0B08), border: Border.all(color: const Color(0xFF554A1C)), borderRadius: BorderRadius.circular(14)),
+    child: Text(text, style: const TextStyle(color: Color(0xFFDDBA3E), fontSize: 10, fontWeight: FontWeight.w700)),
+  );
 }

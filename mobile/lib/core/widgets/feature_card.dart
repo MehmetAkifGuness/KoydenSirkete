@@ -13,28 +13,27 @@ class FeatureCard extends StatelessWidget {
     return Card(
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(16),
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
           child: Row(
             children: [
-              CircleAvatar(
-                radius: 22,
-                backgroundColor: feature.color.withValues(alpha: .15),
-                child: Icon(feature.unlocked ? feature.icon : Icons.lock_outline, color: feature.color),
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: feature.color.withValues(alpha: .65))),
+                child: Icon(feature.unlocked ? feature.icon : Icons.lock_outline, color: feature.color, size: 20),
               ),
               const SizedBox(width: 14),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(feature.title, style: const TextStyle(fontWeight: FontWeight.w800)),
-                    const SizedBox(height: 4),
-                    Text(feature.unlocked ? feature.subtitle : 'Yakında açılacak', style: const TextStyle(color: Colors.white60, fontSize: 12)),
+                    Text(feature.title, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
                   ],
                 ),
               ),
-              Icon(Icons.chevron_right, color: Colors.white.withValues(alpha: .4)),
+              const Icon(Icons.chevron_right, color: Color(0xFF6D674F)),
             ],
           ),
         ),

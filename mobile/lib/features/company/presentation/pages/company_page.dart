@@ -38,7 +38,7 @@ class _EstablishmentView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
         child: Card(
           child: Padding(
             padding: const EdgeInsets.all(20),
@@ -46,7 +46,7 @@ class _EstablishmentView extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Kendi şirketini kur', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900)),
+                const Center(child: Text('Kendi şirketini kur', style: TextStyle(fontFamily: 'serif', fontSize: 22, fontWeight: FontWeight.w700))),
                 const SizedBox(height: 10),
                 const Text('Kariyer yolunu tamamladıktan sonra kendi işini büyütmeye başlayabilirsin.'),
                 const SizedBox(height: 14),
@@ -85,7 +85,7 @@ class _CompanyView extends StatelessWidget {
   Widget build(BuildContext context) {
     final state = session.state;
     return ListView(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
       children: [
         Card(
           child: Padding(
@@ -93,7 +93,7 @@ class _CompanyView extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Şirket seviyesi ${state.companyLevel}', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900)),
+                Text('Şirket seviyesi ${state.companyLevel}', style: const TextStyle(fontFamily: 'serif', fontSize: 21, fontWeight: FontWeight.w700)),
                 const SizedBox(height: 10),
                 Text('Kasa: ₺${state.companyFunds} · Çalışan: ${state.employeeCount}/${CompanyService.employeeCapacity(state.companyLevel)}'),
                 const SizedBox(height: 12),

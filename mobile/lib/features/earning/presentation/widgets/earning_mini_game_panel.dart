@@ -54,7 +54,7 @@ class _EarningMiniGamePanelState extends State<EarningMiniGamePanel> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Hızlı görev', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
+        const Text('Hızlı görev', style: TextStyle(fontFamily: 'serif', fontWeight: FontWeight.w700, fontSize: 18)),
         const SizedBox(height: 8),
         const Text('8 saniye içinde hedefe dokun. Seri yaptıkça kazanç bonusun artar.'),
         const SizedBox(height: 16),

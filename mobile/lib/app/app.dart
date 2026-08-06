@@ -38,7 +38,7 @@ class CareerToCompanyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Müdürüm',
+      title: 'Müdür',
       theme: AppTheme.dark(),
       builder: (context, child) => AppGradientBackground(child: child ?? const SizedBox.shrink()),
       home: AppShell(playerStateStore: playerStateStore),
@@ -60,6 +60,7 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
   late final ForegroundClockTicker _clockTicker;
   late final PlayerStateStore _playerStateStore;
   late final GameSessionController _session;
+  bool _showWelcome = true;
 
   @override
   void initState() {
@@ -76,7 +77,6 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
       interval: GameClockService.realTickInterval,
     );
     _session.initialize();
-    _clockTicker.start();
   }
 
   @override
@@ -92,7 +92,9 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      _clockTicker.start();
+      if (!_showWelcome && _session.state.isOnboarded) {
+        _clockTicker.start();
+      }
     } else {
       _clockTicker.stop();
     }
@@ -109,8 +111,8 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
         if (_session.errorMessage != null) {
           return StorageErrorPage(message: _session.errorMessage!, onRetry: _session.retryInitialization);
         }
-        if (!_session.state.isOnboarded) {
-          return OnboardingPage(session: _session);
+        if (_showWelcome || !_session.state.isOnboarded) {
+          return OnboardingPage(session: _session, onStart: _enterGame);
         }
         return Scaffold(
           body: IndexedStack(
@@ -137,6 +139,14 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
         );
       },
     );
+  }
+
+  void _enterGame() {
+    if (!mounted) {
+      return;
+    }
+    setState(() => _showWelcome = false);
+    _clockTicker.start();
   }
 
   void _openFeature(AppFeature feature) {

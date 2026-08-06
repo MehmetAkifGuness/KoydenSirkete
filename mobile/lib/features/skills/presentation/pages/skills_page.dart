@@ -15,16 +15,16 @@ class SkillsPage extends StatelessWidget {
       body: AnimatedBuilder(
         animation: session,
         builder: (context, _) => ListView.separated(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
           itemCount: SkillId.values.length,
           separatorBuilder: (_, index) => const SizedBox(height: 10),
           itemBuilder: (_, index) {
             final skill = SkillId.values[index];
             final value = session.state.skills[skill];
-            return Card(child: Padding(padding: const EdgeInsets.all(16), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Row(children: [Expanded(child: Text(skill.label, style: const TextStyle(fontWeight: FontWeight.w800))), Text('$value / 100')]),
-              const SizedBox(height: 8),
-              LinearProgressIndicator(value: value / 100),
+            return Card(child: Padding(padding: const EdgeInsets.fromLTRB(20, 20, 20, 18), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Row(children: [Expanded(child: Text(skill.label, style: const TextStyle(fontFamily: 'serif', fontSize: 18, fontWeight: FontWeight.w700))), Text('$value / 100', style: TextStyle(color: value > 0 ? Theme.of(context).colorScheme.primary : const Color(0xFFD1C9B8), fontWeight: FontWeight.w700))]),
+              const SizedBox(height: 14),
+              LinearProgressIndicator(value: value / 100, minHeight: 5, borderRadius: BorderRadius.circular(8)),
             ])));
           },
         ),

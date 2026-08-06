@@ -11,7 +11,7 @@ class SectionTitle extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(title, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
+        Text(title.toUpperCase(), style: const TextStyle(color: Color(0xFF9F988B), fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: .6)),
         if (action != null)
           Text(action!, style: TextStyle(color: Theme.of(context).colorScheme.primary, fontSize: 12, fontWeight: FontWeight.w700)),
       ],

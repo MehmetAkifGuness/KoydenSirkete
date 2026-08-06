@@ -23,10 +23,10 @@ class DashboardDesignState {
       greeting: 'Yeni başlangıç',
       goal: state.knowledge < 12 ? 'İlk eğitimine ulaş' : 'İlk iş ilanını bul',
       metrics: [
-        DashboardMetric(label: 'Para', value: '₺${state.money}', icon: Icons.payments_outlined, color: const Color(0xFF60C98A)),
-        DashboardMetric(label: 'Enerji', value: '${state.energy} / ${state.maxEnergy}', icon: Icons.bolt, color: const Color(0xFFF0B75E)),
-        DashboardMetric(label: 'Bilgi', value: '${state.knowledge}', icon: Icons.menu_book_outlined, color: const Color(0xFF6AA9FF)),
-        DashboardMetric(label: 'Tecrübe', value: '${state.experience}', icon: Icons.workspace_premium_outlined, color: const Color(0xFFBD8CFF)),
+        DashboardMetric(label: 'Para', value: '₺${state.money}', icon: Icons.payments_outlined, color: const Color(0xFFDDBA3E)),
+        DashboardMetric(label: 'Enerji', value: '${state.energy} / ${state.maxEnergy}', icon: Icons.bolt, color: const Color(0xFFDDBA3E)),
+        DashboardMetric(label: 'Bilgi', value: '${state.knowledge}', icon: Icons.menu_book_outlined, color: const Color(0xFFDDBA3E)),
+        DashboardMetric(label: 'Tecrübe', value: '${state.experience}', icon: Icons.workspace_premium_outlined, color: const Color(0xFFDDBA3E)),
       ],
     );
   }

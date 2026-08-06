@@ -14,19 +14,19 @@ class SportPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Spor')),
       body: ListView(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
         children: [
           Card(
             child: Padding(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                const Text('Enerji kapasiteni geliştir', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900)),
+                const Text('Enerji kapasiteni geliştir', style: TextStyle(fontFamily: 'serif', fontSize: 18, fontWeight: FontWeight.w700)),
                 const SizedBox(height: 8),
                 Text('Mevcut enerji: ${state.energy}/${state.maxEnergy}'),
                 const SizedBox(height: 10),
-                LinearProgressIndicator(value: state.energy / state.maxEnergy),
+                LinearProgressIndicator(value: state.energy / state.maxEnergy, minHeight: 6, borderRadius: BorderRadius.circular(8)),
                 const SizedBox(height: 14),
-                const Text('Spor 20 enerji harcar, 2 oyun saati sürer ve tamamlandığında maksimum enerjiyi 5 artırır.'),
+                const Text('Spor 20 enerji harcar, 2 oyun saati sürer ve tamamlandığında maksimum enerjiyi 5 artırır.', style: TextStyle(color: Color(0xFFD1C9B8))),
                 const SizedBox(height: 16),
                 SizedBox(
                   width: double.infinity,

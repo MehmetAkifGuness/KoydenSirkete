@@ -23,7 +23,7 @@ class CareerPage extends StatelessWidget {
           }
           final check = session.checkPromotion(currentJob, nextJob);
           return ListView(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
             children: [
               Card(
                 child: Padding(
@@ -31,7 +31,7 @@ class CareerPage extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(currentJob.title, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900)),
+                      Text(currentJob.title, style: const TextStyle(fontFamily: 'serif', fontSize: 22, fontWeight: FontWeight.w700)),
                       const SizedBox(height: 6),
                       Text(currentJob.company, style: TextStyle(color: Theme.of(context).colorScheme.primary)),
                       const SizedBox(height: 18),
@@ -44,7 +44,7 @@ class CareerPage extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               if (nextJob != null) ...[
-                Text('Sonraki seviye', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
+                const Text('SONRAKİ SEVİYE', style: TextStyle(color: Color(0xFF9F988B), fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: .6)),
                 const SizedBox(height: 10),
                 Card(
                   child: Padding(
@@ -52,7 +52,7 @@ class CareerPage extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(nextJob.title, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 17)),
+                        Text(nextJob.title, style: const TextStyle(fontFamily: 'serif', fontWeight: FontWeight.w700, fontSize: 19)),
                         const SizedBox(height: 6),
                         Text('Maaş: ₺${nextJob.salary} · Bilgi: ${nextJob.minimumKnowledge} · Tecrübe: ${nextJob.minimumExperience}'),
                         const SizedBox(height: 10),

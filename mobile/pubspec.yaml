@@ -1,5 +1,5 @@
 name: kariyerden_sirkete
-description: Müdürüm - tamamen offline kariyer ve şirket simülasyonu.
+description: Müdür - tamamen offline kariyer ve şirket simülasyonu.
 publish_to: none
 version: 2.0.0+1
 
@@ -19,3 +19,5 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/images/mudurum_cover.png
