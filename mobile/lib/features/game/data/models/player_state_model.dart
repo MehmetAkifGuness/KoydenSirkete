@@ -19,6 +19,13 @@ class PlayerStateModel {
     required this.earningSessionsToday,
     this.maxEnergy = 100,
     this.energyRecoveryRemainder = 0,
+    this.negativeMoneyHours = 0,
+    this.wheelCooldownSeconds = 0,
+    this.wheelMajorRewardsToday = 0,
+    this.wheelDurationBuffPercent = 0,
+    this.wheelDurationBuffTasks = 0,
+    this.wheelEnergyBuffPercent = 0,
+    this.wheelEnergyBuffTasks = 0,
     this.activeActivity,
     this.skills = const SkillProfile(),
     this.employment,
@@ -61,6 +68,13 @@ class PlayerStateModel {
       earningSessionsToday: record.earningSessionsToday,
       maxEnergy: record.maxEnergy,
       energyRecoveryRemainder: record.energyRecoveryRemainder,
+      negativeMoneyHours: record.negativeMoneyHours,
+      wheelCooldownSeconds: record.wheelCooldownSeconds,
+      wheelMajorRewardsToday: record.wheelMajorRewardsToday,
+      wheelDurationBuffPercent: record.wheelDurationBuffPercent,
+      wheelDurationBuffTasks: record.wheelDurationBuffTasks,
+      wheelEnergyBuffPercent: record.wheelEnergyBuffPercent,
+      wheelEnergyBuffTasks: record.wheelEnergyBuffTasks,
       activeActivity: ActiveActivityCodec().decode(record.activeActivityJson),
       skills: SkillProfileCodec().decode(record.skillsJson),
       employment: EmploymentCodec().decode(record.employmentJson),
@@ -102,6 +116,13 @@ class PlayerStateModel {
   final int earningSessionsToday;
   final int maxEnergy;
   final int energyRecoveryRemainder;
+  final int negativeMoneyHours;
+  final int wheelCooldownSeconds;
+  final int wheelMajorRewardsToday;
+  final int wheelDurationBuffPercent;
+  final int wheelDurationBuffTasks;
+  final int wheelEnergyBuffPercent;
+  final int wheelEnergyBuffTasks;
   final ActiveActivity? activeActivity;
   final SkillProfile skills;
   final Employment? employment;
@@ -143,6 +164,13 @@ class PlayerStateModel {
       earningSessionsToday: entity.earningSessionsToday,
       maxEnergy: entity.maxEnergy,
       energyRecoveryRemainder: entity.energyRecoveryRemainder,
+      negativeMoneyHours: entity.negativeMoneyHours,
+      wheelCooldownSeconds: entity.wheelCooldownSeconds,
+      wheelMajorRewardsToday: entity.wheelMajorRewardsToday,
+      wheelDurationBuffPercent: entity.wheelDurationBuffPercent,
+      wheelDurationBuffTasks: entity.wheelDurationBuffTasks,
+      wheelEnergyBuffPercent: entity.wheelEnergyBuffPercent,
+      wheelEnergyBuffTasks: entity.wheelEnergyBuffTasks,
       activeActivity: entity.activeActivity,
       skills: entity.skills,
       employment: entity.employment,

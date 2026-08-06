@@ -23,6 +23,7 @@ import '../../jobs/domain/services/job_catalog.dart';
 import '../../employment/domain/entities/employment.dart';
 import '../../employment/domain/services/employment_service.dart';
 import '../../work/domain/services/employer_task_generator.dart';
+import '../../wheel/domain/services/esnaf_wheel_service.dart';
 
 class GameSessionApplicationService {
   GameSessionApplicationService({
@@ -40,6 +41,7 @@ class GameSessionApplicationService {
     JobListingService? jobListingService,
     EmploymentService? employmentService,
     EmployerTaskGenerator? employerTaskGenerator,
+    EsnafWheelService? esnafWheelService,
   })  : _repository = repository,
         _jobApplicationService = jobApplicationService ?? JobApplicationService(),
         _workService = workService ?? WorkService(),
@@ -53,7 +55,8 @@ class GameSessionApplicationService {
         _activityService = activityService ?? ActivityService(),
         _jobListingService = jobListingService ?? JobListingService(),
         _employmentService = employmentService ?? EmploymentService(),
-        _employerTaskGenerator = employerTaskGenerator ?? EmployerTaskGenerator();
+        _employerTaskGenerator = employerTaskGenerator ?? EmployerTaskGenerator(),
+        _esnafWheelService = esnafWheelService ?? EsnafWheelService();
 
   final PlayerStateRepository _repository;
   final JobApplicationService _jobApplicationService;
@@ -69,6 +72,7 @@ class GameSessionApplicationService {
   final JobListingService _jobListingService;
   final EmploymentService _employmentService;
   final EmployerTaskGenerator _employerTaskGenerator;
+  final EsnafWheelService _esnafWheelService;
 
   Future<PlayerState> load() async {
     final loaded = await _repository.load() ?? PlayerState.initial;
@@ -120,7 +124,15 @@ class GameSessionApplicationService {
   Future<PlayerState> startWork(PlayerState state, Job job, WorkTask task) async {
     final activity = _activityService.startWork(state, job, task);
     final activated = _activityService.activate(state, activity);
-    return _persist(_employmentService.markTaskStarted(activated));
+    final marked = _employmentService.markTaskStarted(activated);
+    return _persist(_esnafWheelService.consumeWorkBuffs(marked));
+  }
+
+  WheelAvailability wheelAvailability(PlayerState state) => _esnafWheelService.availability(state);
+
+  Future<WheelSpinOutcome> spinWheel(PlayerState state) async {
+    final outcome = _esnafWheelService.spin(state);
+    return WheelSpinOutcome(state: await _persist(outcome.state), reward: outcome.reward);
   }
 
   Future<PlayerState> leaveJob(PlayerState state) async {
@@ -211,7 +223,8 @@ class GameSessionApplicationService {
 
   Future<PlayerState> _persist(PlayerState state) async {
     final settled = _livingCostService.settle(state);
-    final evaluated = _achievementService.evaluate(settled).state;
+    final normalized = settled.money >= 0 && !settled.isBankrupt ? settled.copyWith(negativeMoneyHours: 0) : settled;
+    final evaluated = _achievementService.evaluate(normalized).state;
     await _repository.save(evaluated);
     return evaluated;
   }

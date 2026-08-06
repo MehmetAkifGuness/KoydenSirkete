@@ -1,7 +1,12 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'dart:math';
 
 import 'package:kariyerden_sirkete/core/errors/game_rule_exception.dart';
 import 'package:kariyerden_sirkete/features/earning/domain/services/earning_service.dart';
+import 'package:kariyerden_sirkete/features/earning/domain/services/earning_mini_game_service.dart';
+import 'package:kariyerden_sirkete/features/earning/presentation/state/earning_mini_game_controller.dart';
+import 'package:kariyerden_sirkete/features/wheel/domain/entities/esnaf_wheel_reward.dart';
+import 'package:kariyerden_sirkete/features/wheel/domain/services/esnaf_wheel_service.dart';
 import 'package:kariyerden_sirkete/features/earning/domain/entities/earning_performance.dart';
 import 'package:kariyerden_sirkete/features/game/domain/entities/player_state.dart';
 import 'package:kariyerden_sirkete/features/training/domain/services/training_catalog.dart';
@@ -20,6 +25,22 @@ import 'package:kariyerden_sirkete/features/skills/domain/entities/skill_profile
 
 void main() {
   group('earning rules', () {
+    test('mini game uses a three by three field and ten second round', () {
+      expect(EarningMiniGameService.durationSeconds, 10);
+      expect(EarningMiniGameService.gridSize, 3);
+    });
+
+    test('mini game selects a different random target cell after each hit', () {
+      final controller = EarningMiniGameController(random: Random(7));
+      controller.start();
+      final firstCell = controller.state.targetCell;
+      controller.hit();
+
+      expect(controller.state.targetCell, isNot(firstCell));
+      expect(controller.state.targetCell, inInclusiveRange(0, EarningMiniGameService.cellCount - 1));
+      controller.dispose();
+    });
+
     test('spends energy, adds reward and advances time', () {
       final service = EarningService();
       final activity = service.start(PlayerState.initial);
@@ -147,6 +168,37 @@ void main() {
     });
   });
 
+  group('esnaf wheel rules', () {
+    test('charges 50 TL without a cooldown', () {
+      final job = JobCatalog.jobs.first;
+      final activity = WorkService().start(PlayerState.initial.copyWith(currentJobId: job.id), job, WorkTaskCatalog.tasks.first);
+      final state = PlayerState.initial.copyWith(money: 100, currentJobId: job.id, activeActivity: activity);
+      final outcome = EsnafWheelService(random: _FixedRandom(7)).spin(state);
+
+      expect(outcome.state.money, 110);
+      expect(outcome.state.wheelCooldownSeconds, 0);
+    });
+
+    test('uses 20 sectors with one very good, one good and two 60 TL rewards', () {
+      final sectors = EsnafWheelRewardCatalog.sectorTypes;
+      expect(sectors, hasLength(20));
+      expect(sectors.where((type) => type == EsnafWheelRewardType.bigTender), hasLength(1));
+      expect(sectors.where((type) => type == EsnafWheelRewardType.luckyDay), hasLength(1));
+      expect(sectors.where((type) => type == EsnafWheelRewardType.tipRain), hasLength(2));
+      expect(sectors.where((type) => type != EsnafWheelRewardType.bigTender && type != EsnafWheelRewardType.luckyDay && type != EsnafWheelRewardType.tipRain), hasLength(16));
+    });
+
+    test('converts major rewards to a tip after the daily limit', () {
+      final job = JobCatalog.jobs.first;
+      final activity = WorkService().start(PlayerState.initial.copyWith(currentJobId: job.id), job, WorkTaskCatalog.tasks.first);
+      final state = PlayerState.initial.copyWith(money: 100, currentJobId: job.id, activeActivity: activity, wheelMajorRewardsToday: 3);
+      final outcome = EsnafWheelService(random: _FixedRandom(0)).spin(state);
+
+      expect(outcome.reward.type, EsnafWheelRewardType.tipRain);
+      expect(outcome.state.wheelMajorRewardsToday, 3);
+    });
+  });
+
   group('city and company rules', () {
     test('city move charges the move cost and living costs settle by day', () {
       final city = CityCatalog.cities[1];
@@ -183,4 +235,19 @@ void main() {
     expect(CityCatalog.version, 3);
     expect(CityCatalog.cities.length, 81);
   });
+}
+
+class _FixedRandom implements Random {
+  const _FixedRandom(this.value);
+
+  final int value;
+
+  @override
+  bool nextBool() => value.isOdd;
+
+  @override
+  double nextDouble() => 0;
+
+  @override
+  int nextInt(int max) => value.clamp(0, max - 1);
 }

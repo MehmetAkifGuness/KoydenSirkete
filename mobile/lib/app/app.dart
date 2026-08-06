@@ -16,6 +16,7 @@ import '../features/game/application/game_session_application_service.dart';
 import '../features/game/domain/services/game_clock_service.dart';
 import '../features/game/presentation/state/game_session_controller.dart';
 import '../features/game/presentation/state/foreground_clock_ticker.dart';
+import '../features/game/presentation/pages/bankruptcy_page.dart';
 import '../features/training/presentation/pages/training_page.dart';
 import '../features/skills/presentation/pages/skills_page.dart';
 import '../features/sport/presentation/pages/sport_page.dart';
@@ -73,7 +74,7 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
       ),
     );
     _clockTicker = ForegroundClockTicker(
-      onTick: () => _session.tick(hours: GameClockService.gameHoursPerRealTick),
+      onTick: _tickClock,
       interval: GameClockService.realTickInterval,
     );
     _session.initialize();
@@ -111,6 +112,9 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
         if (_session.errorMessage != null) {
           return StorageErrorPage(message: _session.errorMessage!, onRetry: _session.retryInitialization);
         }
+        if (_session.state.isBankrupt) {
+          return BankruptcyPage(onRestart: _restartAfterBankruptcy);
+        }
         if (_showWelcome || !_session.state.isOnboarded) {
           return OnboardingPage(session: _session, onStart: _enterGame);
         }
@@ -147,6 +151,22 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
     }
     setState(() => _showWelcome = false);
     _clockTicker.start();
+  }
+
+  Future<void> _tickClock() async {
+    await _session.tick(hours: GameClockService.gameHoursPerRealTick);
+    if (mounted && _session.state.isBankrupt) {
+      _clockTicker.stop();
+    }
+  }
+
+  Future<void> _restartAfterBankruptcy() async {
+    _clockTicker.stop();
+    await _session.resetGame();
+    if (!mounted) {
+      return;
+    }
+    setState(() => _showWelcome = true);
   }
 
   void _openFeature(AppFeature feature) {

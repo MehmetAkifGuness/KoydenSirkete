@@ -15,6 +15,7 @@ import '../../domain/entities/player_state.dart';
 import '../../../daily_goals/domain/entities/daily_goal.dart';
 import '../../../company/domain/entities/company_project.dart';
 import '../../../jobs/domain/entities/job_listing.dart';
+import '../../../wheel/domain/services/esnaf_wheel_service.dart';
 
 class GameSessionController extends ChangeNotifier {
   GameSessionController({required GameSessionApplicationService applicationService})
@@ -68,7 +69,7 @@ class GameSessionController extends ChangeNotifier {
     return _execute(
       action: _applicationService.startSport,
       stateOf: (result) => result,
-      message: (_) => 'Spor başladı. 2 oyun saati sonra maksimum enerjin artacak.',
+      message: (_) => 'Spor başladı. 1 oyun saati sonra maksimum enerjin artacak.',
     );
   }
 
@@ -125,6 +126,16 @@ class GameSessionController extends ChangeNotifier {
       action: (state) => _applicationService.startWork(state, job, task),
       stateOf: (result) => result,
       message: (_) => 'Görev başladı. Süre dolunca maaş ve performans işlenecek.',
+    );
+  }
+
+  WheelAvailability get wheelAvailability => _applicationService.wheelAvailability(_state);
+
+  Future<String?> spinWheel() async {
+    return _execute(
+      action: _applicationService.spinWheel,
+      stateOf: (result) => result.state,
+      message: (result) => result.message,
     );
   }
 

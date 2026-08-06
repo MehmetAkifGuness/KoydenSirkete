@@ -45,6 +45,30 @@ void main() {
     expect(state.energy, 90);
   });
 
+  test('negative money triggers bankruptcy after 24 game hours', () {
+    final clock = GameClockService();
+    var state = PlayerState.initial.copyWith(money: -1);
+
+    for (var index = 0; index < 23; index++) {
+      state = clock.tick(state).state;
+    }
+    expect(state.negativeMoneyHours, 23);
+    expect(state.isBankrupt, isFalse);
+
+    state = clock.tick(state).state;
+    expect(state.negativeMoneyHours, 24);
+    expect(state.isBankrupt, isTrue);
+  });
+
+  test('positive money resets the bankruptcy timer', () {
+    final state = GameClockService().tick(
+      PlayerState.initial.copyWith(money: 10, negativeMoneyHours: 23),
+    ).state;
+
+    expect(state.negativeMoneyHours, 0);
+    expect(state.isBankrupt, isFalse);
+  });
+
   test('activity spends energy at start and rewards only at completion', () {
     final activities = ActivityService();
     final earning = activities.startEarning(PlayerState.initial);
@@ -63,14 +87,13 @@ void main() {
     expect(completed.state.money, greaterThan(PlayerState.initial.money));
   });
 
-  test('sport increases max energy after two hours', () {
+  test('sport increases max energy after one hour', () {
     final activities = ActivityService();
     final sport = activities.startSport(PlayerState.initial);
     var state = activities.activate(PlayerState.initial, sport);
     final clock = GameClockService();
 
     expect(state.energy, 80);
-    state = clock.tick(state).state;
     final tick = clock.tick(state);
     state = activities.complete(tick.state, tick.completedActivity!).state;
 

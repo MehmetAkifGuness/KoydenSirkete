@@ -4,7 +4,7 @@ import '../../../game/domain/entities/player_state.dart';
 
 class SportService {
   static const energyCost = 20;
-  static const durationHours = 2;
+  static const durationHours = 1;
   static const maxEnergyGain = 5;
   static const maxEnergyLimit = 200;
 

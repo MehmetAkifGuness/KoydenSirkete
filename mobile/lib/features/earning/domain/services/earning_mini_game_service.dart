@@ -1,7 +1,9 @@
 import '../entities/earning_performance.dart';
 
 class EarningMiniGameService {
-  static const durationSeconds = 8;
+  static const gridSize = 3;
+  static const cellCount = gridSize * gridSize;
+  static const durationSeconds = 10;
   static const maxHits = 24;
 
   EarningPerformance performanceFor(int hits) {

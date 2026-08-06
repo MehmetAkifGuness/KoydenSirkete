@@ -19,6 +19,13 @@ class PlayerStateRecord {
     required this.earningSessionsToday,
     this.maxEnergy = 100,
     this.energyRecoveryRemainder = 0,
+    this.negativeMoneyHours = 0,
+    this.wheelCooldownSeconds = 0,
+    this.wheelMajorRewardsToday = 0,
+    this.wheelDurationBuffPercent = 0,
+    this.wheelDurationBuffTasks = 0,
+    this.wheelEnergyBuffPercent = 0,
+    this.wheelEnergyBuffTasks = 0,
     this.activeActivityJson,
     this.skillsJson,
     this.employmentJson,
@@ -60,6 +67,13 @@ class PlayerStateRecord {
   final int earningSessionsToday;
   final int maxEnergy;
   final int energyRecoveryRemainder;
+  final int negativeMoneyHours;
+  final int wheelCooldownSeconds;
+  final int wheelMajorRewardsToday;
+  final int wheelDurationBuffPercent;
+  final int wheelDurationBuffTasks;
+  final int wheelEnergyBuffPercent;
+  final int wheelEnergyBuffTasks;
   final String? activeActivityJson;
   final String? skillsJson;
   final String? employmentJson;

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../../../game/presentation/state/game_session_controller.dart';
+import '../../../game/domain/entities/active_activity.dart';
 import '../../../jobs/domain/entities/job.dart';
+import '../../../wheel/presentation/widgets/esnaf_wheel_panel.dart';
 import '../../domain/entities/work_task.dart';
 import '../../domain/services/task_efficiency_service.dart';
 
@@ -13,22 +15,30 @@ class WorkPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tasks = session.employerTasks(job);
     return Scaffold(
       appBar: AppBar(title: Text(job.title)),
       body: AnimatedBuilder(
         animation: session,
-        builder: (context, _) => ListView.separated(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-          itemCount: tasks.length + 1,
-          separatorBuilder: (_, index) => const SizedBox(height: 12),
-          itemBuilder: (context, index) {
-            if (index == 0) {
-              return Text('Performans %${session.state.performance} · Bugün ${session.state.workSessionsToday} görev');
-            }
-            return _WorkTaskCard(task: tasks[index - 1], session: session, job: job);
-          },
-        ),
+        builder: (context, _) {
+          final tasks = session.employerTasks(job);
+          final hasActiveWork = session.state.activeActivity?.type == ActivityType.work;
+          final offset = hasActiveWork ? 2 : 1;
+          return ListView.separated(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+            itemCount: tasks.length + offset,
+            separatorBuilder: (_, index) => const SizedBox(height: 12),
+            itemBuilder: (context, index) {
+              if (index == 0) {
+                return Text('Performans %${session.state.performance} · Bugün ${session.state.workSessionsToday} görev');
+              }
+              if (hasActiveWork && index == 1) {
+                return EsnafWheelPanel(session: session);
+              }
+              final taskIndex = index - offset;
+              return _WorkTaskCard(task: tasks[taskIndex], session: session, job: job);
+            },
+          );
+        },
       ),
     );
   }
@@ -65,7 +75,7 @@ class _WorkTaskCard extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: FilledButton.tonal(
-                onPressed: session.isBusy ? null : () => _work(context),
+                onPressed: session.isBusy || session.state.activeActivity != null ? null : () => _work(context),
                 child: const Text('Görevi yap'),
               ),
             ),

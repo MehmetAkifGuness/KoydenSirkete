@@ -10,7 +10,7 @@ Tamamlandı:
 - 81 şehir, ekonomik seviye ve deterministik şehir fırsatları.
 - 20 kariyer rolü ve gizli deterministik bot rekabeti.
 - Ayrı `İşim`/`Şirketim` alanları, dinamik görevler ve devamsızlık kovulması.
-- SQLite v11–v15 migration'ları ve geriye dönük kayıt koruması.
+- SQLite v11–v17 migration'ları, iflas kontrolü, Esnaf Çarkı ve geriye dönük kayıt koruması.
 - 31 Flutter/domain/widget testi ve temiz statik analiz.
 
 ## 1.4.0 — Şirket derinliği

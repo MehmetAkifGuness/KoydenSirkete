@@ -4,6 +4,7 @@ import '../../../employment/domain/entities/employment.dart';
 
 class PlayerState {
   static const _unset = Object();
+  static const bankruptcyDurationHours = 24;
 
   const PlayerState({
     required this.schemaVersion,
@@ -16,6 +17,13 @@ class PlayerState {
     required this.earningSessionsToday,
     this.maxEnergy = 100,
     this.energyRecoveryRemainder = 0,
+    this.negativeMoneyHours = 0,
+    this.wheelCooldownSeconds = 0,
+    this.wheelMajorRewardsToday = 0,
+    this.wheelDurationBuffPercent = 0,
+    this.wheelDurationBuffTasks = 0,
+    this.wheelEnergyBuffPercent = 0,
+    this.wheelEnergyBuffTasks = 0,
     this.activeActivity,
     this.skills = const SkillProfile(),
     this.employment,
@@ -47,7 +55,7 @@ class PlayerState {
   });
 
   static const initial = PlayerState(
-    schemaVersion: 15,
+    schemaVersion: 17,
     money: 240,
     energy: 100,
     knowledge: 0,
@@ -57,6 +65,13 @@ class PlayerState {
     earningSessionsToday: 0,
     maxEnergy: 100,
     energyRecoveryRemainder: 0,
+    negativeMoneyHours: 0,
+    wheelCooldownSeconds: 0,
+    wheelMajorRewardsToday: 0,
+    wheelDurationBuffPercent: 0,
+    wheelDurationBuffTasks: 0,
+    wheelEnergyBuffPercent: 0,
+    wheelEnergyBuffTasks: 0,
     activeActivity: null,
     skills: SkillProfile.empty,
     employment: null,
@@ -94,6 +109,13 @@ class PlayerState {
   final int earningSessionsToday;
   final int maxEnergy;
   final int energyRecoveryRemainder;
+  final int negativeMoneyHours;
+  final int wheelCooldownSeconds;
+  final int wheelMajorRewardsToday;
+  final int wheelDurationBuffPercent;
+  final int wheelDurationBuffTasks;
+  final int wheelEnergyBuffPercent;
+  final int wheelEnergyBuffTasks;
   final ActiveActivity? activeActivity;
   final SkillProfile skills;
   final Employment? employment;
@@ -134,6 +156,13 @@ class PlayerState {
     int? earningSessionsToday,
     int? maxEnergy,
     int? energyRecoveryRemainder,
+    int? negativeMoneyHours,
+    int? wheelCooldownSeconds,
+    int? wheelMajorRewardsToday,
+    int? wheelDurationBuffPercent,
+    int? wheelDurationBuffTasks,
+    int? wheelEnergyBuffPercent,
+    int? wheelEnergyBuffTasks,
     Object? activeActivity = _unset,
     SkillProfile? skills,
     Object? employment = _unset,
@@ -174,6 +203,13 @@ class PlayerState {
       earningSessionsToday: earningSessionsToday ?? this.earningSessionsToday,
       maxEnergy: maxEnergy ?? this.maxEnergy,
       energyRecoveryRemainder: energyRecoveryRemainder ?? this.energyRecoveryRemainder,
+      negativeMoneyHours: negativeMoneyHours ?? this.negativeMoneyHours,
+      wheelCooldownSeconds: wheelCooldownSeconds ?? this.wheelCooldownSeconds,
+      wheelMajorRewardsToday: wheelMajorRewardsToday ?? this.wheelMajorRewardsToday,
+      wheelDurationBuffPercent: wheelDurationBuffPercent ?? this.wheelDurationBuffPercent,
+      wheelDurationBuffTasks: wheelDurationBuffTasks ?? this.wheelDurationBuffTasks,
+      wheelEnergyBuffPercent: wheelEnergyBuffPercent ?? this.wheelEnergyBuffPercent,
+      wheelEnergyBuffTasks: wheelEnergyBuffTasks ?? this.wheelEnergyBuffTasks,
       activeActivity: identical(activeActivity, _unset) ? this.activeActivity : activeActivity as ActiveActivity?,
       skills: skills ?? this.skills,
       employment: identical(employment, _unset) ? this.employment : employment as Employment?,
@@ -205,6 +241,8 @@ class PlayerState {
     );
   }
 
+  bool get isBankrupt => negativeMoneyHours >= bankruptcyDurationHours;
+
   PlayerState advanceGameHour() {
     final absoluteHour = (day - 1) * 24 + hour + 1;
     final nextDay = absoluteHour ~/ 24 + 1;
@@ -215,6 +253,7 @@ class PlayerState {
       earningSessionsToday: nextDay == day ? earningSessionsToday : 0,
       workSessionsToday: nextDay == day ? workSessionsToday : 0,
       trainingSessionsToday: nextDay == day ? trainingSessionsToday : 0,
+      wheelMajorRewardsToday: nextDay == day ? wheelMajorRewardsToday : 0,
     );
   }
 }

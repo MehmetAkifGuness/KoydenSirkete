@@ -77,7 +77,7 @@ Android-first, tamamen offline kariyer ve şirket simülasyonu.
 - 20 rol, cihaz içinde seed tabanlı gizli bot rekabeti ve günlük başvuru sonucu.
 - Ayrı `İşim` ve `Şirketim` ekranları; her oyun gününde değişen işveren görevleri.
 - İki oyun günü görev başlatılmadığında yalnızca foreground gün geçişinde işten çıkarılma.
-- SQLite şema v15; eski v10 kayıtları sıfırlanmadan okunur.
+- SQLite şema v17; eski v10 kayıtları sıfırlanmadan okunur. Para 24 oyun saati boyunca negatif kalırsa iflas sistemi devreye girer. Aktif işlerde 50 TL bedelli, bekleme süresi olmayan 20 dilimli Esnaf Çarkı kullanılabilir.
 
 ## Çalıştırma
 

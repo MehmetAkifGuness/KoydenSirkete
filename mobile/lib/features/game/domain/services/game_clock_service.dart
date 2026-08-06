@@ -38,10 +38,11 @@ class GameClockService {
     final shouldRecover = recoveryRemainder >= hoursPerRecovery;
     final nextRemainder = shouldRecover ? recoveryRemainder - hoursPerRecovery : recoveryRemainder;
     final nextEnergy = shouldRecover ? math.min(advanced.maxEnergy, advanced.energy + recoveryAmount) : advanced.energy;
+    final negativeMoneyHours = advanced.money < 0 ? math.min(PlayerState.bankruptcyDurationHours, advanced.negativeMoneyHours + 1) : 0;
     final activity = advanced.activeActivity;
     if (activity == null) {
       return ClockTickResult(
-        state: advanced.copyWith(energy: nextEnergy, energyRecoveryRemainder: nextRemainder),
+        state: advanced.copyWith(energy: nextEnergy, energyRecoveryRemainder: nextRemainder, negativeMoneyHours: negativeMoneyHours),
         dayChanged: dayChanged,
       );
     }
@@ -53,6 +54,7 @@ class GameClockService {
       state: advanced.copyWith(
         energy: nextEnergy,
         energyRecoveryRemainder: nextRemainder,
+        negativeMoneyHours: negativeMoneyHours,
         activeActivity: nextActivity,
       ),
       completedActivity: completed,

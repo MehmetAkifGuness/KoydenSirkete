@@ -22,6 +22,13 @@ void main() {
       companyFunds: 300,
       employeeCount: 2,
       projectProgress: 40,
+      negativeMoneyHours: 12,
+      wheelCooldownSeconds: 160,
+      wheelMajorRewardsToday: 2,
+      wheelDurationBuffPercent: 50,
+      wheelDurationBuffTasks: 2,
+      wheelEnergyBuffPercent: 20,
+      wheelEnergyBuffTasks: 1,
       isOnboarded: true,
     );
 
@@ -39,6 +46,13 @@ void main() {
     expect(actual?.companyFunds, expected.companyFunds);
     expect(actual?.employeeCount, expected.employeeCount);
     expect(actual?.projectProgress, expected.projectProgress);
+    expect(actual?.negativeMoneyHours, expected.negativeMoneyHours);
+    expect(actual?.wheelCooldownSeconds, expected.wheelCooldownSeconds);
+    expect(actual?.wheelMajorRewardsToday, expected.wheelMajorRewardsToday);
+    expect(actual?.wheelDurationBuffPercent, expected.wheelDurationBuffPercent);
+    expect(actual?.wheelDurationBuffTasks, expected.wheelDurationBuffTasks);
+    expect(actual?.wheelEnergyBuffPercent, expected.wheelEnergyBuffPercent);
+    expect(actual?.wheelEnergyBuffTasks, expected.wheelEnergyBuffTasks);
     expect(actual?.isOnboarded, expected.isOnboarded);
   });
 }

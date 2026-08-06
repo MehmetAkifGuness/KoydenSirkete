@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../game/presentation/state/game_session_controller.dart';
+import '../../../game/domain/entities/active_activity.dart';
 import '../../../jobs/domain/services/job_catalog.dart';
 import '../../../work/presentation/pages/work_page.dart';
 
@@ -39,7 +40,7 @@ class EmploymentPage extends StatelessWidget {
               ]))),
               const SizedBox(height: 14),
               FilledButton.icon(
-                onPressed: session.isBusy || state.activeActivity != null ? null : () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => WorkPage(session: session, job: job))),
+                onPressed: session.isBusy || (state.activeActivity != null && state.activeActivity!.type != ActivityType.work) ? null : () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => WorkPage(session: session, job: job))),
                 icon: const Icon(Icons.assignment_outlined),
                 label: const Text('Günlük görevleri yönet'),
               ),

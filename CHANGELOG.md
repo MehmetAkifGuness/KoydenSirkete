@@ -8,7 +8,7 @@
 - 81 Türkiye ili, şehir ekonomisi, maaş katsayısı ve fırsat kataloğu eklendi.
 - 20 rol, gizli seed tabanlı bot rekabeti ve günlük başvuru bekleme kuralı eklendi.
 - `İşim` ve `Şirketim` ekranları ayrıldı; günlük dinamik işveren görevleri ve iki günlük devamsızlıkta kovulma eklendi.
-- SQLite şeması v10'dan v15'e geriye dönük migration'larla genişletildi.
+- SQLite şeması v10'dan v17'ye geriye dönük migration'larla genişletildi; 24 oyun saatlik iflas kontrolü, eğitim filtreleme ekranı ve sınırlı Esnaf Çarkı eklendi.
 
 ## 1.5.0–1.9.0
 

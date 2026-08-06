@@ -17,7 +17,7 @@ class AppDatabase implements PlayerStateStore {
     final databasePath = join(await getDatabasesPath(), _databaseName);
     return _database = await openDatabase(
       databasePath,
-      version: 15,
+      version: 17,
       onCreate: (database, _) async {
         await database.execute('''
           CREATE TABLE $_tableName (
@@ -27,6 +27,13 @@ class AppDatabase implements PlayerStateStore {
             energy INTEGER NOT NULL,
             max_energy INTEGER NOT NULL DEFAULT 100,
             energy_recovery_remainder INTEGER NOT NULL DEFAULT 0,
+            negative_money_hours INTEGER NOT NULL DEFAULT 0,
+            wheel_cooldown_seconds INTEGER NOT NULL DEFAULT 0,
+            wheel_major_rewards_today INTEGER NOT NULL DEFAULT 0,
+            wheel_duration_buff_percent INTEGER NOT NULL DEFAULT 0,
+            wheel_duration_buff_tasks INTEGER NOT NULL DEFAULT 0,
+            wheel_energy_buff_percent INTEGER NOT NULL DEFAULT 0,
+            wheel_energy_buff_tasks INTEGER NOT NULL DEFAULT 0,
             active_activity_json TEXT,
             skills_json TEXT,
             employment_json TEXT,
@@ -122,6 +129,17 @@ class AppDatabase implements PlayerStateStore {
         if (oldVersion < 15) {
           await database.execute('ALTER TABLE $_tableName ADD COLUMN dismissed_day INTEGER NOT NULL DEFAULT 0');
         }
+        if (oldVersion < 16) {
+          await database.execute('ALTER TABLE $_tableName ADD COLUMN negative_money_hours INTEGER NOT NULL DEFAULT 0');
+        }
+        if (oldVersion < 17) {
+          await database.execute('ALTER TABLE $_tableName ADD COLUMN wheel_cooldown_seconds INTEGER NOT NULL DEFAULT 0');
+          await database.execute('ALTER TABLE $_tableName ADD COLUMN wheel_major_rewards_today INTEGER NOT NULL DEFAULT 0');
+          await database.execute('ALTER TABLE $_tableName ADD COLUMN wheel_duration_buff_percent INTEGER NOT NULL DEFAULT 0');
+          await database.execute('ALTER TABLE $_tableName ADD COLUMN wheel_duration_buff_tasks INTEGER NOT NULL DEFAULT 0');
+          await database.execute('ALTER TABLE $_tableName ADD COLUMN wheel_energy_buff_percent INTEGER NOT NULL DEFAULT 0');
+          await database.execute('ALTER TABLE $_tableName ADD COLUMN wheel_energy_buff_tasks INTEGER NOT NULL DEFAULT 0');
+        }
       },
     );
   }
@@ -140,6 +158,13 @@ class AppDatabase implements PlayerStateStore {
       energy: row['energy']! as int,
       maxEnergy: row['max_energy'] as int? ?? 100,
       energyRecoveryRemainder: row['energy_recovery_remainder'] as int? ?? 0,
+      negativeMoneyHours: row['negative_money_hours'] as int? ?? 0,
+      wheelCooldownSeconds: row['wheel_cooldown_seconds'] as int? ?? 0,
+      wheelMajorRewardsToday: row['wheel_major_rewards_today'] as int? ?? 0,
+      wheelDurationBuffPercent: row['wheel_duration_buff_percent'] as int? ?? 0,
+      wheelDurationBuffTasks: row['wheel_duration_buff_tasks'] as int? ?? 0,
+      wheelEnergyBuffPercent: row['wheel_energy_buff_percent'] as int? ?? 0,
+      wheelEnergyBuffTasks: row['wheel_energy_buff_tasks'] as int? ?? 0,
       activeActivityJson: row['active_activity_json'] as String?,
       skillsJson: row['skills_json'] as String?,
       employmentJson: row['employment_json'] as String?,
@@ -187,6 +212,13 @@ class AppDatabase implements PlayerStateStore {
         'energy': record.energy,
         'max_energy': record.maxEnergy,
         'energy_recovery_remainder': record.energyRecoveryRemainder,
+        'negative_money_hours': record.negativeMoneyHours,
+        'wheel_cooldown_seconds': record.wheelCooldownSeconds,
+        'wheel_major_rewards_today': record.wheelMajorRewardsToday,
+        'wheel_duration_buff_percent': record.wheelDurationBuffPercent,
+        'wheel_duration_buff_tasks': record.wheelDurationBuffTasks,
+        'wheel_energy_buff_percent': record.wheelEnergyBuffPercent,
+        'wheel_energy_buff_tasks': record.wheelEnergyBuffTasks,
         'active_activity_json': record.activeActivityJson,
         'skills_json': record.skillsJson,
         'employment_json': record.employmentJson,

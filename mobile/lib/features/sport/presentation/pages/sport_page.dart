@@ -26,7 +26,7 @@ class SportPage extends StatelessWidget {
                 const SizedBox(height: 10),
                 LinearProgressIndicator(value: state.energy / state.maxEnergy, minHeight: 6, borderRadius: BorderRadius.circular(8)),
                 const SizedBox(height: 14),
-                const Text('Spor 20 enerji harcar, 2 oyun saati sürer ve tamamlandığında maksimum enerjiyi 5 artırır.', style: TextStyle(color: Color(0xFFD1C9B8))),
+                const Text('Spor 20 enerji harcar, 1 oyun saati sürer ve tamamlandığında maksimum enerjiyi 5 artırır.', style: TextStyle(color: Color(0xFFD1C9B8))),
                 const SizedBox(height: 16),
                 SizedBox(
                   width: double.infinity,

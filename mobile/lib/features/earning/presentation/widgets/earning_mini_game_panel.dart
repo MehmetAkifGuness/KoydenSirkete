@@ -1,15 +1,10 @@
 import 'package:flutter/material.dart';
 
 import '../../../game/presentation/state/game_session_controller.dart';
+import '../../domain/services/earning_mini_game_service.dart';
 import '../state/earning_mini_game_controller.dart';
 
-const _targetPositions = [
-  Alignment.center,
-  Alignment.topLeft,
-  Alignment.bottomRight,
-  Alignment.topRight,
-  Alignment.bottomLeft,
-];
+const _targetCellCount = EarningMiniGameService.cellCount;
 
 class EarningMiniGamePanel extends StatefulWidget {
   const EarningMiniGamePanel({required this.session, super.key});
@@ -56,7 +51,7 @@ class _EarningMiniGamePanelState extends State<EarningMiniGamePanel> {
       children: [
         const Text('Hızlı görev', style: TextStyle(fontFamily: 'serif', fontWeight: FontWeight.w700, fontSize: 18)),
         const SizedBox(height: 8),
-        const Text('8 saniye içinde hedefe dokun. Seri yaptıkça kazanç bonusun artar.'),
+        const Text('10 saniye içinde hedefe dokun. Seri yaptıkça kazanç bonusun artar.'),
         const SizedBox(height: 16),
         SizedBox(
           width: double.infinity,
@@ -71,7 +66,7 @@ class _EarningMiniGamePanelState extends State<EarningMiniGamePanel> {
   }
 
   Widget _playing(BuildContext context, EarningMiniGameState state) {
-    final position = _targetPositions[state.hits % _targetPositions.length];
+    final activeCell = state.targetCell;
     return Column(
       children: [
         Row(
@@ -83,20 +78,17 @@ class _EarningMiniGamePanelState extends State<EarningMiniGamePanel> {
         ),
         const SizedBox(height: 12),
         SizedBox(
-          height: 190,
-          child: AnimatedAlign(
-            alignment: position,
-            duration: const Duration(milliseconds: 180),
-            curve: Curves.easeOut,
-            child: SizedBox(
-              width: 92,
-              height: 92,
-              child: FilledButton(
-                onPressed: _game.hit,
-                style: FilledButton.styleFrom(shape: const CircleBorder(), padding: EdgeInsets.zero),
-                child: const Icon(Icons.touch_app_outlined, size: 32),
-              ),
+          height: 230,
+          child: GridView.builder(
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: _targetCellCount,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3,
+              crossAxisSpacing: 8,
+              mainAxisSpacing: 8,
+              mainAxisExtent: 70,
             ),
+            itemBuilder: (context, index) => _TargetCell(active: index == activeCell, onTap: _game.hit),
           ),
         ),
       ],
@@ -132,5 +124,41 @@ class _EarningMiniGamePanelState extends State<EarningMiniGamePanel> {
     if (message != null) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
     }
+  }
+}
+
+class _TargetCell extends StatelessWidget {
+  const _TargetCell({required this.active, required this.onTap});
+
+  final bool active;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 180),
+      decoration: BoxDecoration(
+        color: active ? const Color(0xFF17140A) : const Color(0xFF090909),
+        border: Border.all(color: active ? Theme.of(context).colorScheme.primary : const Color(0xFF302A12)),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Center(
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 150),
+          child: active
+              ? SizedBox(
+                  key: const ValueKey('target'),
+                  width: 56,
+                  height: 56,
+                  child: FilledButton(
+                    onPressed: onTap,
+                    style: FilledButton.styleFrom(shape: const CircleBorder(), padding: EdgeInsets.zero),
+                    child: const Icon(Icons.touch_app_outlined, size: 25),
+                  ),
+                )
+              : const SizedBox(key: ValueKey('empty')),
+        ),
+      ),
+    );
   }
 }

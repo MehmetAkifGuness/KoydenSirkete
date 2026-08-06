@@ -10,15 +10,18 @@ class EffectiveWorkTask {
 
 class TaskEfficiencyService {
   EffectiveWorkTask calculate(PlayerState state, WorkTask task) {
-    if (task.skillRequirements.isEmpty) {
-      return EffectiveWorkTask(durationHours: task.durationHours, energyCost: task.energyCost);
-    }
-    final average = task.skillRequirements.entries
-            .map((entry) => state.skills[entry.key] / entry.value)
-            .fold<double>(0, (total, ratio) => total + ratio) /
-        task.skillRequirements.length;
-    final durationReduction = (average * .35).clamp(0, .35);
-    final energyReduction = (average * .30).clamp(0, .30);
+    final average = task.skillRequirements.isEmpty
+        ? 0
+        : task.skillRequirements.entries
+                .map((entry) => state.skills[entry.key] / entry.value)
+                .fold<double>(0, (total, ratio) => total + ratio) /
+            task.skillRequirements.length;
+    final skillDurationReduction = (average * .35).clamp(0, .35);
+    final skillEnergyReduction = (average * .30).clamp(0, .30);
+    final wheelDurationReduction = state.wheelDurationBuffTasks > 0 ? state.wheelDurationBuffPercent / 100 : 0;
+    final wheelEnergyReduction = state.wheelEnergyBuffTasks > 0 ? state.wheelEnergyBuffPercent / 100 : 0;
+    final durationReduction = (1 - (1 - skillDurationReduction) * (1 - wheelDurationReduction)).clamp(0, .75);
+    final energyReduction = (1 - (1 - skillEnergyReduction) * (1 - wheelEnergyReduction)).clamp(0, .75);
     return EffectiveWorkTask(
       durationHours: (task.durationHours * (1 - durationReduction)).ceil().clamp(1, task.durationHours),
       energyCost: (task.energyCost * (1 - energyReduction)).ceil().clamp(5, task.energyCost),
