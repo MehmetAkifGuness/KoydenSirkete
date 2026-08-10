@@ -18,4 +18,4 @@ features/<feature>/
 └── data/repositories
 ```
 
-2.0.0 itibarıyla `earning`, `training`, `skills`, `sport`, `jobs`, `career`, `cities`, `employment`, `company` ve `wheel` offline oynanabilir durumdadır. Oyun saati yalnızca foreground'da ilerler ve tüm kalıcı veri SQLite v17 üzerinde tutulur.
+2.0.0 itibarıyla `earning`, `training`, `skills`, `sport`, `jobs`, `career`, `cities`, `employment`, `company` ve `wheel` offline oynanabilir durumdadır. Oyun saati yalnızca foreground'da ilerler; enerji gerçek zamanla, uygulama kapalıyken de tamamlanır ve tüm kalıcı veri SQLite v18 üzerinde tutulur.

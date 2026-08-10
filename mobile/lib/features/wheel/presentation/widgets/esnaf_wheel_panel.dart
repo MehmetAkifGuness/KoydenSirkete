@@ -1,10 +1,12 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import '../../../../app/theme/app_palette.dart';
 
-import '../../../game/domain/entities/active_activity.dart';
+import '../../../../core/widgets/app_feedback.dart';
 import '../../../game/domain/entities/player_state.dart';
 import '../../../game/presentation/state/game_session_controller.dart';
+import '../../domain/entities/esnaf_wheel_reward.dart';
 
 class EsnafWheelPanel extends StatefulWidget {
   const EsnafWheelPanel({required this.session, super.key});
@@ -19,6 +21,8 @@ class _EsnafWheelPanelState extends State<EsnafWheelPanel> with SingleTickerProv
   late final AnimationController _spinController;
   late final CurvedAnimation _spinAnimation;
   bool _isSpinning = false;
+  double _wheelStartAngle = 0;
+  double _wheelEndAngle = 0;
 
   @override
   void initState() {
@@ -46,19 +50,19 @@ class _EsnafWheelPanelState extends State<EsnafWheelPanel> with SingleTickerProv
           Row(children: [
             Icon(Icons.casino_outlined, color: gold),
             const SizedBox(width: 10),
-            const Expanded(child: Text('Esnaf Çarkı', style: TextStyle(fontFamily: 'serif', fontSize: 19, fontWeight: FontWeight.w700))),
+            const Expanded(child: Text('İş Çarkı', style: TextStyle(fontFamily: 'serif', fontSize: 19, fontWeight: FontWeight.w700))),
             Text('${state.wheelMajorRewardsToday}/3 büyük ödül', style: TextStyle(color: gold, fontSize: 11, fontWeight: FontWeight.w700)),
           ]),
           const SizedBox(height: 6),
-          const Text('20 dilimde şansını dene.', style: TextStyle(color: Color(0xFFD1C9B8))),
+          const Text('20 dilimde şansını dene.', style: TextStyle(color: AppPalette.textSecondary)),
           const SizedBox(height: 10),
-          Center(child: _Wheel(animation: _spinAnimation)),
+          Center(child: _Wheel(animation: _spinAnimation, startAngle: _wheelStartAngle, endAngle: _wheelEndAngle)),
           Wrap(spacing: 8, runSpacing: 8, children: [
             const _InfoPill(text: '50 TL'),
             const _InfoPill(text: 'Bekleme yok'),
-            const _InfoPill(text: 'Aktif iş'),
+            const _InfoPill(text: 'İş gerektirmez'),
           ]),
-          if (state.wheelDurationBuffTasks > 0 || state.wheelEnergyBuffTasks > 0) ...[
+          if (state.wheelDurationBuffTasks > 0 || state.wheelEnergyBuffTasks > 0 || state.wheelRewardBuffTasks > 0) ...[
             const SizedBox(height: 10),
             Text(_buffText(state), style: TextStyle(color: gold, fontSize: 12, fontWeight: FontWeight.w700)),
           ],
@@ -66,14 +70,14 @@ class _EsnafWheelPanelState extends State<EsnafWheelPanel> with SingleTickerProv
           SizedBox(
             width: double.infinity,
             child: FilledButton.icon(
-              onPressed: availability.isAvailable && !_isSpinning && !widget.session.isBusy && state.activeActivity?.type == ActivityType.work ? () => _spin(context) : null,
+              onPressed: availability.isAvailable && !_isSpinning && !widget.session.isBusy ? () => _spin(context) : null,
               icon: Icon(_isSpinning ? Icons.hourglass_top : Icons.casino_outlined),
               label: Text(_isSpinning ? 'Çark dönüyor...' : 'Çarkı çevir · 50 TL'),
             ),
           ),
           if (!availability.isAvailable && !_isSpinning) ...[
             const SizedBox(height: 8),
-            Text(availability.reason, style: const TextStyle(color: Color(0xFFB9A76A), fontSize: 12)),
+            Text(availability.reason, style: const TextStyle(color: AppPalette.warning, fontSize: 12)),
           ],
         ]),
       ),
@@ -88,28 +92,50 @@ class _EsnafWheelPanelState extends State<EsnafWheelPanel> with SingleTickerProv
     if (state.wheelEnergyBuffTasks > 0) {
       parts.add('Enerji -%${state.wheelEnergyBuffPercent} · ${state.wheelEnergyBuffTasks} görev');
     }
+    if (state.wheelRewardBuffTasks > 0) {
+      parts.add('Kazanç x2 · ${state.wheelRewardBuffTasks} görev');
+    }
     return parts.join('  |  ');
   }
 
   Future<void> _spin(BuildContext context) async {
     setState(() => _isSpinning = true);
-    final result = widget.session.spinWheel();
+    final outcome = await widget.session.spinWheel();
+    if (!mounted) {
+      return;
+    }
+    if (outcome == null) {
+      setState(() => _isSpinning = false);
+      return;
+    }
+    setState(() {
+      _wheelStartAngle = _wheelEndAngle;
+      _wheelEndAngle = _nextAngle(outcome.sectorIndex);
+    });
     await _spinController.forward(from: 0);
-    final message = await result;
     if (!context.mounted) {
       return;
     }
     setState(() => _isSpinning = false);
-    if (message != null) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
-    }
+    AppFeedback.show(context, outcome.message);
+  }
+
+  double _nextAngle(int sectorIndex) {
+    const fullTurn = math.pi * 2;
+    final slice = fullTurn / EsnafWheelRewardCatalog.sectorTypes.length;
+    final targetAngle = -((sectorIndex + .5) * slice);
+    final currentAngle = _wheelEndAngle % fullTurn;
+    final correction = (targetAngle - currentAngle) % fullTurn;
+    return _wheelEndAngle + fullTurn * 6 + correction;
   }
 }
 
 class _Wheel extends StatelessWidget {
-  const _Wheel({required this.animation});
+  const _Wheel({required this.animation, required this.startAngle, required this.endAngle});
 
   final Animation<double> animation;
+  final double startAngle;
+  final double endAngle;
 
   @override
   Widget build(BuildContext context) {
@@ -122,16 +148,16 @@ class _Wheel extends StatelessWidget {
           AnimatedBuilder(
             animation: animation,
             builder: (_, _) => Transform.rotate(
-              angle: animation.value * math.pi * 12,
+              angle: startAngle + (endAngle - startAngle) * animation.value,
               child: const CustomPaint(size: Size.square(220), painter: _WheelPainter()),
             ),
           ),
-          const Align(alignment: Alignment.topCenter, child: Icon(Icons.arrow_drop_down, size: 34, color: Color(0xFFE6C44A))),
+          Align(alignment: Alignment.topCenter, child: Icon(Icons.arrow_drop_down, size: 34, color: AppPalette.primaryBright)),
           Container(
             width: 34,
             height: 34,
-            decoration: BoxDecoration(color: const Color(0xFF0A0A08), shape: BoxShape.circle, border: Border.all(color: const Color(0xFFE6C44A), width: 2)),
-            child: const Icon(Icons.casino, size: 17, color: Color(0xFFE6C44A)),
+            decoration: BoxDecoration(color: AppPalette.surfaceMuted, shape: BoxShape.circle, border: Border.all(color: AppPalette.primaryBright, width: 2)),
+            child: Icon(Icons.casino, size: 17, color: AppPalette.primaryBright),
           ),
         ],
       ),
@@ -143,14 +169,14 @@ class _WheelPainter extends CustomPainter {
   const _WheelPainter();
 
   static const _labels = [
-    'İHALE', 'ŞANS', '60 TL', 'KAZIK', 'BOŞ', 'BAYAT', 'ÇIRAK', '60 TL', 'KAZIK', 'BOŞ',
-    'BAYAT', 'KAZIK', 'BOŞ', 'ÇIRAK', 'KAZIK', 'BAYAT', 'BOŞ', 'KAZIK', 'BOŞ', 'KAZIK',
+    'İHALE', 'BOŞ', '-50 TL', 'BOŞ', '-50 TL', 'ŞANS', 'BOŞ', '-50 TL', 'BOŞ', 'BOŞ',
+    '100 TL', 'BOŞ', '-50 TL', 'BOŞ', 'BOŞ', '100 TL', 'BOŞ', '-50 TL', 'BOŞ', 'BOŞ',
   ];
-  static const _colors = [
-    Color(0xFFE6C44A), Color(0xFFB99832), Color(0xFFDDBA3E), Color(0xFF6B2525), Color(0xFF2E2B25),
-    Color(0xFF4A4130), Color(0xFF6B2525), Color(0xFFDDBA3E), Color(0xFF6B2525), Color(0xFF2E2B25),
-    Color(0xFF4A4130), Color(0xFF6B2525), Color(0xFF2E2B25), Color(0xFF6B2525), Color(0xFF6B2525),
-    Color(0xFF4A4130), Color(0xFF2E2B25), Color(0xFF6B2525), Color(0xFF2E2B25), Color(0xFF6B2525),
+  static List<Color> get _colors => [
+    AppPalette.primaryBright, AppPalette.wheelRisk, AppPalette.wheelNeutral, AppPalette.surfaceElevated, AppPalette.wheelRisk,
+    AppPalette.primaryDim, AppPalette.wheelRisk, AppPalette.wheelNeutral, AppPalette.surfaceElevated, AppPalette.wheelRisk,
+    AppPalette.primary, AppPalette.wheelNeutral, AppPalette.wheelRisk, AppPalette.surfaceElevated, AppPalette.wheelRisk,
+    AppPalette.primaryBright, AppPalette.wheelNeutral, AppPalette.wheelRisk, AppPalette.surfaceElevated, AppPalette.wheelRisk,
   ];
 
   @override
@@ -164,13 +190,13 @@ class _WheelPainter extends CustomPainter {
       canvas.drawArc(rect, start, slice, true, Paint()..color = _colors[index]);
       final angle = start + slice / 2;
       final textPainter = TextPainter(
-        text: TextSpan(text: _labels[index], style: TextStyle(color: index == 3 || index == 6 || index == 8 || index == 11 || index == 13 || index == 14 || index == 17 || index == 19 ? Colors.white : Colors.black, fontSize: 7, fontWeight: FontWeight.w800)),
+        text: TextSpan(text: _labels[index], style: TextStyle(color: index == 0 || index == 5 || index == 10 || index == 15 ? AppPalette.background : AppPalette.textPrimary, fontSize: 7, fontWeight: FontWeight.w800)),
         textDirection: TextDirection.ltr,
       )..layout();
       final textCenter = Offset(center.dx + math.cos(angle) * radius * .61, center.dy + math.sin(angle) * radius * .61);
       textPainter.paint(canvas, textCenter - Offset(textPainter.width / 2, textPainter.height / 2));
     }
-    canvas.drawCircle(center, radius - 3, Paint()..color = const Color(0xFFE6C44A)..style = PaintingStyle.stroke..strokeWidth = 3);
+    canvas.drawCircle(center, radius - 3, Paint()..color = AppPalette.primaryBright..style = PaintingStyle.stroke..strokeWidth = 3);
   }
 
   @override
@@ -185,7 +211,7 @@ class _InfoPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-    decoration: BoxDecoration(border: Border.all(color: const Color(0xFF8C741A)), borderRadius: BorderRadius.circular(16)),
-    child: Text(text, style: const TextStyle(color: Color(0xFFDDBA3E), fontSize: 11, fontWeight: FontWeight.w700)),
+    decoration: BoxDecoration(border: Border.all(color: AppPalette.outline), borderRadius: BorderRadius.circular(16)),
+    child: Text(text, style: TextStyle(color: AppPalette.primary, fontSize: 11, fontWeight: FontWeight.w700)),
   );
 }

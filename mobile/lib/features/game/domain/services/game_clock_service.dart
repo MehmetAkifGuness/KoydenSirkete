@@ -6,9 +6,8 @@ import '../entities/player_state.dart';
 
 class GameClockService {
   static const realTickInterval = Duration(seconds: 20);
-  static const gameHoursPerRealTick = 1;
-  static const hoursPerRecovery = 3;
-  static const recoveryAmount = 10;
+  static const gameSpeedMultiplier = 2;
+  static const gameHoursPerRealTick = gameSpeedMultiplier;
 
   ClockTickResult tick(PlayerState state, {int hours = 1}) {
     if (hours < 1) {
@@ -17,16 +16,17 @@ class GameClockService {
 
     var current = state;
     var dayChanged = false;
-    ActiveActivity? completedActivity;
+    final completedActivities = <ActiveActivity>[];
     for (var index = 0; index < hours; index++) {
       final result = _tickHour(current);
       current = result.state;
       dayChanged = dayChanged || result.dayChanged;
-      completedActivity ??= result.completedActivity;
+      completedActivities.addAll(result.activities);
     }
     return ClockTickResult(
       state: current,
-      completedActivity: completedActivity,
+      completedActivity: completedActivities.isEmpty ? null : completedActivities.first,
+      completedActivities: completedActivities,
       dayChanged: dayChanged,
     );
   }
@@ -34,30 +34,33 @@ class GameClockService {
   ClockTickResult _tickHour(PlayerState state) {
     final advanced = state.advanceGameHour();
     final dayChanged = advanced.day != state.day;
-    final recoveryRemainder = state.energyRecoveryRemainder + 1;
-    final shouldRecover = recoveryRemainder >= hoursPerRecovery;
-    final nextRemainder = shouldRecover ? recoveryRemainder - hoursPerRecovery : recoveryRemainder;
-    final nextEnergy = shouldRecover ? math.min(advanced.maxEnergy, advanced.energy + recoveryAmount) : advanced.energy;
     final negativeMoneyHours = advanced.money < 0 ? math.min(PlayerState.bankruptcyDurationHours, advanced.negativeMoneyHours + 1) : 0;
-    final activity = advanced.activeActivity;
-    if (activity == null) {
+    final activities = advanced.activities;
+    if (activities.isEmpty) {
       return ClockTickResult(
-        state: advanced.copyWith(energy: nextEnergy, energyRecoveryRemainder: nextRemainder, negativeMoneyHours: negativeMoneyHours),
+        state: advanced.copyWith(negativeMoneyHours: negativeMoneyHours),
         dayChanged: dayChanged,
       );
     }
 
-    final remaining = activity.remainingHours - 1;
-    final completed = remaining <= 0 ? activity : null;
-    final nextActivity = remaining <= 0 ? null : activity.copyWith(remainingHours: remaining);
+    final completed = <ActiveActivity>[];
+    final nextActivities = <ActiveActivity>[];
+    for (final activity in activities) {
+      final remaining = activity.remainingHours - 1;
+      if (remaining <= 0) {
+        completed.add(activity);
+      } else {
+        nextActivities.add(activity.copyWith(remainingHours: remaining));
+      }
+    }
     return ClockTickResult(
       state: advanced.copyWith(
-        energy: nextEnergy,
-        energyRecoveryRemainder: nextRemainder,
         negativeMoneyHours: negativeMoneyHours,
-        activeActivity: nextActivity,
+        activeActivity: null,
+        activeActivities: nextActivities,
       ),
-      completedActivity: completed,
+      completedActivity: completed.isEmpty ? null : completed.first,
+      completedActivities: completed,
       dayChanged: dayChanged,
     );
   }

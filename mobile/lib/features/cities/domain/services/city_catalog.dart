@@ -1,7 +1,11 @@
+import 'dart:math' as math;
+
 import '../entities/city.dart';
 
 abstract final class CityCatalog {
-  static const version = 3;
+  static const version = 5;
+  static const _minimumPopulation = 82836;
+  static const _maximumPopulation = 15754053;
 
   static const _names = <String>[
     'Kırşehir', 'Ankara', 'İstanbul', 'Antalya', 'İzmir', 'Adana', 'Adıyaman', 'Afyonkarahisar', 'Ağrı', 'Amasya',
@@ -12,6 +16,17 @@ abstract final class CityCatalog {
     'Niğde', 'Ordu', 'Rize', 'Sakarya', 'Samsun', 'Siirt', 'Sinop', 'Sivas', 'Tekirdağ', 'Tokat',
     'Trabzon', 'Tunceli', 'Şanlıurfa', 'Uşak', 'Van', 'Yozgat', 'Zonguldak', 'Aksaray', 'Bayburt', 'Karaman',
     'Kırıkkale', 'Batman', 'Şırnak', 'Bartın', 'Ardahan', 'Iğdır', 'Yalova', 'Karabük', 'Kilis', 'Osmaniye', 'Düzce',
+  ];
+
+  static const _populations = <int>[
+    242777, 5910320, 15754053, 2777677, 4504185, 2283609, 617821, 751808, 491489, 342242,
+    167531, 1172107, 1284517, 228995, 282299, 360423, 327173, 277226, 3263011, 573976,
+    200549, 519590, 1060975, 1852356, 422438, 605678, 239625, 736877, 927956, 2222415,
+    455074, 138807, 279681, 1577531, 445303, 1956428, 268991, 379934, 1458991, 379595,
+    2161171, 2343409, 570478, 755854, 1477756, 1146278, 903576, 1099547, 389127, 320150,
+    374492, 768087, 346947, 1123693, 1392403, 332369, 225848, 631401, 1208441, 614141,
+    823323, 85083, 2265800, 374405, 1112013, 413208, 585203, 441136, 82836, 262355,
+    282830, 662626, 573666, 206663, 90392, 205071, 311635, 249614, 157363, 564123, 415622,
   ];
 
   static final cities = List<City>.unmodifiable(
@@ -26,34 +41,47 @@ abstract final class CityCatalog {
   }
 
   static City _create(int id, String name) {
-    if (id == 1) return const City(id: 1, name: 'Kırşehir', description: 'Düşük giderli başlangıç şehri.', dailyCost: 0, moveCost: 0, minimumCareerLevel: 1);
-    if (id == 2) return const City(id: 2, name: 'Ankara', description: 'Dengeli yaşam maliyeti ve geniş kamu/özel sektör fırsatı.', dailyCost: 20, moveCost: 100, minimumCareerLevel: 1, salaryMultiplier: 1.15, opportunityCount: 7, economicLevel: CityEconomicLevel.developing);
-    if (id == 3) return const City(id: 3, name: 'İstanbul', description: 'En yoğun iş ağına sahip ekonomik merkez.', dailyCost: 45, moveCost: 300, minimumCareerLevel: 2, salaryMultiplier: 1.5, opportunityCount: 14, economicLevel: CityEconomicLevel.economicCenter);
-    if (id == 4) return const City(id: 4, name: 'Antalya', description: 'Turizm ve ticaret fırsatları güçlü metropol.', dailyCost: 35, moveCost: 200, minimumCareerLevel: 1, salaryMultiplier: 1.3, opportunityCount: 10, economicLevel: CityEconomicLevel.metropolis);
-    if (id == 5) return const City(id: 5, name: 'İzmir', description: 'Ticaret, teknoloji ve üretim fırsatları güçlü merkez.', dailyCost: 60, moveCost: 400, minimumCareerLevel: 2, salaryMultiplier: 1.45, opportunityCount: 13, economicLevel: CityEconomicLevel.economicCenter);
-    final level = id >= 70
-        ? CityEconomicLevel.economicCenter
-        : id >= 40
-            ? CityEconomicLevel.metropolis
-            : id >= 16
-                ? CityEconomicLevel.developing
-                : CityEconomicLevel.regional;
-    final factor = switch (level) {
-      CityEconomicLevel.regional => (daily: 15, move: 80, salary: 1.0, opportunities: 4, career: 1),
-      CityEconomicLevel.developing => (daily: 25, move: 150, salary: 1.15, opportunities: 7, career: 1),
-      CityEconomicLevel.metropolis => (daily: 45, move: 300, salary: 1.3, opportunities: 10, career: 2),
-      CityEconomicLevel.economicCenter => (daily: 70, move: 500, salary: 1.5, opportunities: 14, career: 3),
-    };
+    final population = _populations[id - 1];
+    final technology = _technologyFor(population);
+    final level = _economicLevelFor(technology);
+    final market = (population / 250000).round().clamp(1, 20);
+    final dailyCost = dailyCostForPopulation(population);
+    final moveCost = (dailyCost * (4 + technology ~/ 20)).round();
     return City(
       id: id,
       name: name,
-      description: '${level.name} ekonomik seviyesinde şehir.',
-      dailyCost: factor.daily,
-      moveCost: factor.move,
-      minimumCareerLevel: factor.career,
-      salaryMultiplier: factor.salary,
-      opportunityCount: factor.opportunities,
+      description: '${level.name} ekonomik seviyesinde, nüfus ve pazar büyüklüğüne göre hesaplanan şehir.',
+      dailyCost: dailyCost,
+      moveCost: moveCost,
+      minimumCareerLevel: technology >= 90 ? 3 : technology >= 60 ? 2 : 1,
+      salaryMultiplier: (0.8 + population / 1000000 * .8).clamp(.8, 16.0),
+      opportunityCount: (3 + market ~/ 2).clamp(3, 14),
+      maximumJobLevel: _maximumJobLevelFor(level),
       economicLevel: level,
+      population: population,
+      technologyLevel: technology,
+      marketLevel: market,
     );
   }
+
+  static int _technologyFor(int population) {
+    final ratio = math.log(population / _minimumPopulation) / math.log(_maximumPopulation / _minimumPopulation);
+    return (20 + ratio * 80).round().clamp(20, 100);
+  }
+
+  static int dailyCostForPopulation(int population) => (population / 2000).round().clamp(1, 100000);
+
+  static CityEconomicLevel _economicLevelFor(int technology) {
+    if (technology >= 80) return CityEconomicLevel.economicCenter;
+    if (technology >= 60) return CityEconomicLevel.metropolis;
+    if (technology >= 35) return CityEconomicLevel.developing;
+    return CityEconomicLevel.regional;
+  }
+
+  static int _maximumJobLevelFor(CityEconomicLevel level) => switch (level) {
+        CityEconomicLevel.regional => 2,
+        CityEconomicLevel.developing => 3,
+        CityEconomicLevel.metropolis => 4,
+        CityEconomicLevel.economicCenter => 5,
+      };
 }

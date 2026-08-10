@@ -9,6 +9,7 @@ import 'package:kariyerden_sirkete/features/wheel/domain/entities/esnaf_wheel_re
 import 'package:kariyerden_sirkete/features/wheel/domain/services/esnaf_wheel_service.dart';
 import 'package:kariyerden_sirkete/features/earning/domain/entities/earning_performance.dart';
 import 'package:kariyerden_sirkete/features/game/domain/entities/player_state.dart';
+import 'package:kariyerden_sirkete/features/employment/domain/entities/employment.dart';
 import 'package:kariyerden_sirkete/features/training/domain/services/training_catalog.dart';
 import 'package:kariyerden_sirkete/features/training/domain/services/training_service.dart';
 import 'package:kariyerden_sirkete/features/jobs/domain/services/job_application_service.dart';
@@ -124,6 +125,20 @@ void main() {
       expect(result.currentJobId, job.id);
     });
 
+    test('stores the listed second-rank job instead of falling back to rank one', () {
+      final job = JobCatalog.jobs[1];
+      final state = PlayerState.initial.copyWith(
+        knowledge: 100,
+        experience: 100,
+        skills: SkillProfile({for (final skill in SkillId.values) skill: 1000}),
+      );
+      final result = JobApplicationService().apply(state, job);
+
+      expect(result.currentJobId, job.id);
+      expect(result.employment?.jobId, job.id);
+      expect(result.careerLevel, job.level);
+    });
+
     test('rejects a job when knowledge is insufficient', () {
       final job = JobCatalog.jobs[1];
 
@@ -142,6 +157,14 @@ void main() {
         throwsA(isA<GameRuleException>()),
       );
     });
+
+    test('reports missing skills below the current job warning', () {
+      final check = JobApplicationService().check(PlayerState.initial.copyWith(currentJobId: 1), JobCatalog.jobs[1]);
+
+      expect(check.isEligible, isFalse);
+      expect(check.reason, contains('Önce mevcut işinden ayrılmalısın'));
+      expect(check.missingSkills[SkillId.sales], 130);
+    });
   });
 
   group('work and career rules', () {
@@ -151,41 +174,64 @@ void main() {
       final result = WorkService().execute(state, job, WorkTaskCatalog.tasks.first);
 
       expect(result.income, 120);
-      expect(result.state.energy, 80);
+      expect(result.state.energy, 90);
       expect(result.state.performance, 5);
-      expect(result.state.experience, 4);
+      expect(result.state.experience, 5);
     });
 
     test('promotion requires performance and progression', () {
       final current = JobCatalog.jobs.first;
       final next = JobCatalog.jobs[1];
-      final state = PlayerState.initial.copyWith(currentJobId: current.id, performance: 70, knowledge: 12, experience: 10, skills: SkillProfile({SkillId.sales: 20, SkillId.leadership: 12}));
+      final state = PlayerState.initial.copyWith(currentJobId: current.id, employment: const Employment(jobId: 1, cityId: 1, salary: 120, company: 'Bereket Market', startedDay: 1), performance: 70, knowledge: 12, experience: 10, skills: SkillProfile({SkillId.sales: 130, SkillId.leadership: 78}));
       final result = CareerService().promote(state, current, next);
 
       expect(result.currentJobId, next.id);
       expect(result.careerLevel, 2);
       expect(result.performance, 50);
+      expect(result.employment?.jobId, next.id);
+      expect(result.employment?.salary, next.salary);
     });
   });
 
   group('esnaf wheel rules', () {
-    test('charges 50 TL without a cooldown', () {
-      final job = JobCatalog.jobs.first;
-      final activity = WorkService().start(PlayerState.initial.copyWith(currentJobId: job.id), job, WorkTaskCatalog.tasks.first);
-      final state = PlayerState.initial.copyWith(money: 100, currentJobId: job.id, activeActivity: activity);
-      final outcome = EsnafWheelService(random: _FixedRandom(7)).spin(state);
+    test('charges 50 TL without a cooldown and without active work', () {
+      final state = PlayerState.initial.copyWith(money: 100);
+      final outcome = EsnafWheelService(random: _FixedRandom(15)).spin(state);
 
-      expect(outcome.state.money, 110);
+      expect(outcome.state.money, 150);
       expect(outcome.state.wheelCooldownSeconds, 0);
     });
 
-    test('uses 20 sectors with one very good, one good and two 60 TL rewards', () {
+    test('uses 20 sectors with separated premium rewards', () {
       final sectors = EsnafWheelRewardCatalog.sectorTypes;
       expect(sectors, hasLength(20));
       expect(sectors.where((type) => type == EsnafWheelRewardType.bigTender), hasLength(1));
       expect(sectors.where((type) => type == EsnafWheelRewardType.luckyDay), hasLength(1));
       expect(sectors.where((type) => type == EsnafWheelRewardType.tipRain), hasLength(2));
       expect(sectors.where((type) => type != EsnafWheelRewardType.bigTender && type != EsnafWheelRewardType.luckyDay && type != EsnafWheelRewardType.tipRain), hasLength(16));
+      expect([0, 5, 10, 15].map((index) => sectors[index]), orderedEquals([
+        EsnafWheelRewardType.bigTender,
+        EsnafWheelRewardType.luckyDay,
+        EsnafWheelRewardType.tipRain,
+        EsnafWheelRewardType.tipRain,
+      ]));
+    });
+
+    test('uses 50 TL penalty and 1000 TL tender rewards', () {
+      final penalty = EsnafWheelService(random: _FixedRandom(2)).spin(PlayerState.initial.copyWith(money: 100));
+      final tender = EsnafWheelService(random: _FixedRandom(0)).spin(PlayerState.initial.copyWith(money: 100));
+
+      expect(penalty.state.money, 0);
+      expect(tender.state.money, 1050);
+    });
+
+    test('chance reward halves work costs and doubles the next two incomes', () {
+      final outcome = EsnafWheelService(random: _FixedRandom(5)).spin(PlayerState.initial.copyWith(money: 100));
+
+      expect(outcome.state.wheelDurationBuffPercent, 50);
+      expect(outcome.state.wheelEnergyBuffPercent, 50);
+      expect(outcome.state.wheelRewardBuffPercent, 100);
+      expect(outcome.state.wheelRewardBuffTasks, 2);
     });
 
     test('converts major rewards to a tip after the daily limit', () {
@@ -202,27 +248,31 @@ void main() {
   group('city and company rules', () {
     test('city move charges the move cost and living costs settle by day', () {
       final city = CityCatalog.cities[1];
-      final moved = CityService().move(PlayerState.initial.copyWith(money: 500), city);
+      final startingMoney = city.moveCost + city.dailyCost;
+      final moved = CityService().move(PlayerState.initial.copyWith(money: startingMoney, careerLevel: city.minimumCareerLevel), city);
       final settled = LivingCostService().settle(moved.copyWith(day: 2));
 
       expect(moved.currentCityId, city.id);
-      expect(moved.money, 400);
-      expect(settled.money, 380);
+      expect(moved.money, startingMoney - city.moveCost);
+      expect(settled.money, moved.money - city.dailyCost);
       expect(settled.lastLivingCostDay, 2);
     });
 
     test('company can be established, staffed and progressed', () {
       final service = CompanyService();
-      final ready = PlayerState.initial.copyWith(money: 1500, careerLevel: 3);
+      final ready = PlayerState.initial.copyWith(money: 1500, careerLevel: 3, currentJobId: 1, employment: const Employment(jobId: 1, cityId: 1, salary: 120, company: 'Bereket Market', startedDay: 1));
       final company = service.establish(ready);
-      final staffed = service.recruit(company);
+      final staffed = service.recruit(company, employee: service.availableEmployees(company).first);
       final progress = service.advanceProject(staffed);
 
       expect(company.companyLevel, 1);
       expect(company.currentJobId, isNull);
+      expect(company.employment, isNull);
       expect(staffed.employeeCount, 1);
-      expect(progress.state.projectProgress, 10);
-      expect(progress.state.experience, 5);
+      expect(staffed.companyFunds, company.companyFunds);
+      expect(staffed.employees.single.performance, greaterThan(0));
+      expect(progress.state.projectProgress, service.dailyProjectProgress(staffed));
+      expect(progress.state.experience, 0);
     });
   });
 
@@ -232,7 +282,7 @@ void main() {
     expect(WorkTaskCatalog.forJob(4), isNotEmpty);
     expect(TrainingCatalog.version, 3);
     expect(TrainingCatalog.courses.length, greaterThanOrEqualTo(10));
-    expect(CityCatalog.version, 3);
+    expect(CityCatalog.version, 5);
     expect(CityCatalog.cities.length, 81);
   });
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../app/theme/app_palette.dart';
 
 class BankruptcyPage extends StatefulWidget {
   const BankruptcyPage({required this.onRestart, super.key});
@@ -33,7 +34,7 @@ class _BankruptcyPageState extends State<BankruptcyPage> {
                     const Text(
                       'Paran 24 oyun saati boyunca negatif kaldı.\nKariyer planın sıfırlanıyor.',
                       textAlign: TextAlign.center,
-                      style: TextStyle(color: Color(0xFFD1C9B8), height: 1.5),
+                      style: TextStyle(color: AppPalette.textSecondary, height: 1.5),
                     ),
                     const SizedBox(height: 26),
                     SizedBox(

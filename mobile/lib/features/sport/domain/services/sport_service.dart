@@ -6,11 +6,13 @@ class SportService {
   static const energyCost = 20;
   static const durationHours = 1;
   static const maxEnergyGain = 5;
-  static const maxEnergyLimit = 200;
+  static const maxEnergyLimit = 1000;
 
   ActiveActivity start(PlayerState state) {
     if (state.energy < energyCost) {
-      throw const GameRuleException('Spor yapmak için en az 20 enerji gerekir.');
+      throw const GameRuleException(
+        'Spor yapmak için en az 20 enerji gerekir.',
+      );
     }
     return ActiveActivity(
       type: ActivityType.sport,
@@ -24,7 +26,13 @@ class SportService {
   }
 
   PlayerState complete(PlayerState state) {
-    final nextMaxEnergy = (state.maxEnergy + maxEnergyGain).clamp(100, maxEnergyLimit);
-    return state.copyWith(maxEnergy: nextMaxEnergy, energy: state.energy.clamp(0, nextMaxEnergy));
+    final nextMaxEnergy = (state.maxEnergy + maxEnergyGain).clamp(
+      100,
+      maxEnergyLimit,
+    );
+    return state.copyWith(
+      maxEnergy: nextMaxEnergy,
+      energy: state.energy.clamp(0, nextMaxEnergy),
+    );
   }
 }

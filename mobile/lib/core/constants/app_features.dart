@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../app/theme/app_palette.dart';
+
 class AppFeature {
   const AppFeature({
     required this.title,
@@ -17,60 +19,60 @@ class AppFeature {
 }
 
 abstract final class AppFeatures {
-  static const earning = AppFeature(
+  static AppFeature get earning => AppFeature(
     title: 'Para kazan',
     subtitle: 'İlk sermayeni oluştur',
     icon: Icons.payments_outlined,
-    color: Color(0xFFDDBA3E),
+    color: AppPalette.primary,
     unlocked: true,
   );
-  static const training = AppFeature(
+  static AppFeature get training => AppFeature(
     title: 'Eğitim',
     subtitle: 'Bilgi ve becerilerini geliştir',
     icon: Icons.school_outlined,
-    color: Color(0xFFDDBA3E),
+    color: AppPalette.primary,
     unlocked: true,
   );
-  static const skills = AppFeature(
+  static AppFeature get skills => AppFeature(
     title: 'Yetenekler',
     subtitle: 'Mesleki alanlarını geliştir',
     icon: Icons.auto_awesome_outlined,
-    color: Color(0xFFDDBA3E),
+    color: AppPalette.primary,
     unlocked: true,
   );
-  static const sport = AppFeature(
+  static AppFeature get sport => AppFeature(
     title: 'Spor',
     subtitle: 'Maksimum enerjini artır',
     icon: Icons.fitness_center_outlined,
-    color: Color(0xFFDDBA3E),
+    color: AppPalette.primary,
     unlocked: true,
   );
-  static const jobs = AppFeature(
+  static AppFeature get jobs => AppFeature(
     title: 'İş ilanları',
     subtitle: 'İlk fırsatını bul',
     icon: Icons.work_outline,
-    color: Color(0xFFDDBA3E),
+    color: AppPalette.primary,
     unlocked: true,
   );
-  static const career = AppFeature(
+  static AppFeature get career => AppFeature(
     title: 'Kariyer',
     subtitle: 'İlerleme yolunu gör',
     icon: Icons.trending_up,
-    color: Color(0xFFDDBA3E),
+    color: AppPalette.primary,
     unlocked: true,
   );
-  static const cities = AppFeature(
+  static AppFeature get cities => AppFeature(
     title: 'Şehirler',
     subtitle: 'Yeni yaşam alanları',
     icon: Icons.location_city_outlined,
-    color: Color(0xFFDDBA3E),
+    color: AppPalette.primary,
     unlocked: true,
   );
-  static const company = AppFeature(
+  static AppFeature get company => AppFeature(
     title: 'Şirket',
     subtitle: 'Geleceğin işini kur',
     icon: Icons.business_outlined,
-    color: Color(0xFFDDBA3E),
+    color: AppPalette.primary,
     unlocked: true,
   );
 }

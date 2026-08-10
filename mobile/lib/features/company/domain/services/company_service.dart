@@ -1,6 +1,8 @@
 import '../../../../core/errors/game_rule_exception.dart';
 import '../../../game/domain/entities/player_state.dart';
+import '../entities/company_employee.dart';
 import '../entities/company_project.dart';
+import 'company_employee_catalog.dart';
 import 'company_project_catalog.dart';
 
 class CompanyCheck {
@@ -17,14 +19,84 @@ class CompanyActionResult {
   final String message;
 }
 
+class CompanyOperationResult {
+  const CompanyOperationResult({required this.state, required this.messages});
+
+  final PlayerState state;
+  final List<String> messages;
+}
+
 class CompanyService {
   static const establishmentCost = 1000;
-  static const recruitmentCost = 200;
+  static const recruitmentCost = 0;
   static const projectCost = 100;
   static const maxCompanyLevel = 3;
+  static const dailyBaseRevenue = 50;
+  static const dailyEmployeeRevenue = 75;
+  static const dailyProjectRevenue = 25;
 
   static int upgradeCost(int level) => level * 600;
-  static int employeeCapacity(int level) => level * 2;
+  static int employeeCapacity(int level) => level * 4;
+
+  static List<CompanyEmployee> employeesFor(PlayerState state) {
+    if (state.employees.isNotEmpty) {
+      return state.employees;
+    }
+    return CompanyEmployeeCatalog.legacyDefaults(state.employeeCount);
+  }
+
+  List<CompanyEmployee> availableEmployees(PlayerState state) {
+    return CompanyEmployeeCatalog.available(
+      state.companyLevel,
+      employeesFor(state).map((employee) => employee.id),
+    );
+  }
+
+  int dailyPayroll(PlayerState state) {
+    return employeesFor(state).fold(0, (total, employee) => total + employee.dailySalary);
+  }
+
+  int dailyEmployeeContribution(CompanyEmployee employee) => dailyEmployeeRevenue + employee.performance ~/ 20;
+
+  int dailyEmployeeNetContribution(CompanyEmployee employee) => dailyEmployeeContribution(employee) - employee.dailySalary;
+
+  int dailyRevenue(PlayerState state) {
+    if (state.companyLevel == 0) return 0;
+    final projectLevel = CompanyProjectCatalog.byId(state.activeProjectId).id;
+    return state.companyLevel * dailyBaseRevenue +
+        employeesFor(state).fold<int>(
+          0,
+          (total, employee) => total + dailyEmployeeContribution(employee),
+        ) +
+        projectLevel * dailyProjectRevenue;
+  }
+
+  PlayerState collectDailyRevenue(PlayerState state, {int days = 1}) {
+    return processDailyOperations(state, days: days).state;
+  }
+
+  CompanyOperationResult processDailyOperations(PlayerState state, {int days = 1}) {
+    if (days < 1 || state.companyLevel == 0) {
+      return CompanyOperationResult(state: state, messages: const <String>[]);
+    }
+    var current = state;
+    final messages = <String>[];
+    for (var day = 0; day < days; day++) {
+      final revenue = dailyRevenue(current);
+      final payroll = dailyPayroll(current);
+      final completedProjectsBeforeOperation = current.completedProjects;
+      current = current.copyWith(companyFunds: current.companyFunds + revenue - payroll);
+      if (employeesFor(current).isEmpty) {
+        continue;
+      }
+      final projectResult = advanceProject(current);
+      current = projectResult.state;
+      if (projectResult.state.completedProjects > completedProjectsBeforeOperation) {
+        messages.add(projectResult.message);
+      }
+    }
+    return CompanyOperationResult(state: current, messages: messages);
+  }
 
   CompanyCheck checkEstablishment(PlayerState state) {
     if (state.companyLevel > 0) {
@@ -46,6 +118,7 @@ class CompanyService {
     }
     return state.copyWith(
       currentJobId: null,
+      employment: null,
       money: state.money - establishmentCost,
       companyLevel: 1,
       companyFunds: 500,
@@ -56,19 +129,54 @@ class CompanyService {
     );
   }
 
-  PlayerState recruit(PlayerState state) {
+  PlayerState recruit(PlayerState state, {CompanyEmployee? employee}) {
     if (state.companyLevel == 0) {
       throw const GameRuleException('Önce şirketini kurmalısın.');
     }
-    if (state.companyFunds < recruitmentCost) {
-      throw const GameRuleException('Çalışan almak için şirket kasasında yeterli para yok.');
-    }
-    if (state.employeeCount >= employeeCapacity(state.companyLevel)) {
+    final employees = employeesFor(state);
+    if (employees.length >= employeeCapacity(state.companyLevel)) {
       throw const GameRuleException('Bu şirket seviyesi için çalışan kapasitesi dolu.');
     }
+    final selected = employee;
+    if (selected == null) {
+      throw const GameRuleException('İşe almak istediğin çalışanı seçmelisin.');
+    }
+    if (selected.requiredCompanyLevel > state.companyLevel ||
+        employees.any((current) => current.id == selected.id)) {
+      throw const GameRuleException('Bu çalışan şu anda işe alınamaz.');
+    }
     return state.copyWith(
-      companyFunds: state.companyFunds - recruitmentCost,
-      employeeCount: state.employeeCount + 1,
+      employeeCount: employees.length + 1,
+      employees: <CompanyEmployee>[...employees, selected],
+    );
+  }
+
+  PlayerState dismissEmployee(PlayerState state, int employeeId) {
+    if (state.companyLevel == 0) {
+      throw const GameRuleException('Önce şirketini kurmalısın.');
+    }
+    final employees = employeesFor(state);
+    if (!employees.any((employee) => employee.id == employeeId)) {
+      throw const GameRuleException('Bu çalışan şirketinde bulunamadı.');
+    }
+    final remaining = employees.where((employee) => employee.id != employeeId).toList(growable: false);
+    return state.copyWith(
+      employeeCount: remaining.length,
+      employees: remaining,
+    );
+  }
+
+  int dailyProjectProgress(PlayerState state) {
+    if (state.companyLevel == 0) {
+      return 0;
+    }
+    final project = CompanyProjectCatalog.byId(state.activeProjectId);
+    return employeesFor(state).fold(
+      0,
+      (total, employee) {
+        final progress = (project.progressPerEmployee * employee.performance / 100).round();
+        return total + (progress < 1 ? 1 : progress);
+      },
     );
   }
 
@@ -76,25 +184,25 @@ class CompanyService {
     if (state.companyLevel == 0) {
       throw const GameRuleException('Önce şirketini kurmalısın.');
     }
-    if (state.employeeCount == 0) {
+    if (employeesFor(state).isEmpty) {
       throw const GameRuleException('Proje için en az bir çalışan almalısın.');
     }
     final project = CompanyProjectCatalog.byId(state.activeProjectId);
-    if (state.companyFunds < project.cost) {
-      throw const GameRuleException('Proje için şirket kasasında yeterli para yok.');
-    }
-    final completed = state.projectProgress + state.employeeCount * project.progressPerEmployee >= 100;
-    final nextProgress = completed ? 0 : state.projectProgress + state.employeeCount * project.progressPerEmployee;
+    final totalProgress = state.projectProgress + dailyProjectProgress(state);
+    final completed = totalProgress >= 100;
+    final nextProgress = completed ? totalProgress - 100 : totalProgress;
+    final netReward = project.reward - project.cost;
     final nextState = state.copyWith(
-      companyFunds: state.companyFunds - project.cost,
+      companyFunds: state.companyFunds + (completed ? netReward : 0),
       projectProgress: nextProgress,
-      money: completed ? state.money + project.reward : state.money,
-      experience: state.experience + project.experienceReward,
+      experience: completed ? state.experience + project.experienceReward : state.experience,
       completedProjects: completed ? state.completedProjects + 1 : state.completedProjects,
     );
     return CompanyActionResult(
       state: nextState,
-      message: completed ? 'Proje tamamlandı. Şirketin ₺${project.reward} gelir elde etti.' : 'Proje ilerlemesi %$nextProgress oldu.',
+      message: completed
+          ? 'Proje tamamlandı. Net şirket geliri: ₺$netReward.'
+          : 'Proje otomatik olarak %$nextProgress ilerledi.',
     );
   }
 

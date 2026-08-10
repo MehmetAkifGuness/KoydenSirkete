@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../app/theme/app_palette.dart';
 import '../constants/app_features.dart';
 
 class FeaturePlaceholderPage extends StatelessWidget {
@@ -24,7 +25,7 @@ class FeaturePlaceholderPage extends StatelessWidget {
               Text(
                 feature.unlocked ? 'Bu ekran tasarım taslağıdır.' : 'Bu özellik sonraki sürüm planında açılacak.',
                 textAlign: TextAlign.center,
-                style: const TextStyle(color: Colors.white60, height: 1.5),
+                style: const TextStyle(color: AppPalette.textSecondary, height: 1.5),
               ),
             ],
           ),

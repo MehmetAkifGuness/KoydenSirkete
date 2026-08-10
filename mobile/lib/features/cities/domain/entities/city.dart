@@ -10,7 +10,11 @@ class City {
     required this.minimumCareerLevel,
     this.salaryMultiplier = 1,
     this.opportunityCount = 3,
+    this.maximumJobLevel = 2,
     this.economicLevel = CityEconomicLevel.regional,
+    this.population = 0,
+    this.technologyLevel = 0,
+    this.marketLevel = 0,
   });
 
   final int id;
@@ -21,5 +25,9 @@ class City {
   final int minimumCareerLevel;
   final double salaryMultiplier;
   final int opportunityCount;
+  final int maximumJobLevel;
   final CityEconomicLevel economicLevel;
+  final int population;
+  final int technologyLevel;
+  final int marketLevel;
 }

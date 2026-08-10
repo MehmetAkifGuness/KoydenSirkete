@@ -1,4 +1,5 @@
 import '../../../jobs/domain/entities/job.dart';
+import '../../../skills/domain/entities/skill_profile.dart';
 import '../entities/work_task.dart';
 
 class EmployerTaskGenerator {
@@ -12,13 +13,13 @@ class EmployerTaskGenerator {
         jobId: job.id,
         title: '${template.title} · ${job.title}',
         description: template.description,
-        energyCost: (template.energyCost + job.level * 2).clamp(5, 100),
-        durationHours: (template.durationHours + job.level % 3).clamp(1, 24),
+        energyCost: template.energyCost,
+        durationHours: template.durationHours,
         salaryMultiplier: template.salaryMultiplier + job.level * .03,
         performanceGain: template.performanceGain,
-        experienceGain: template.experienceGain + job.level,
+        experienceGain: template.experienceGain,
         skillRequirements: {
-          for (final entry in job.skillRequirements.entries) entry.key: (entry.value * template.requirementFactor).round().clamp(1, 100),
+          for (final entry in job.scaledSkillRequirements.entries) entry.key: (entry.value * template.requirementFactor).round().clamp(1, SkillProfile.maxValue),
         },
       );
     }, growable: false);
@@ -34,11 +35,12 @@ class EmployerTaskGenerator {
   int _seed(int first, int second, int third) => (first * 92821 + second * 68917 + third * 31337).abs();
 
   static const _templates = <_TaskTemplate>[
-    _TaskTemplate('Günlük rapor', 'Günün verilerini düzenle ve işverene sun.', 18, 4, 1.0, 5, 4, .75),
-    _TaskTemplate('Müşteri çözümü', 'Müşteri talebini analiz et ve çözüm üret.', 22, 5, 1.1, 6, 5, .9),
-    _TaskTemplate('Süreç iyileştirme', 'İş akışındaki kaybı tespit edip iyileştirme öner.', 26, 6, 1.2, 7, 6, 1.0),
-    _TaskTemplate('Ekip koordinasyonu', 'Günün görevlerini ekip üyeleriyle koordine et.', 24, 5, 1.15, 6, 6, .85),
-    _TaskTemplate('Hedef çalışması', 'İşverenin günlük hedefini tamamla.', 30, 7, 1.3, 8, 7, 1.1),
+    _TaskTemplate('Günlük rapor', 'Günün verilerini düzenle ve işverene sun.', 10, 2, 1.0, 5, 5, .75),
+    _TaskTemplate('Müşteri çözümü', 'Müşteri talebini analiz et ve çözüm üret.', 12, 3, 1.1, 6, 6, .9),
+    _TaskTemplate('Süreç iyileştirme', 'İş akışındaki kaybı tespit edip iyileştirme öner.', 14, 4, 1.2, 7, 7, 1.0),
+    _TaskTemplate('Ekip koordinasyonu', 'Günün görevlerini ekip üyeleriyle koordine et.', 16, 5, 1.15, 6, 8, .85),
+    _TaskTemplate('Hedef çalışması', 'İşverenin günlük hedefini tamamla.', 18, 6, 1.3, 8, 9, 1.1),
+    _TaskTemplate('Stratejik proje', 'Şirketin gelişim hedefi için stratejik bir proje tamamla.', 20, 7, 1.4, 9, 10, 1.15),
   ];
 }
 

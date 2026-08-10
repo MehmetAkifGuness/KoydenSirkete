@@ -6,12 +6,13 @@ class ForegroundClockTicker {
   final Future<void> Function() onTick;
   final Duration interval;
   Timer? _timer;
+  bool _tickInProgress = false;
 
   void start() {
     if (_timer != null) {
       return;
     }
-    _timer = Timer.periodic(interval, (_) => unawaited(onTick()));
+    _timer = Timer.periodic(interval, (_) => _runTick());
   }
 
   void stop() {
@@ -20,4 +21,12 @@ class ForegroundClockTicker {
   }
 
   void dispose() => stop();
+
+  void _runTick() {
+    if (_tickInProgress) {
+      return;
+    }
+    _tickInProgress = true;
+    unawaited(onTick().whenComplete(() => _tickInProgress = false));
+  }
 }

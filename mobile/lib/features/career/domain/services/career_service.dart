@@ -11,7 +11,8 @@ class PromotionCheck {
 
 class CareerService {
   PromotionCheck check(PlayerState state, Job currentJob, Job? nextJob) {
-    if (state.currentJobId != currentJob.id) {
+    final activeJobId = state.employment?.jobId ?? state.currentJobId;
+    if (activeJobId != currentJob.id) {
       return const PromotionCheck(isEligible: false, reason: 'Bu kariyer hattı aktif işin değil.');
     }
     if (nextJob == null) {
@@ -32,7 +33,7 @@ class CareerService {
         reason: 'Terfi için en az ${nextJob.minimumExperience} tecrübe gerekiyor.',
       );
     }
-    for (final requirement in nextJob.skillRequirements.entries) {
+    for (final requirement in nextJob.scaledSkillRequirements.entries) {
       if (requirement.value > 0 && state.skills[requirement.key] < requirement.value) {
         return PromotionCheck(isEligible: false, reason: '${requirement.key.label} yeteneği en az ${requirement.value} olmalı.');
       }
@@ -49,6 +50,11 @@ class CareerService {
       currentJobId: nextJob.id,
       careerLevel: nextJob.level,
       performance: 50,
+      employment: state.employment?.copyWith(
+        jobId: nextJob.id,
+        salary: nextJob.salary,
+        company: nextJob.company,
+      ),
     );
   }
 }

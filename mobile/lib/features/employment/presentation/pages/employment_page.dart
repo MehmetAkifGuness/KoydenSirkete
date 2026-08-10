@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import '../../../../app/theme/app_palette.dart';
 
+import '../../../../core/widgets/app_feedback.dart';
 import '../../../game/presentation/state/game_session_controller.dart';
-import '../../../game/domain/entities/active_activity.dart';
 import '../../../jobs/domain/services/job_catalog.dart';
+import '../../../wheel/presentation/widgets/esnaf_wheel_panel.dart';
 import '../../../work/presentation/pages/work_page.dart';
 
 class EmploymentPage extends StatelessWidget {
@@ -18,29 +20,37 @@ class EmploymentPage extends StatelessWidget {
         animation: session,
         builder: (context, _) {
           final state = session.state;
-          final job = JobCatalog.findById(state.currentJobId);
-          if (job == null || state.employment == null) {
-            return _EmptyEmployment(event: state.lastJobEvent);
+          final employment = state.employment;
+          final job = JobCatalog.findById(employment?.jobId ?? state.currentJobId);
+          if (job == null || employment == null) {
+            return ListView(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+              children: [
+                _EmptyEmployment(event: state.lastJobEvent),
+                const SizedBox(height: 16),
+                EsnafWheelPanel(session: session),
+              ],
+            );
           }
           return ListView(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
             children: [
               Card(child: Padding(padding: const EdgeInsets.all(20), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text(state.employment!.company, style: const TextStyle(fontSize: 13, color: Colors.white60)),
+                Text(employment.company, style: const TextStyle(fontSize: 13, color: AppPalette.textMuted)),
                 const SizedBox(height: 5),
                 Text(job.title, style: const TextStyle(fontFamily: 'serif', fontSize: 20, fontWeight: FontWeight.w700)),
                 const SizedBox(height: 12),
-                Text('Maaş ₺${state.employment!.salary} · ${job.careerTrack} ${job.level}. rütbe'),
+                Text('Maaş ₺${employment.salary} · ${job.careerTrack} ${job.level}. rütbe'),
                 const SizedBox(height: 12),
                 LinearProgressIndicator(value: state.performance / 100, minHeight: 5, borderRadius: BorderRadius.circular(8)),
                 const SizedBox(height: 6),
                 Text('Performans %${state.performance} · Bugün ${state.workSessionsToday} görev'),
                 const SizedBox(height: 12),
-                Text('Son görev günü: ${state.employment!.lastTaskDay}'),
+                Text('Son görev günü: ${employment.lastTaskDay}'),
               ]))),
               const SizedBox(height: 14),
               FilledButton.icon(
-                onPressed: session.isBusy || (state.activeActivity != null && state.activeActivity!.type != ActivityType.work) ? null : () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => WorkPage(session: session, job: job))),
+                onPressed: session.isBusy || !state.hasActivityCapacity ? null : () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => WorkPage(session: session, job: job))),
                 icon: const Icon(Icons.assignment_outlined),
                 label: const Text('Günlük görevleri yönet'),
               ),
@@ -49,6 +59,8 @@ class EmploymentPage extends StatelessWidget {
                 onPressed: session.isBusy ? null : () => _leave(context),
                 child: const Text('İşten ayrıl'),
               ),
+              const SizedBox(height: 16),
+              EsnafWheelPanel(session: session),
             ],
           );
         },
@@ -59,7 +71,7 @@ class EmploymentPage extends StatelessWidget {
   Future<void> _leave(BuildContext context) async {
     final message = await session.leaveJob();
     if (!context.mounted || message == null) return;
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    AppFeedback.show(context, message);
   }
 }
 

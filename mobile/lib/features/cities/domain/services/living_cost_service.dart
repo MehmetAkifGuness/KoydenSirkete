@@ -1,5 +1,6 @@
 import '../../../game/domain/entities/player_state.dart';
 import '../services/city_catalog.dart';
+import '../../../assets/domain/services/asset_service.dart';
 
 class LivingCostService {
   PlayerState settle(PlayerState state) {
@@ -11,8 +12,9 @@ class LivingCostService {
       return state.copyWith(lastLivingCostDay: state.day);
     }
     final elapsedDays = state.day - state.lastLivingCostDay;
+    final dailyCost = AssetService().hasHomeInCity(state, state.currentCityId) ? 0 : city.dailyCost;
     return state.copyWith(
-      money: state.money - city.dailyCost * elapsedDays,
+      money: state.money - dailyCost * elapsedDays,
       lastLivingCostDay: state.day,
     );
   }

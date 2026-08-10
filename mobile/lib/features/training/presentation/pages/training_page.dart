@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import '../../../../app/theme/app_palette.dart';
 
+import '../../../../core/widgets/app_feedback.dart';
 import '../../../game/presentation/state/game_session_controller.dart';
 import '../../../skills/domain/entities/skill_id.dart';
 import '../../domain/entities/course.dart';
@@ -44,12 +46,12 @@ class _TrainingPageState extends State<TrainingPage> {
             children: [
               _FilterBar(selected: _filter, onSelected: (value) => setState(() => _filter = value)),
               const SizedBox(height: 16),
-              Text('${courses.length} eğitim', style: const TextStyle(color: Color(0xFF9F988B), fontSize: 12, fontWeight: FontWeight.w700)),
+              Text('${courses.length} eğitim', style: const TextStyle(color: AppPalette.textMuted, fontSize: 12, fontWeight: FontWeight.w700)),
               const SizedBox(height: 10),
               for (final course in courses) ...[
                 _CourseCard(
                   course: course,
-                  enabled: !widget.session.isBusy && widget.session.state.activeActivity == null,
+                  enabled: !widget.session.isBusy && widget.session.state.hasActivityCapacity,
                   onTap: () => _train(context, course),
                 ),
                 const SizedBox(height: 12),
@@ -66,7 +68,7 @@ class _TrainingPageState extends State<TrainingPage> {
     if (!context.mounted || message == null) {
       return;
     }
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    AppFeedback.show(context, message);
   }
 }
 
@@ -100,11 +102,11 @@ class _FilterBar extends StatelessWidget {
               duration: const Duration(milliseconds: 160),
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               decoration: BoxDecoration(
-                color: isSelected ? const Color(0xFFDDBA3E) : const Color(0xFF090909),
-                border: Border.all(color: const Color(0xFFDDBA3E)),
+                color: isSelected ? AppPalette.primary : AppPalette.surfaceMuted,
+                border: Border.all(color: AppPalette.outline),
                 borderRadius: BorderRadius.circular(18),
               ),
-              child: Text(filter, style: TextStyle(color: isSelected ? Colors.black : const Color(0xFFDDBA3E), fontSize: 12, fontWeight: FontWeight.w700)),
+              child: Text(filter, style: TextStyle(color: isSelected ? AppPalette.background : AppPalette.primary, fontSize: 12, fontWeight: FontWeight.w700)),
             ),
           );
         },
@@ -130,12 +132,12 @@ class _CourseCard extends StatelessWidget {
           children: [
             Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Expanded(child: Padding(padding: const EdgeInsets.only(top: 24), child: Text(course.name, style: const TextStyle(fontFamily: 'serif', fontWeight: FontWeight.w700, fontSize: 18)))),
-              Container(padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10), decoration: const BoxDecoration(color: Color(0xFFDDBA3E), borderRadius: BorderRadius.only(bottomLeft: Radius.circular(10))), child: Text(course.cost == 0 ? 'Ücretsiz' : '₺${course.cost}', style: const TextStyle(color: Colors.black, fontWeight: FontWeight.w700))),
+              Container(padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10), decoration: BoxDecoration(color: AppPalette.primary, borderRadius: BorderRadius.only(bottomLeft: Radius.circular(10))), child: Text(course.cost == 0 ? 'Ücretsiz' : '₺${course.cost}', style: TextStyle(color: AppPalette.background, fontWeight: FontWeight.w700))),
             ]),
             const SizedBox(height: 8),
-            Text(course.description, style: const TextStyle(color: Color(0xFFD1C9B8))),
+            Text(course.description, style: const TextStyle(color: AppPalette.textSecondary)),
             const SizedBox(height: 16),
-            Container(padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9), decoration: BoxDecoration(border: Border.all(color: const Color(0xFF8C741A)), borderRadius: BorderRadius.circular(8)), child: Wrap(spacing: 12, runSpacing: 8, children: [
+            Container(padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9), decoration: BoxDecoration(border: Border.all(color: AppPalette.outline), borderRadius: BorderRadius.circular(8)), child: Wrap(spacing: 12, runSpacing: 8, children: [
               _Tag(icon: Icons.schedule_outlined, text: '${course.durationHours} saat'),
               _Tag(icon: Icons.bolt, text: '-${course.energyCost}'),
               _Tag(icon: Icons.menu_book_outlined, text: '+${course.knowledge}'),

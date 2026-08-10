@@ -71,13 +71,14 @@ Android-first, tamamen offline kariyer ve şirket simülasyonu.
 ## v2.0.0 offline gerçek zamanlı sürüm
 
 - Yalnızca foreground'da ilerleyen oyun saati: 20 gerçek saniye = 1 oyun saati.
-- Tek aktif aktivite, 2 saatte 10 enerji yenilenmesi ve sporla 200'e kadar maksimum enerji.
-- 10 mesleki yetenek, çoklu yetenek eğitimleri ve göreve göre süre/enerji verimliliği.
-- Türkiye'nin 81 ili, ekonomik seviyeler, şehir bazlı maaş ve iş fırsatları.
+- Tek aktif aktivite, gerçek her 60 saniyede 10 enerji yenilenmesi ve sporla 200'e kadar maksimum enerji.
+- Uygulama kapalıyken de enerji açılışta geçen gerçek süreye göre tamamlanır.
+- 10 mesleki yetenek, 1000 üst sınır, çoklu yetenek eğitimleri ve göreve göre süre/enerji verimliliği.
+- Türkiye'nin 81 ili, 2025 ADNKS nüfuslarıyla nüfusa bağlı teknoloji, ekonomi, maaş ve iş fırsatları.
 - 20 rol, cihaz içinde seed tabanlı gizli bot rekabeti ve günlük başvuru sonucu.
 - Ayrı `İşim` ve `Şirketim` ekranları; her oyun gününde değişen işveren görevleri.
 - İki oyun günü görev başlatılmadığında yalnızca foreground gün geçişinde işten çıkarılma.
-- SQLite şema v17; eski v10 kayıtları sıfırlanmadan okunur. Para 24 oyun saati boyunca negatif kalırsa iflas sistemi devreye girer. Aktif işlerde 50 TL bedelli, bekleme süresi olmayan 20 dilimli Esnaf Çarkı kullanılabilir.
+- SQLite şema v18; eski v10 kayıtları sıfırlanmadan okunur. Para 24 oyun saati boyunca negatif kalırsa iflas sistemi devreye girer. Aktif işlerde 50 TL bedelli, bekleme süresi olmayan 20 dilimli Esnaf Çarkı kullanılabilir.
 
 ## Çalıştırma
 

@@ -1,7 +1,11 @@
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 
+import '../../../../app/theme/theme_palette_picker.dart';
+import '../../../game/presentation/pages/developer_data_page.dart';
 import '../../../game/presentation/state/game_session_controller.dart';
 import '../../../progress/presentation/pages/progress_page.dart';
+import '../../../assets/presentation/pages/assets_page.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({required this.session, super.key});
@@ -27,6 +31,16 @@ class ProfilePage extends StatelessWidget {
           const SizedBox(height: 12),
           Card(
             child: ListTile(
+              leading: const Icon(Icons.home_work_outlined),
+              title: const Text('Varlıklarım'),
+              subtitle: const Text('Ev al, kira giderinden kurtul ve araba ile taşınma maliyetini azalt.'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => AssetsPage(session: session))),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Card(
+            child: ListTile(
               leading: const Icon(Icons.emoji_events_outlined),
               title: const Text('İstatistikler ve başarılar', style: TextStyle(fontFamily: 'serif', fontSize: 18, fontWeight: FontWeight.w700)),
               subtitle: const Text('Toplam ilerlemeni ve açılan ödülleri görüntüle.'),
@@ -42,6 +56,24 @@ class ProfilePage extends StatelessWidget {
               subtitle: Text('Oyun kuralları ve ilerleme yalnızca bu cihazda saklanır.'),
             ),
           ),
+          const SizedBox(height: 12),
+          ThemePalettePicker(
+            selectedId: state.themePaletteId,
+            enabled: !session.isBusy,
+            onSelected: (id) => session.selectThemePalette(id),
+          ),
+          if (kDebugMode) ...[
+            const SizedBox(height: 12),
+            Card(
+              child: ListTile(
+                leading: const Icon(Icons.developer_mode_outlined),
+                title: const Text('Geliştirici verileri'),
+                subtitle: const Text('Debug APK içinde oyun değerlerini düzenle.'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: session.isBusy ? null : () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => DeveloperDataPage(session: session))),
+              ),
+            ),
+          ],
           const SizedBox(height: 12),
           Card(
             child: ListTile(

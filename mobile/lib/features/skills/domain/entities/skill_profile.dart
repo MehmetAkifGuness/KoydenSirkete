@@ -3,6 +3,8 @@ import 'skill_id.dart';
 class SkillProfile {
   const SkillProfile([this._values = const {}]);
 
+  static const maxValue = 1000;
+
   final Map<SkillId, int> _values;
 
   static const empty = SkillProfile();
@@ -19,5 +21,5 @@ class SkillProfile {
 
   int weightedScore() => _values.values.fold(0, (total, value) => total + value);
 
-  static int _clamp(int value) => value.clamp(0, 100);
+  static int _clamp(int value) => value.clamp(0, maxValue);
 }

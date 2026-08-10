@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import '../../../../app/theme/app_palette.dart';
 
+import '../../../../core/widgets/app_feedback.dart';
 import '../../../game/presentation/state/game_session_controller.dart';
 import '../../domain/entities/city.dart';
 import '../../domain/services/city_catalog.dart';
+import '../../domain/services/city_service.dart';
+import '../../../assets/domain/services/asset_service.dart';
 
 class CitiesPage extends StatelessWidget {
   const CitiesPage({required this.session, super.key});
@@ -11,22 +15,25 @@ class CitiesPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final currentCity = CityCatalog.findById(session.state.currentCityId);
     return Scaffold(
       appBar: AppBar(title: const Text('Şehirler')),
       body: AnimatedBuilder(
         animation: session,
-        builder: (context, _) => ListView.separated(
+        builder: (context, _) {
+          final currentCity = CityCatalog.findById(session.state.currentCityId);
+          final currentDailyCost = currentCity != null && AssetService().hasHomeInCity(session.state, currentCity.id) ? 0 : currentCity?.dailyCost ?? 0;
+          return ListView.separated(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
           itemCount: CityCatalog.cities.length + 1,
           separatorBuilder: (_, index) => const SizedBox(height: 12),
           itemBuilder: (context, index) {
             if (index == 0) {
-              return Text('Mevcut şehir: ${currentCity?.name ?? 'Bilinmiyor'} · Günlük gider: ₺${currentCity?.dailyCost ?? 0}');
+              return Text('Mevcut şehir: ${currentCity?.name ?? 'Bilinmiyor'} · Günlük gider: ₺$currentDailyCost');
             }
             return _CityCard(city: CityCatalog.cities[index - 1], session: session);
           },
-        ),
+          );
+        },
       ),
     );
   }
@@ -42,6 +49,7 @@ class _CityCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final isCurrent = city.id == session.state.currentCityId;
     final check = session.checkCityMove(city);
+    final moveCost = CityService().moveCost(session.state, city);
     return Card(
       child: Padding(
       padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
@@ -55,15 +63,17 @@ class _CityCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 8),
-            Text(city.description, style: const TextStyle(color: Colors.white70)),
+            Text(city.description, style: const TextStyle(color: AppPalette.textSecondary)),
             const SizedBox(height: 10),
-            Text('Taşınma: ₺${city.moveCost} · Maaş x${city.salaryMultiplier.toStringAsFixed(2)} · ${city.opportunityCount} fırsat'),
+            Text('Taşınma: ₺$moveCost · Maaş x${city.salaryMultiplier.toStringAsFixed(2)} · ${city.opportunityCount} fırsat'),
+            const SizedBox(height: 6),
+            Text('Nüfus: ${city.population} · Teknoloji: ${city.technologyLevel}/100 · Pazar: ${city.marketLevel}'),
             const SizedBox(height: 6),
             _CityPill(text: 'EKONOMİK SEVİYE: ${city.economicLevel.name.toUpperCase()}'),
             const SizedBox(height: 6),
             _CityPill(text: 'KARİYER SEVİYESİ: ${city.minimumCareerLevel}'),
             const SizedBox(height: 10),
-            Text(isCurrent ? 'Şu anda buradasın.' : check.reason, style: TextStyle(color: isCurrent || check.isEligible ? Colors.greenAccent : Colors.orangeAccent)),
+            Text(isCurrent ? 'Şu anda buradasın.' : check.reason, style: TextStyle(color: isCurrent || check.isEligible ? AppPalette.success : AppPalette.warning)),
             const SizedBox(height: 10),
             SizedBox(
               width: double.infinity,
@@ -83,7 +93,7 @@ class _CityCard extends StatelessWidget {
     if (!context.mounted || message == null) {
       return;
     }
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    AppFeedback.show(context, message);
   }
 }
 
@@ -95,7 +105,7 @@ class _CityPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
-    decoration: BoxDecoration(color: const Color(0xFF0B0B08), border: Border.all(color: const Color(0xFF554A1C)), borderRadius: BorderRadius.circular(14)),
-    child: Text(text, style: const TextStyle(color: Color(0xFFDDBA3E), fontSize: 10, fontWeight: FontWeight.w700)),
+    decoration: BoxDecoration(color: AppPalette.surfaceMuted, border: Border.all(color: AppPalette.outline), borderRadius: BorderRadius.circular(14)),
+    child: Text(text, style: TextStyle(color: AppPalette.primary, fontSize: 10, fontWeight: FontWeight.w700)),
   );
 }

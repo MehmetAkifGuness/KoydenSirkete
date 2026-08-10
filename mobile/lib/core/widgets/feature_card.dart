@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../app/theme/app_palette.dart';
 import '../constants/app_features.dart';
 
 class FeatureCard extends StatelessWidget {
@@ -33,7 +34,7 @@ class FeatureCard extends StatelessWidget {
                   ],
                 ),
               ),
-              const Icon(Icons.chevron_right, color: Color(0xFF6D674F)),
+              Icon(Icons.chevron_right, color: AppPalette.outlineMuted),
             ],
           ),
         ),

@@ -10,7 +10,9 @@ class EmploymentService {
 
   PlayerState checkAttendance(PlayerState state) {
     final employment = state.employment;
-    if (employment == null || state.day - employment.lastTaskDay < 2) return state;
+    if (employment == null || state.day - employment.startedDay < 2) return state;
+    final lastTaskDay = employment.lastTaskDay < employment.startedDay ? employment.startedDay : employment.lastTaskDay;
+    if (state.day - lastTaskDay < 2) return state;
     return state.copyWith(
       currentJobId: null,
       employment: null,

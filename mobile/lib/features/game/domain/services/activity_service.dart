@@ -75,14 +75,20 @@ class ActivityService {
   }
 
   PlayerState activate(PlayerState state, ActiveActivity activity) {
-    if (state.activeActivity != null) {
+    if (!state.hasActivityCapacity) {
       throw const GameRuleException(
-        'Önce devam eden aktiviteni tamamlamalısın.',
+        'R\u00FCtbe kapasitesi dolu.',
       );
+    }
+    if (state.activities.any(
+      (current) => current.type == activity.type && current.sourceId == activity.sourceId,
+    )) {
+      throw const GameRuleException('Ayn\u0131 aktivite zaten devam ediyor.');
     }
     return state.copyWith(
       energy: state.energy - activity.energyCost,
-      activeActivity: activity,
+      activeActivity: null,
+      activeActivities: <ActiveActivity>[...state.activities, activity],
     );
   }
 

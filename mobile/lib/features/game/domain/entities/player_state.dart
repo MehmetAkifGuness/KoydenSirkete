@@ -1,11 +1,11 @@
 import 'active_activity.dart';
 import '../../../skills/domain/entities/skill_profile.dart';
 import '../../../employment/domain/entities/employment.dart';
-
+import '../../../company/domain/entities/company_employee.dart';
+import '../../../company/domain/entities/company_branch.dart';
 class PlayerState {
   static const _unset = Object();
   static const bankruptcyDurationHours = 24;
-
   const PlayerState({
     required this.schemaVersion,
     required this.money,
@@ -17,6 +17,7 @@ class PlayerState {
     required this.earningSessionsToday,
     this.maxEnergy = 100,
     this.energyRecoveryRemainder = 0,
+    this.energyRecoveryAt,
     this.negativeMoneyHours = 0,
     this.wheelCooldownSeconds = 0,
     this.wheelMajorRewardsToday = 0,
@@ -24,7 +25,11 @@ class PlayerState {
     this.wheelDurationBuffTasks = 0,
     this.wheelEnergyBuffPercent = 0,
     this.wheelEnergyBuffTasks = 0,
-    this.activeActivity,
+    this.wheelRewardBuffPercent = 0,
+    this.wheelRewardBuffTasks = 0,
+    this.themePaletteId = 0,
+    ActiveActivity? activeActivity,
+    this.activeActivities = const <ActiveActivity>[],
     this.skills = const SkillProfile(),
     this.employment,
     this.applicationBlockedJobId,
@@ -44,6 +49,10 @@ class PlayerState {
     this.companyLevel = 0,
     this.companyFunds = 0,
     this.employeeCount = 0,
+    this.employees = const <CompanyEmployee>[],
+    this.branches = const <CompanyBranch>[],
+    this.ownedHomeIds = const <int>[],
+    this.ownedCarId,
     this.projectProgress = 0,
     this.totalEarned = 0,
     this.totalWorkSessions = 0,
@@ -52,10 +61,9 @@ class PlayerState {
     this.activeProjectId = 1,
     this.completedProjects = 0,
     this.isOnboarded = false,
-  });
-
+  }) : _legacyActiveActivity = activeActivity;
   static const initial = PlayerState(
-    schemaVersion: 17,
+    schemaVersion: 23,
     money: 240,
     energy: 100,
     knowledge: 0,
@@ -63,42 +71,7 @@ class PlayerState {
     day: 1,
     hour: 8,
     earningSessionsToday: 0,
-    maxEnergy: 100,
-    energyRecoveryRemainder: 0,
-    negativeMoneyHours: 0,
-    wheelCooldownSeconds: 0,
-    wheelMajorRewardsToday: 0,
-    wheelDurationBuffPercent: 0,
-    wheelDurationBuffTasks: 0,
-    wheelEnergyBuffPercent: 0,
-    wheelEnergyBuffTasks: 0,
-    activeActivity: null,
-    skills: SkillProfile.empty,
-    employment: null,
-    jobDataVersion: 3,
-    taskDataVersion: 2,
-    dismissedDay: 0,
-    currentJobId: null,
-    performance: 0,
-    workSessionsToday: 0,
-    trainingSessionsToday: 0,
-    dailyGoalClaimedDay: 0,
-    careerLevel: 1,
-    currentCityId: 1,
-    lastLivingCostDay: 1,
-    companyLevel: 0,
-    companyFunds: 0,
-    employeeCount: 0,
-    projectProgress: 0,
-    totalEarned: 0,
-    totalWorkSessions: 0,
-    totalTrainingSessions: 0,
-    unlockedAchievementsMask: 0,
-    activeProjectId: 1,
-    completedProjects: 0,
-    isOnboarded: false,
   );
-
   final int schemaVersion;
   final int money;
   final int energy;
@@ -109,6 +82,7 @@ class PlayerState {
   final int earningSessionsToday;
   final int maxEnergy;
   final int energyRecoveryRemainder;
+  final DateTime? energyRecoveryAt;
   final int negativeMoneyHours;
   final int wheelCooldownSeconds;
   final int wheelMajorRewardsToday;
@@ -116,7 +90,11 @@ class PlayerState {
   final int wheelDurationBuffTasks;
   final int wheelEnergyBuffPercent;
   final int wheelEnergyBuffTasks;
-  final ActiveActivity? activeActivity;
+  final int wheelRewardBuffPercent;
+  final int wheelRewardBuffTasks;
+  final int themePaletteId;
+  final ActiveActivity? _legacyActiveActivity;
+  final List<ActiveActivity> activeActivities;
   final SkillProfile skills;
   final Employment? employment;
   final int? applicationBlockedJobId;
@@ -136,6 +114,10 @@ class PlayerState {
   final int companyLevel;
   final int companyFunds;
   final int employeeCount;
+  final List<CompanyEmployee> employees;
+  final List<CompanyBranch> branches;
+  final List<int> ownedHomeIds;
+  final int? ownedCarId;
   final int projectProgress;
   final int totalEarned;
   final int totalWorkSessions;
@@ -144,7 +126,6 @@ class PlayerState {
   final int activeProjectId;
   final int completedProjects;
   final bool isOnboarded;
-
   PlayerState copyWith({
     int? schemaVersion,
     int? money,
@@ -156,6 +137,7 @@ class PlayerState {
     int? earningSessionsToday,
     int? maxEnergy,
     int? energyRecoveryRemainder,
+    DateTime? energyRecoveryAt,
     int? negativeMoneyHours,
     int? wheelCooldownSeconds,
     int? wheelMajorRewardsToday,
@@ -163,7 +145,11 @@ class PlayerState {
     int? wheelDurationBuffTasks,
     int? wheelEnergyBuffPercent,
     int? wheelEnergyBuffTasks,
+    int? wheelRewardBuffPercent,
+    int? wheelRewardBuffTasks,
+    int? themePaletteId,
     Object? activeActivity = _unset,
+    Object? activeActivities = _unset,
     SkillProfile? skills,
     Object? employment = _unset,
     Object? applicationBlockedJobId = _unset,
@@ -183,6 +169,10 @@ class PlayerState {
     int? companyLevel,
     int? companyFunds,
     int? employeeCount,
+    Object? employees = _unset,
+    Object? branches = _unset,
+    Object? ownedHomeIds = _unset,
+    Object? ownedCarId = _unset,
     int? projectProgress,
     int? totalEarned,
     int? totalWorkSessions,
@@ -203,6 +193,7 @@ class PlayerState {
       earningSessionsToday: earningSessionsToday ?? this.earningSessionsToday,
       maxEnergy: maxEnergy ?? this.maxEnergy,
       energyRecoveryRemainder: energyRecoveryRemainder ?? this.energyRecoveryRemainder,
+      energyRecoveryAt: energyRecoveryAt ?? this.energyRecoveryAt,
       negativeMoneyHours: negativeMoneyHours ?? this.negativeMoneyHours,
       wheelCooldownSeconds: wheelCooldownSeconds ?? this.wheelCooldownSeconds,
       wheelMajorRewardsToday: wheelMajorRewardsToday ?? this.wheelMajorRewardsToday,
@@ -210,7 +201,15 @@ class PlayerState {
       wheelDurationBuffTasks: wheelDurationBuffTasks ?? this.wheelDurationBuffTasks,
       wheelEnergyBuffPercent: wheelEnergyBuffPercent ?? this.wheelEnergyBuffPercent,
       wheelEnergyBuffTasks: wheelEnergyBuffTasks ?? this.wheelEnergyBuffTasks,
-      activeActivity: identical(activeActivity, _unset) ? this.activeActivity : activeActivity as ActiveActivity?,
+      wheelRewardBuffPercent: wheelRewardBuffPercent ?? this.wheelRewardBuffPercent,
+      wheelRewardBuffTasks: wheelRewardBuffTasks ?? this.wheelRewardBuffTasks,
+      themePaletteId: themePaletteId ?? this.themePaletteId,
+      activeActivity: identical(activeActivities, _unset)
+          ? (identical(activeActivity, _unset) ? _legacyActiveActivity : activeActivity as ActiveActivity?)
+          : null,
+      activeActivities: identical(activeActivities, _unset)
+          ? (identical(activeActivity, _unset) ? this.activeActivities : const <ActiveActivity>[])
+          : List<ActiveActivity>.unmodifiable(activeActivities as List<ActiveActivity>),
       skills: skills ?? this.skills,
       employment: identical(employment, _unset) ? this.employment : employment as Employment?,
       applicationBlockedJobId: identical(applicationBlockedJobId, _unset) ? this.applicationBlockedJobId : applicationBlockedJobId as int?,
@@ -230,6 +229,16 @@ class PlayerState {
       companyLevel: companyLevel ?? this.companyLevel,
       companyFunds: companyFunds ?? this.companyFunds,
       employeeCount: employeeCount ?? this.employeeCount,
+      employees: identical(employees, _unset)
+          ? this.employees
+          : List<CompanyEmployee>.unmodifiable(employees as List<CompanyEmployee>),
+      branches: identical(branches, _unset)
+          ? this.branches
+          : List<CompanyBranch>.unmodifiable(branches as List<CompanyBranch>),
+      ownedHomeIds: identical(ownedHomeIds, _unset)
+          ? this.ownedHomeIds
+          : List<int>.unmodifiable(ownedHomeIds as List<int>),
+      ownedCarId: identical(ownedCarId, _unset) ? this.ownedCarId : ownedCarId as int?,
       projectProgress: projectProgress ?? this.projectProgress,
       totalEarned: totalEarned ?? this.totalEarned,
       totalWorkSessions: totalWorkSessions ?? this.totalWorkSessions,
@@ -240,8 +249,18 @@ class PlayerState {
       isOnboarded: isOnboarded ?? this.isOnboarded,
     );
   }
-
   bool get isBankrupt => negativeMoneyHours >= bankruptcyDurationHours;
+  ActiveActivity? get activeActivity =>
+      activeActivities.isNotEmpty ? activeActivities.first : _legacyActiveActivity;
+  List<ActiveActivity> get activities {
+    if (activeActivities.isNotEmpty) {
+      return List.unmodifiable(activeActivities);
+    }
+    final legacy = _legacyActiveActivity;
+    return legacy == null ? const <ActiveActivity>[] : List.unmodifiable([legacy]);
+  }
+  int get activityCapacity => careerLevel < 1 ? 1 : careerLevel;
+  bool get hasActivityCapacity => activities.length < activityCapacity;
 
   PlayerState advanceGameHour() {
     final absoluteHour = (day - 1) * 24 + hour + 1;

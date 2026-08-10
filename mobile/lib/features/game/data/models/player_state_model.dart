@@ -6,6 +6,11 @@ import '../mappers/skill_profile_codec.dart';
 import '../../../skills/domain/entities/skill_profile.dart';
 import '../../../employment/domain/entities/employment.dart';
 import '../mappers/employment_codec.dart';
+import '../../../company/domain/entities/company_employee.dart';
+import '../mappers/company_employee_codec.dart';
+import '../mappers/company_branch_codec.dart';
+import '../mappers/owned_asset_ids_codec.dart';
+import '../../../company/domain/entities/company_branch.dart';
 
 class PlayerStateModel {
   const PlayerStateModel({
@@ -19,6 +24,7 @@ class PlayerStateModel {
     required this.earningSessionsToday,
     this.maxEnergy = 100,
     this.energyRecoveryRemainder = 0,
+    this.energyRecoveryAt,
     this.negativeMoneyHours = 0,
     this.wheelCooldownSeconds = 0,
     this.wheelMajorRewardsToday = 0,
@@ -26,9 +32,17 @@ class PlayerStateModel {
     this.wheelDurationBuffTasks = 0,
     this.wheelEnergyBuffPercent = 0,
     this.wheelEnergyBuffTasks = 0,
+    this.wheelRewardBuffPercent = 0,
+    this.wheelRewardBuffTasks = 0,
+    this.themePaletteId = 0,
     this.activeActivity,
+    this.activeActivities = const <ActiveActivity>[],
     this.skills = const SkillProfile(),
     this.employment,
+    this.employees = const <CompanyEmployee>[],
+    this.branches = const <CompanyBranch>[],
+    this.ownedHomeIds = const <int>[],
+    this.ownedCarId,
     this.applicationBlockedJobId,
     this.applicationBlockedUntilDay = 0,
     this.lastJobEvent,
@@ -68,6 +82,7 @@ class PlayerStateModel {
       earningSessionsToday: record.earningSessionsToday,
       maxEnergy: record.maxEnergy,
       energyRecoveryRemainder: record.energyRecoveryRemainder,
+      energyRecoveryAt: record.energyRecoveryAt,
       negativeMoneyHours: record.negativeMoneyHours,
       wheelCooldownSeconds: record.wheelCooldownSeconds,
       wheelMajorRewardsToday: record.wheelMajorRewardsToday,
@@ -75,9 +90,23 @@ class PlayerStateModel {
       wheelDurationBuffTasks: record.wheelDurationBuffTasks,
       wheelEnergyBuffPercent: record.wheelEnergyBuffPercent,
       wheelEnergyBuffTasks: record.wheelEnergyBuffTasks,
+      wheelRewardBuffPercent: record.wheelRewardBuffPercent,
+      wheelRewardBuffTasks: record.wheelRewardBuffTasks,
+      themePaletteId: record.themePaletteId,
       activeActivity: ActiveActivityCodec().decode(record.activeActivityJson),
-      skills: SkillProfileCodec().decode(record.skillsJson),
+      activeActivities: ActiveActivityCodec().decodeList(
+        record.activeActivitiesJson,
+        legacyValue: record.activeActivityJson,
+      ),
+      skills: SkillProfileCodec().decode(record.skillsJson, scale: record.schemaVersion < 18 ? 10 : 1),
       employment: EmploymentCodec().decode(record.employmentJson),
+      employees: CompanyEmployeeCodec().decodeList(
+        record.employeesJson,
+        legacyCount: record.employeeCount,
+      ),
+      branches: CompanyBranchCodec().decodeList(record.branchesJson),
+      ownedHomeIds: OwnedAssetIdsCodec().decode(record.ownedHomeIdsJson),
+      ownedCarId: record.ownedCarId,
       applicationBlockedJobId: record.applicationBlockedJobId,
       applicationBlockedUntilDay: record.applicationBlockedUntilDay,
       lastJobEvent: record.lastJobEvent,
@@ -116,6 +145,7 @@ class PlayerStateModel {
   final int earningSessionsToday;
   final int maxEnergy;
   final int energyRecoveryRemainder;
+  final DateTime? energyRecoveryAt;
   final int negativeMoneyHours;
   final int wheelCooldownSeconds;
   final int wheelMajorRewardsToday;
@@ -123,9 +153,17 @@ class PlayerStateModel {
   final int wheelDurationBuffTasks;
   final int wheelEnergyBuffPercent;
   final int wheelEnergyBuffTasks;
+  final int wheelRewardBuffPercent;
+  final int wheelRewardBuffTasks;
+  final int themePaletteId;
   final ActiveActivity? activeActivity;
+  final List<ActiveActivity> activeActivities;
   final SkillProfile skills;
   final Employment? employment;
+  final List<CompanyEmployee> employees;
+  final List<CompanyBranch> branches;
+  final List<int> ownedHomeIds;
+  final int? ownedCarId;
   final int? applicationBlockedJobId;
   final int applicationBlockedUntilDay;
   final String? lastJobEvent;
@@ -164,6 +202,7 @@ class PlayerStateModel {
       earningSessionsToday: entity.earningSessionsToday,
       maxEnergy: entity.maxEnergy,
       energyRecoveryRemainder: entity.energyRecoveryRemainder,
+      energyRecoveryAt: entity.energyRecoveryAt,
       negativeMoneyHours: entity.negativeMoneyHours,
       wheelCooldownSeconds: entity.wheelCooldownSeconds,
       wheelMajorRewardsToday: entity.wheelMajorRewardsToday,
@@ -171,9 +210,17 @@ class PlayerStateModel {
       wheelDurationBuffTasks: entity.wheelDurationBuffTasks,
       wheelEnergyBuffPercent: entity.wheelEnergyBuffPercent,
       wheelEnergyBuffTasks: entity.wheelEnergyBuffTasks,
+      wheelRewardBuffPercent: entity.wheelRewardBuffPercent,
+      wheelRewardBuffTasks: entity.wheelRewardBuffTasks,
+      themePaletteId: entity.themePaletteId,
       activeActivity: entity.activeActivity,
+      activeActivities: entity.activities,
       skills: entity.skills,
       employment: entity.employment,
+      employees: entity.employees,
+      branches: entity.branches,
+      ownedHomeIds: entity.ownedHomeIds,
+      ownedCarId: entity.ownedCarId,
       applicationBlockedJobId: entity.applicationBlockedJobId,
       applicationBlockedUntilDay: entity.applicationBlockedUntilDay,
       lastJobEvent: entity.lastJobEvent,

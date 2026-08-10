@@ -8,7 +8,7 @@ class SkillProfileCodec {
     return jsonEncode({for (final skill in SkillId.values) skill.name: profile[skill]});
   }
 
-  SkillProfile decode(String? value) {
+  SkillProfile decode(String? value, {int scale = 1}) {
     if (value == null || value.isEmpty) {
       return SkillProfile.empty;
     }
@@ -16,7 +16,7 @@ class SkillProfileCodec {
       final json = jsonDecode(value) as Map<String, dynamic>;
       return SkillProfile({
         for (final skill in SkillId.values)
-          skill: (json[skill.name] as num?)?.toInt() ?? 0,
+            skill: ((json[skill.name] as num?)?.toInt() ?? 0) * scale,
       });
     } on Object {
       return SkillProfile.empty;

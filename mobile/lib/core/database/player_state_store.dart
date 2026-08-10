@@ -19,6 +19,7 @@ class PlayerStateRecord {
     required this.earningSessionsToday,
     this.maxEnergy = 100,
     this.energyRecoveryRemainder = 0,
+    this.energyRecoveryAt,
     this.negativeMoneyHours = 0,
     this.wheelCooldownSeconds = 0,
     this.wheelMajorRewardsToday = 0,
@@ -26,9 +27,17 @@ class PlayerStateRecord {
     this.wheelDurationBuffTasks = 0,
     this.wheelEnergyBuffPercent = 0,
     this.wheelEnergyBuffTasks = 0,
+    this.wheelRewardBuffPercent = 0,
+    this.wheelRewardBuffTasks = 0,
+    this.themePaletteId = 0,
     this.activeActivityJson,
+    this.activeActivitiesJson,
     this.skillsJson,
     this.employmentJson,
+    this.employeesJson,
+    this.branchesJson,
+    this.ownedHomeIdsJson,
+    this.ownedCarId,
     this.applicationBlockedJobId,
     this.applicationBlockedUntilDay = 0,
     this.lastJobEvent,
@@ -67,6 +76,7 @@ class PlayerStateRecord {
   final int earningSessionsToday;
   final int maxEnergy;
   final int energyRecoveryRemainder;
+  final DateTime? energyRecoveryAt;
   final int negativeMoneyHours;
   final int wheelCooldownSeconds;
   final int wheelMajorRewardsToday;
@@ -74,9 +84,17 @@ class PlayerStateRecord {
   final int wheelDurationBuffTasks;
   final int wheelEnergyBuffPercent;
   final int wheelEnergyBuffTasks;
+  final int wheelRewardBuffPercent;
+  final int wheelRewardBuffTasks;
+  final int themePaletteId;
   final String? activeActivityJson;
+  final String? activeActivitiesJson;
   final String? skillsJson;
   final String? employmentJson;
+  final String? employeesJson;
+  final String? branchesJson;
+  final String? ownedHomeIdsJson;
+  final int? ownedCarId;
   final int? applicationBlockedJobId;
   final int applicationBlockedUntilDay;
   final String? lastJobEvent;

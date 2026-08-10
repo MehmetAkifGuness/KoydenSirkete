@@ -12,26 +12,30 @@ import '../../../cities/domain/services/city_service.dart';
 import '../../../company/domain/services/company_service.dart';
 import '../../application/game_session_application_service.dart';
 import '../../domain/entities/player_state.dart';
+import '../../domain/entities/debug_state_patch.dart';
 import '../../../daily_goals/domain/entities/daily_goal.dart';
 import '../../../company/domain/entities/company_project.dart';
+import '../../../company/domain/entities/company_employee.dart';
+import '../../../company/domain/entities/company_branch.dart';
+import '../../../company/domain/services/company_branch_service.dart';
+import '../../../assets/domain/entities/home_asset.dart';
+import '../../../assets/domain/entities/car_asset.dart';
+import '../../../assets/domain/services/asset_service.dart';
 import '../../../jobs/domain/entities/job_listing.dart';
 import '../../../wheel/domain/services/esnaf_wheel_service.dart';
 
 class GameSessionController extends ChangeNotifier {
   GameSessionController({required GameSessionApplicationService applicationService})
       : _applicationService = applicationService;
-
   final GameSessionApplicationService _applicationService;
   PlayerState _state = PlayerState.initial;
   bool _isReady = false;
   bool _isBusy = false;
   String? _errorMessage;
-
   PlayerState get state => _state;
   bool get isReady => _isReady;
   bool get isBusy => _isBusy;
   String? get errorMessage => _errorMessage;
-
   Future<void> initialize() async {
     _isReady = false;
     _errorMessage = null;
@@ -46,9 +50,7 @@ class GameSessionController extends ChangeNotifier {
       notifyListeners();
     }
   }
-
   Future<void> retryInitialization() => initialize();
-
   Future<String?> earnMoney({EarningPerformance performance = EarningPerformance.none}) async {
     return _execute(
       action: (state) => _applicationService.startEarning(state, performance: performance),
@@ -85,6 +87,20 @@ class GameSessionController extends ChangeNotifier {
       return result.message;
     } catch (_) {
       return 'Oyun saati kaydedilemedi.';
+    } finally {
+      _isBusy = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> recoverEnergy() async {
+    if (!_canExecute()) {
+      return;
+    }
+    _isBusy = true;
+    notifyListeners();
+    try {
+      _state = await _applicationService.recoverEnergy(_state);
     } finally {
       _isBusy = false;
       notifyListeners();
@@ -131,12 +147,24 @@ class GameSessionController extends ChangeNotifier {
 
   WheelAvailability get wheelAvailability => _applicationService.wheelAvailability(_state);
 
-  Future<String?> spinWheel() async {
-    return _execute(
-      action: _applicationService.spinWheel,
-      stateOf: (result) => result.state,
-      message: (result) => result.message,
-    );
+  Future<WheelSpinOutcome?> spinWheel() async {
+    if (!_canExecute()) {
+      return null;
+    }
+    _isBusy = true;
+    notifyListeners();
+    try {
+      final outcome = await _applicationService.spinWheel(_state);
+      _state = outcome.state;
+      return outcome;
+    } on GameRuleException {
+      return null;
+    } catch (_) {
+      return null;
+    } finally {
+      _isBusy = false;
+      notifyListeners();
+    }
   }
 
   Future<String?> leaveJob() async {
@@ -199,6 +227,22 @@ class GameSessionController extends ChangeNotifier {
     }
   }
 
+  Future<String?> selectThemePalette(int paletteId) async {
+    return _execute(
+      action: (state) => _applicationService.selectThemePalette(state, paletteId),
+      stateOf: (result) => result,
+      message: (_) => 'Renk paleti güncellendi.',
+    );
+  }
+
+  Future<String?> updateDebugState(DebugStatePatch patch) async {
+    return _execute(
+      action: (state) => _applicationService.updateDebugState(state, patch),
+      stateOf: (result) => result,
+      message: (_) => 'Geliştirici verileri kaydedildi.',
+    );
+  }
+
   DailyGoalStatus get dailyGoalStatus => _applicationService.dailyGoalStatus(_state);
 
   Future<String?> claimDailyGoal() async {
@@ -219,11 +263,67 @@ class GameSessionController extends ChangeNotifier {
     );
   }
 
-  Future<String?> recruitEmployee() async {
+  Future<String?> recruitEmployee(CompanyEmployee employee) async {
     return _execute(
-      action: _applicationService.recruitEmployee,
+      action: (state) => _applicationService.recruitEmployee(state, employee: employee),
       stateOf: (result) => result,
-      message: (_) => 'Yeni çalışan ekibe katıldı.',
+      message: (_) => 'Çalışan ekibe katıldı. İşe alım ücretsiz; günlük maaş gideri artık uygulanacak.',
+    );
+  }
+
+  Future<String?> dismissEmployee(int employeeId) async {
+    return _execute(
+      action: (state) => _applicationService.dismissEmployee(state, employeeId: employeeId),
+      stateOf: (result) => result,
+      message: (_) => 'Çalışanın işten çıkarıldı. Maaş gideri ve proje katkısı güncellendi.',
+    );
+  }
+
+  CompanyCheckResult checkBranchOpen(City city) => _applicationService.checkBranchOpen(_state, city);
+
+  List<CompanyEmployee> branchCandidates(CompanyBranch branch) => _applicationService.branchCandidates(_state, branch);
+
+  Future<String?> openBranch(City city) {
+    return _execute(
+      action: (state) => _applicationService.openBranch(state, city),
+      stateOf: (result) => result,
+      message: (_) => '${city.name} şehrinde bayin açıldı.',
+    );
+  }
+
+  Future<String?> recruitBranchEmployee(int cityId, CompanyEmployee employee) {
+    return _execute(
+      action: (state) => _applicationService.recruitBranchEmployee(state, cityId: cityId, employee: employee),
+      stateOf: (result) => result,
+      message: (_) => 'Çalışan bayine katıldı.',
+    );
+  }
+
+  Future<String?> dismissBranchEmployee(int cityId, int employeeId) {
+    return _execute(
+      action: (state) => _applicationService.dismissBranchEmployee(state, cityId: cityId, employeeId: employeeId),
+      stateOf: (result) => result,
+      message: (_) => 'Bayi çalışanı işten çıkarıldı.',
+    );
+  }
+
+  AssetCheck checkHome(HomeAsset home, City city) => _applicationService.checkHome(_state, home, city);
+
+  Future<String?> buyHome(HomeAsset home, City city) {
+    return _execute(
+      action: (state) => _applicationService.buyHome(state, home, city),
+      stateOf: (result) => result,
+      message: (_) => '${home.name} satın alındı. Bu şehirde kira ödemezsin.',
+    );
+  }
+
+  AssetCheck checkCar(CarAsset car) => _applicationService.checkCar(_state, car);
+
+  Future<String?> buyCar(CarAsset car) {
+    return _execute(
+      action: (state) => _applicationService.buyCar(state, car),
+      stateOf: (result) => result,
+      message: (_) => '${car.name} satın alındı. Şehir değiştirirken avantaj kazanırsın.',
     );
   }
 

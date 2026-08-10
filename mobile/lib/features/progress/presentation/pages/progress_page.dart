@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../app/theme/app_palette.dart';
 
 import '../../../game/presentation/state/game_session_controller.dart';
 import '../../../game/domain/entities/player_state.dart';
@@ -63,7 +64,7 @@ class _Stat extends StatelessWidget {
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Text(value, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900)),
         const SizedBox(height: 3),
-        Text(label, style: const TextStyle(color: Colors.white60, fontSize: 12)),
+        Text(label, style: const TextStyle(color: AppPalette.textMuted, fontSize: 12)),
       ]),
     );
   }
@@ -83,17 +84,17 @@ class _AchievementTile extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(14),
         child: Row(children: [
-          Icon(unlocked ? Icons.emoji_events : Icons.lock_outline, color: unlocked ? Colors.amber : Colors.white38),
+          Icon(unlocked ? Icons.emoji_events : Icons.lock_outline, color: unlocked ? AppPalette.tertiary : AppPalette.outlineMuted),
           const SizedBox(width: 12),
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text(achievement.title, style: const TextStyle(fontWeight: FontWeight.w800)),
             const SizedBox(height: 3),
-            Text(achievement.description, style: const TextStyle(color: Colors.white60, fontSize: 12)),
+            Text(achievement.description, style: const TextStyle(color: AppPalette.textMuted, fontSize: 12)),
             const SizedBox(height: 8),
             LinearProgressIndicator(value: progress / achievement.target),
           ])),
           const SizedBox(width: 10),
-          Text('₺${achievement.reward}', style: const TextStyle(color: Colors.amber, fontWeight: FontWeight.w800)),
+          Text('₺${achievement.reward}', style: TextStyle(color: AppPalette.tertiary, fontWeight: FontWeight.w800)),
         ]),
       ),
     );

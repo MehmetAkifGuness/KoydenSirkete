@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../app/theme/app_palette.dart';
+
 class MetricTile extends StatelessWidget {
   const MetricTile({required this.label, required this.value, required this.icon, required this.color, super.key});
 
@@ -16,7 +18,7 @@ class MetricTile extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(children: [Icon(icon, size: 18, color: color), const SizedBox(width: 8), Expanded(child: Text(label, style: const TextStyle(color: Color(0xFFACA493), fontSize: 12, fontWeight: FontWeight.w600)))]),
+            Row(children: [Icon(icon, size: 18, color: color), const SizedBox(width: 8), Expanded(child: Text(label, style: const TextStyle(color: AppPalette.textMuted, fontSize: 12, fontWeight: FontWeight.w600)))]),
             const Spacer(),
             Text(value, style: Theme.of(context).textTheme.titleLarge?.copyWith(fontSize: 17, fontWeight: FontWeight.w700)),
             if (label == 'Enerji') ...[

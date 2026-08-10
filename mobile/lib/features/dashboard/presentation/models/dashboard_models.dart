@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../app/theme/app_palette.dart';
 
 import '../../../game/domain/entities/player_state.dart';
 
@@ -23,22 +24,22 @@ class DashboardDesignState {
       greeting: 'Yeni başlangıç',
       goal: state.knowledge < 12 ? 'İlk eğitimine ulaş' : 'İlk iş ilanını bul',
       metrics: [
-        DashboardMetric(label: 'Para', value: '₺${state.money}', icon: Icons.payments_outlined, color: const Color(0xFFDDBA3E)),
-        DashboardMetric(label: 'Enerji', value: '${state.energy} / ${state.maxEnergy}', icon: Icons.bolt, color: const Color(0xFFDDBA3E)),
-        DashboardMetric(label: 'Bilgi', value: '${state.knowledge}', icon: Icons.menu_book_outlined, color: const Color(0xFFDDBA3E)),
-        DashboardMetric(label: 'Tecrübe', value: '${state.experience}', icon: Icons.workspace_premium_outlined, color: const Color(0xFFDDBA3E)),
+        DashboardMetric(label: 'Para', value: '₺${state.money}', icon: Icons.payments_outlined, color: AppPalette.primary),
+        DashboardMetric(label: 'Enerji', value: '${state.energy} / ${state.maxEnergy}', icon: Icons.bolt, color: AppPalette.tertiary),
+        DashboardMetric(label: 'Bilgi', value: '${state.knowledge}', icon: Icons.menu_book_outlined, color: AppPalette.secondary),
+        DashboardMetric(label: 'Tecrübe', value: '${state.experience}', icon: Icons.workspace_premium_outlined, color: AppPalette.success),
       ],
     );
   }
 
-  static const initial = DashboardDesignState(
+  static DashboardDesignState get initial => DashboardDesignState(
     greeting: 'Yeni başlangıç',
     goal: 'İlk eğitimine ulaş',
     metrics: [
-      DashboardMetric(label: 'Para', value: '₺240', icon: Icons.payments_outlined, color: Color(0xFF60C98A)),
-      DashboardMetric(label: 'Enerji', value: '100 / 100', icon: Icons.bolt, color: Color(0xFFF0B75E)),
-      DashboardMetric(label: 'Bilgi', value: '12', icon: Icons.menu_book_outlined, color: Color(0xFF6AA9FF)),
-      DashboardMetric(label: 'Tecrübe', value: '4', icon: Icons.workspace_premium_outlined, color: Color(0xFFBD8CFF)),
+      DashboardMetric(label: 'Para', value: '₺240', icon: Icons.payments_outlined, color: AppPalette.primary),
+      DashboardMetric(label: 'Enerji', value: '100 / 100', icon: Icons.bolt, color: AppPalette.tertiary),
+      DashboardMetric(label: 'Bilgi', value: '12', icon: Icons.menu_book_outlined, color: AppPalette.secondary),
+      DashboardMetric(label: 'Tecrübe', value: '4', icon: Icons.workspace_premium_outlined, color: AppPalette.success),
     ],
   );
 }

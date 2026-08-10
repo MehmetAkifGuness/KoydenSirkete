@@ -13,10 +13,11 @@ class WheelAvailability {
 }
 
 class WheelSpinOutcome {
-  const WheelSpinOutcome({required this.state, required this.reward});
+  const WheelSpinOutcome({required this.state, required this.reward, required this.sectorIndex});
 
   final PlayerState state;
   final EsnafWheelReward reward;
+  final int sectorIndex;
 
   String get message => '${reward.title}: ${reward.description}';
 }
@@ -31,9 +32,6 @@ class EsnafWheelService {
   final Random _random;
 
   WheelAvailability availability(PlayerState state) {
-    if (state.activeActivity?.type != ActivityType.work) {
-      return const WheelAvailability(isAvailable: false, reason: 'Çarkı yalnızca aktif iş görevi sırasında çevirebilirsin.');
-    }
     if (state.money < spinCost) {
       return const WheelAvailability(isAvailable: false, reason: 'Çarkı çevirmek için 50 TL gerekir.');
     }
@@ -46,9 +44,16 @@ class EsnafWheelService {
       throw GameRuleException(availability.reason);
     }
 
-    var reward = _drawReward();
+    final drawn = _drawReward();
+    var reward = drawn.reward;
+    var sectorIndex = drawn.index;
     if (reward.isMajor && state.wheelMajorRewardsToday >= dailyMajorRewardLimit) {
       reward = EsnafWheelRewardCatalog.byType(EsnafWheelRewardType.tipRain);
+      final tipSectors = [
+        for (var index = 0; index < EsnafWheelRewardCatalog.sectorTypes.length; index++)
+          if (EsnafWheelRewardCatalog.sectorTypes[index] == EsnafWheelRewardType.tipRain) index,
+      ];
+      sectorIndex = tipSectors[_random.nextInt(tipSectors.length)];
     }
     var nextState = state.copyWith(
       money: state.money - spinCost,
@@ -56,7 +61,7 @@ class EsnafWheelService {
       wheelMajorRewardsToday: state.wheelMajorRewardsToday + (reward.isMajor ? 1 : 0),
     );
     nextState = _applyReward(nextState, reward.type);
-    return WheelSpinOutcome(state: nextState, reward: reward);
+    return WheelSpinOutcome(state: nextState, reward: reward, sectorIndex: sectorIndex);
   }
 
   PlayerState consumeWorkBuffs(PlayerState state) {
@@ -68,9 +73,9 @@ class EsnafWheelService {
     );
   }
 
-  EsnafWheelReward _drawReward() {
-    final sectorType = EsnafWheelRewardCatalog.sectorTypes[_random.nextInt(EsnafWheelRewardCatalog.sectorTypes.length)];
-    return EsnafWheelRewardCatalog.byType(sectorType);
+  _DrawnReward _drawReward() {
+    final index = _random.nextInt(EsnafWheelRewardCatalog.sectorTypes.length);
+    return _DrawnReward(index: index, reward: EsnafWheelRewardCatalog.byType(EsnafWheelRewardCatalog.sectorTypes[index]));
   }
 
   PlayerState _applyReward(PlayerState state, EsnafWheelRewardType type) {
@@ -78,9 +83,13 @@ class EsnafWheelService {
       EsnafWheelRewardType.luckyDay => state.copyWith(
           wheelDurationBuffPercent: max(state.wheelDurationBuffPercent, 50),
           wheelDurationBuffTasks: max(state.wheelDurationBuffTasks, buffTaskCount),
+          wheelEnergyBuffPercent: max(state.wheelEnergyBuffPercent, 50),
+          wheelEnergyBuffTasks: max(state.wheelEnergyBuffTasks, buffTaskCount),
+          wheelRewardBuffPercent: max(state.wheelRewardBuffPercent, 100),
+          wheelRewardBuffTasks: max(state.wheelRewardBuffTasks, buffTaskCount),
         ),
-      EsnafWheelRewardType.esnafBlessing => state.copyWith(money: state.money + 30),
-      EsnafWheelRewardType.customerPenalty => state.copyWith(money: state.money - 25),
+      EsnafWheelRewardType.esnafBlessing => state.copyWith(money: state.money + 100),
+      EsnafWheelRewardType.customerPenalty => state.copyWith(money: state.money - 50),
       EsnafWheelRewardType.supplierDiscount => state.copyWith(
           wheelEnergyBuffPercent: max(state.wheelEnergyBuffPercent, 20),
           wheelEnergyBuffTasks: max(state.wheelEnergyBuffTasks, buffTaskCount),
@@ -91,18 +100,31 @@ class EsnafWheelService {
           wheelDurationBuffPercent: max(state.wheelDurationBuffPercent, 25),
           wheelDurationBuffTasks: max(state.wheelDurationBuffTasks, buffTaskCount),
         ),
-      EsnafWheelRewardType.tipRain => state.copyWith(money: state.money + 60),
-      EsnafWheelRewardType.bigTender => state.copyWith(money: state.money + 250),
+      EsnafWheelRewardType.tipRain => state.copyWith(money: state.money + 100),
+      EsnafWheelRewardType.bigTender => state.copyWith(money: state.money + 1000),
     };
   }
 
   PlayerState _addWorkHour(PlayerState state) {
-    final activity = state.activeActivity;
-    if (activity == null || activity.type != ActivityType.work) {
+    final index = state.activities.indexWhere((activity) => activity.type == ActivityType.work);
+    if (index < 0) {
       return state;
     }
-    return state.copyWith(activeActivity: activity.copyWith(remainingHours: activity.remainingHours + 1, totalHours: activity.totalHours + 1));
+    final activities = [...state.activities];
+    final activity = activities[index];
+    activities[index] = activity.copyWith(
+      remainingHours: activity.remainingHours + 1,
+      totalHours: activity.totalHours + 1,
+    );
+    return state.copyWith(activeActivity: null, activeActivities: activities);
   }
 
   int _remainingTasks(int tasks) => max(0, tasks - 1);
+}
+
+class _DrawnReward {
+  const _DrawnReward({required this.index, required this.reward});
+
+  final int index;
+  final EsnafWheelReward reward;
 }

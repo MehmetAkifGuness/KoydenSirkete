@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import '../../../../app/theme/app_palette.dart';
 
+import '../../../../core/widgets/app_feedback.dart';
 import '../../../game/presentation/state/game_session_controller.dart';
 import '../../../jobs/domain/entities/job.dart';
 import '../../../jobs/domain/services/job_catalog.dart';
@@ -16,7 +18,7 @@ class CareerPage extends StatelessWidget {
       body: AnimatedBuilder(
         animation: session,
         builder: (context, _) {
-          final currentJob = JobCatalog.findById(session.state.currentJobId);
+          final currentJob = JobCatalog.findById(session.state.employment?.jobId ?? session.state.currentJobId);
           final nextJob = JobCatalog.findById(currentJob?.nextJobId);
           if (currentJob == null) {
             return const Center(child: Text('Kariyer yolunu açmak için önce bir işe başvur.'));
@@ -44,7 +46,7 @@ class CareerPage extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               if (nextJob != null) ...[
-                const Text('SONRAKİ SEVİYE', style: TextStyle(color: Color(0xFF9F988B), fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: .6)),
+                const Text('SONRAKİ SEVİYE', style: TextStyle(color: AppPalette.textMuted, fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: .6)),
                 const SizedBox(height: 10),
                 Card(
                   child: Padding(
@@ -56,7 +58,7 @@ class CareerPage extends StatelessWidget {
                         const SizedBox(height: 6),
                         Text('Maaş: ₺${nextJob.salary} · Bilgi: ${nextJob.minimumKnowledge} · Tecrübe: ${nextJob.minimumExperience}'),
                         const SizedBox(height: 10),
-                        Text(check.reason, style: TextStyle(color: check.isEligible ? Colors.greenAccent : Colors.orangeAccent)),
+                        Text(check.reason, style: TextStyle(color: check.isEligible ? AppPalette.success : AppPalette.warning)),
                         const SizedBox(height: 12),
                         SizedBox(
                           width: double.infinity,
@@ -84,7 +86,7 @@ class CareerPage extends StatelessWidget {
     if (!context.mounted || message == null) {
       return;
     }
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    AppFeedback.show(context, message);
   }
 }
 

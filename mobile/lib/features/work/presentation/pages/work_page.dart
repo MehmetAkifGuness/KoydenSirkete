@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import '../../../../app/theme/app_palette.dart';
 
+import '../../../../core/widgets/app_feedback.dart';
 import '../../../game/presentation/state/game_session_controller.dart';
-import '../../../game/domain/entities/active_activity.dart';
 import '../../../jobs/domain/entities/job.dart';
-import '../../../wheel/presentation/widgets/esnaf_wheel_panel.dart';
 import '../../domain/entities/work_task.dart';
 import '../../domain/services/task_efficiency_service.dart';
 
@@ -21,20 +21,15 @@ class WorkPage extends StatelessWidget {
         animation: session,
         builder: (context, _) {
           final tasks = session.employerTasks(job);
-          final hasActiveWork = session.state.activeActivity?.type == ActivityType.work;
-          final offset = hasActiveWork ? 2 : 1;
           return ListView.separated(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-            itemCount: tasks.length + offset,
+            itemCount: tasks.length + 1,
             separatorBuilder: (_, index) => const SizedBox(height: 12),
             itemBuilder: (context, index) {
               if (index == 0) {
                 return Text('Performans %${session.state.performance} · Bugün ${session.state.workSessionsToday} görev');
               }
-              if (hasActiveWork && index == 1) {
-                return EsnafWheelPanel(session: session);
-              }
-              final taskIndex = index - offset;
+              final taskIndex = index - 1;
               return _WorkTaskCard(task: tasks[taskIndex], session: session, job: job);
             },
           );
@@ -61,7 +56,7 @@ class _WorkTaskCard extends StatelessWidget {
           children: [
             Text(task.title, style: const TextStyle(fontFamily: 'serif', fontSize: 19, fontWeight: FontWeight.w700)),
             const SizedBox(height: 8),
-            Text(task.description, style: const TextStyle(color: Colors.white70)),
+            Text(task.description, style: const TextStyle(color: AppPalette.textSecondary)),
             const SizedBox(height: 12),
             Wrap(
               spacing: 8,
@@ -75,7 +70,7 @@ class _WorkTaskCard extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: FilledButton.tonal(
-                onPressed: session.isBusy || session.state.activeActivity != null ? null : () => _work(context),
+                onPressed: session.isBusy || !session.state.hasActivityCapacity ? null : () => _work(context),
                 child: const Text('Görevi yap'),
               ),
             ),
@@ -90,6 +85,6 @@ class _WorkTaskCard extends StatelessWidget {
     if (!context.mounted || message == null) {
       return;
     }
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    AppFeedback.show(context, message);
   }
 }

@@ -17,7 +17,7 @@ class AppDatabase implements PlayerStateStore {
     final databasePath = join(await getDatabasesPath(), _databaseName);
     return _database = await openDatabase(
       databasePath,
-      version: 17,
+      version: 23,
       onCreate: (database, _) async {
         await database.execute('''
           CREATE TABLE $_tableName (
@@ -27,6 +27,7 @@ class AppDatabase implements PlayerStateStore {
             energy INTEGER NOT NULL,
             max_energy INTEGER NOT NULL DEFAULT 100,
             energy_recovery_remainder INTEGER NOT NULL DEFAULT 0,
+            energy_recovery_at INTEGER,
             negative_money_hours INTEGER NOT NULL DEFAULT 0,
             wheel_cooldown_seconds INTEGER NOT NULL DEFAULT 0,
             wheel_major_rewards_today INTEGER NOT NULL DEFAULT 0,
@@ -34,9 +35,17 @@ class AppDatabase implements PlayerStateStore {
             wheel_duration_buff_tasks INTEGER NOT NULL DEFAULT 0,
             wheel_energy_buff_percent INTEGER NOT NULL DEFAULT 0,
             wheel_energy_buff_tasks INTEGER NOT NULL DEFAULT 0,
+            wheel_reward_buff_percent INTEGER NOT NULL DEFAULT 0,
+            wheel_reward_buff_tasks INTEGER NOT NULL DEFAULT 0,
+            theme_palette_id INTEGER NOT NULL DEFAULT 0,
             active_activity_json TEXT,
+            active_activities_json TEXT,
             skills_json TEXT,
             employment_json TEXT,
+            employees_json TEXT,
+            branches_json TEXT,
+            owned_home_ids_json TEXT,
+            owned_car_id INTEGER,
             application_blocked_job_id INTEGER,
             application_blocked_until_day INTEGER NOT NULL DEFAULT 0,
             last_job_event TEXT,
@@ -140,10 +149,30 @@ class AppDatabase implements PlayerStateStore {
           await database.execute('ALTER TABLE $_tableName ADD COLUMN wheel_energy_buff_percent INTEGER NOT NULL DEFAULT 0');
           await database.execute('ALTER TABLE $_tableName ADD COLUMN wheel_energy_buff_tasks INTEGER NOT NULL DEFAULT 0');
         }
+        if (oldVersion < 18) {
+          await database.execute('ALTER TABLE $_tableName ADD COLUMN energy_recovery_at INTEGER');
+        }
+        if (oldVersion < 19) {
+          await database.execute('ALTER TABLE $_tableName ADD COLUMN active_activities_json TEXT');
+        }
+        if (oldVersion < 20) {
+          await database.execute('ALTER TABLE $_tableName ADD COLUMN employees_json TEXT');
+        }
+        if (oldVersion < 21) {
+          await database.execute('ALTER TABLE $_tableName ADD COLUMN wheel_reward_buff_percent INTEGER NOT NULL DEFAULT 0');
+          await database.execute('ALTER TABLE $_tableName ADD COLUMN wheel_reward_buff_tasks INTEGER NOT NULL DEFAULT 0');
+        }
+        if (oldVersion < 22) {
+          await database.execute('ALTER TABLE $_tableName ADD COLUMN theme_palette_id INTEGER NOT NULL DEFAULT 0');
+        }
+        if (oldVersion < 23) {
+          await database.execute('ALTER TABLE $_tableName ADD COLUMN branches_json TEXT');
+          await database.execute('ALTER TABLE $_tableName ADD COLUMN owned_home_ids_json TEXT');
+          await database.execute('ALTER TABLE $_tableName ADD COLUMN owned_car_id INTEGER');
+        }
       },
     );
   }
-
   @override
   Future<PlayerStateRecord?> readPlayerState() async {
     final rows = await (await _open()).query(_tableName, limit: 1);
@@ -158,6 +187,7 @@ class AppDatabase implements PlayerStateStore {
       energy: row['energy']! as int,
       maxEnergy: row['max_energy'] as int? ?? 100,
       energyRecoveryRemainder: row['energy_recovery_remainder'] as int? ?? 0,
+      energyRecoveryAt: _dateTimeFromMillis(row['energy_recovery_at'] as int?),
       negativeMoneyHours: row['negative_money_hours'] as int? ?? 0,
       wheelCooldownSeconds: row['wheel_cooldown_seconds'] as int? ?? 0,
       wheelMajorRewardsToday: row['wheel_major_rewards_today'] as int? ?? 0,
@@ -165,9 +195,17 @@ class AppDatabase implements PlayerStateStore {
       wheelDurationBuffTasks: row['wheel_duration_buff_tasks'] as int? ?? 0,
       wheelEnergyBuffPercent: row['wheel_energy_buff_percent'] as int? ?? 0,
       wheelEnergyBuffTasks: row['wheel_energy_buff_tasks'] as int? ?? 0,
+      wheelRewardBuffPercent: row['wheel_reward_buff_percent'] as int? ?? 0,
+      wheelRewardBuffTasks: row['wheel_reward_buff_tasks'] as int? ?? 0,
+      themePaletteId: row['theme_palette_id'] as int? ?? 0,
       activeActivityJson: row['active_activity_json'] as String?,
+      activeActivitiesJson: row['active_activities_json'] as String?,
       skillsJson: row['skills_json'] as String?,
       employmentJson: row['employment_json'] as String?,
+      employeesJson: row['employees_json'] as String?,
+      branchesJson: row['branches_json'] as String?,
+      ownedHomeIdsJson: row['owned_home_ids_json'] as String?,
+      ownedCarId: row['owned_car_id'] as int?,
       applicationBlockedJobId: row['application_blocked_job_id'] as int?,
       applicationBlockedUntilDay: row['application_blocked_until_day'] as int? ?? 0,
       lastJobEvent: row['last_job_event'] as String?,
@@ -212,6 +250,7 @@ class AppDatabase implements PlayerStateStore {
         'energy': record.energy,
         'max_energy': record.maxEnergy,
         'energy_recovery_remainder': record.energyRecoveryRemainder,
+        'energy_recovery_at': record.energyRecoveryAt?.millisecondsSinceEpoch,
         'negative_money_hours': record.negativeMoneyHours,
         'wheel_cooldown_seconds': record.wheelCooldownSeconds,
         'wheel_major_rewards_today': record.wheelMajorRewardsToday,
@@ -219,9 +258,17 @@ class AppDatabase implements PlayerStateStore {
         'wheel_duration_buff_tasks': record.wheelDurationBuffTasks,
         'wheel_energy_buff_percent': record.wheelEnergyBuffPercent,
         'wheel_energy_buff_tasks': record.wheelEnergyBuffTasks,
+        'wheel_reward_buff_percent': record.wheelRewardBuffPercent,
+        'wheel_reward_buff_tasks': record.wheelRewardBuffTasks,
+        'theme_palette_id': record.themePaletteId,
         'active_activity_json': record.activeActivityJson,
+        'active_activities_json': record.activeActivitiesJson,
         'skills_json': record.skillsJson,
         'employment_json': record.employmentJson,
+        'employees_json': record.employeesJson,
+        'branches_json': record.branchesJson,
+        'owned_home_ids_json': record.ownedHomeIdsJson,
+        'owned_car_id': record.ownedCarId,
         'application_blocked_job_id': record.applicationBlockedJobId,
         'application_blocked_until_day': record.applicationBlockedUntilDay,
         'last_job_event': record.lastJobEvent,
@@ -263,4 +310,5 @@ class AppDatabase implements PlayerStateStore {
     _database = null;
     await database?.close();
   }
+  DateTime? _dateTimeFromMillis(int? value) => value == null || value <= 0 ? null : DateTime.fromMillisecondsSinceEpoch(value);
 }

@@ -6,6 +6,9 @@ import '../models/player_state_model.dart';
 import '../mappers/active_activity_codec.dart';
 import '../mappers/skill_profile_codec.dart';
 import '../mappers/employment_codec.dart';
+import '../mappers/company_employee_codec.dart';
+import '../mappers/company_branch_codec.dart';
+import '../mappers/owned_asset_ids_codec.dart';
 
 class LocalPlayerStateRepository implements PlayerStateRepository {
   LocalPlayerStateRepository({
@@ -42,6 +45,7 @@ class LocalPlayerStateRepository implements PlayerStateRepository {
         earningSessionsToday: model.earningSessionsToday,
         maxEnergy: model.maxEnergy,
         energyRecoveryRemainder: model.energyRecoveryRemainder,
+        energyRecoveryAt: model.energyRecoveryAt,
         negativeMoneyHours: model.negativeMoneyHours,
         wheelCooldownSeconds: model.wheelCooldownSeconds,
         wheelMajorRewardsToday: model.wheelMajorRewardsToday,
@@ -49,9 +53,17 @@ class LocalPlayerStateRepository implements PlayerStateRepository {
         wheelDurationBuffTasks: model.wheelDurationBuffTasks,
         wheelEnergyBuffPercent: model.wheelEnergyBuffPercent,
         wheelEnergyBuffTasks: model.wheelEnergyBuffTasks,
+        wheelRewardBuffPercent: model.wheelRewardBuffPercent,
+        wheelRewardBuffTasks: model.wheelRewardBuffTasks,
+        themePaletteId: model.themePaletteId,
         activeActivityJson: ActiveActivityCodec().encode(model.activeActivity),
+        activeActivitiesJson: ActiveActivityCodec().encodeList(model.activeActivities),
         skillsJson: SkillProfileCodec().encode(model.skills),
         employmentJson: EmploymentCodec().encode(model.employment),
+        employeesJson: CompanyEmployeeCodec().encodeList(model.employees),
+        branchesJson: CompanyBranchCodec().encodeList(model.branches),
+        ownedHomeIdsJson: OwnedAssetIdsCodec().encode(model.ownedHomeIds),
+        ownedCarId: model.ownedCarId,
         applicationBlockedJobId: model.applicationBlockedJobId,
         applicationBlockedUntilDay: model.applicationBlockedUntilDay,
         lastJobEvent: model.lastJobEvent,

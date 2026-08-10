@@ -38,7 +38,7 @@ class CompetitionService {
   }
 
   int _playerScore(PlayerState state, JobListing listing) {
-    final skillScore = listing.job.skillRequirements.entries.fold<double>(0, (total, entry) {
+    final skillScore = listing.job.scaledSkillRequirements.entries.fold<double>(0, (total, entry) {
       if (entry.value <= 0) return total;
       final ratio = state.skills[entry.key] / entry.value;
       return total + ratio.clamp(0, 1.5) * 35;

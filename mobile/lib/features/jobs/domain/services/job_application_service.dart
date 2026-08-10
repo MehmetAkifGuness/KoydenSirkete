@@ -4,13 +4,15 @@ import '../../../game/domain/entities/active_activity.dart';
 import '../../../employment/domain/entities/employment.dart';
 import '../entities/job.dart';
 import '../entities/job_listing.dart';
+import '../../../skills/domain/entities/skill_id.dart';
 import 'competition_service.dart';
 
 class JobApplicationCheck {
-  const JobApplicationCheck({required this.isEligible, required this.reason});
+  const JobApplicationCheck({required this.isEligible, required this.reason, this.missingSkills = const {}});
 
   final bool isEligible;
   final String reason;
+  final Map<SkillId, int> missingSkills;
 }
 
 class JobApplicationService {
@@ -19,8 +21,9 @@ class JobApplicationService {
   final CompetitionService _competitionService;
 
   JobApplicationCheck check(PlayerState state, Job job) {
-    if (state.currentJobId != null) {
-      return const JobApplicationCheck(isEligible: false, reason: 'Önce mevcut işinden ayrılmalısın.');
+    final missingSkills = _missingSkills(state, job);
+    if (state.currentJobId != null || state.employment != null) {
+      return JobApplicationCheck(isEligible: false, reason: 'Önce mevcut işinden ayrılmalısın.', missingSkills: missingSkills);
     }
     if (state.knowledge < job.minimumKnowledge) {
       return JobApplicationCheck(
@@ -34,8 +37,8 @@ class JobApplicationService {
         reason: 'En az ${job.minimumExperience} tecrübe gerekiyor.',
       );
     }
-    for (final requirement in job.skillRequirements.entries) {
-      if (requirement.value > 0 && state.skills[requirement.key] < requirement.value) {
+    for (final requirement in missingSkills.entries) {
+      if (requirement.value > 0) {
         return JobApplicationCheck(
           isEligible: false,
           reason: '${requirement.key.label} yeteneği en az ${requirement.value} olmalı.',
@@ -44,6 +47,11 @@ class JobApplicationService {
     }
     return const JobApplicationCheck(isEligible: true, reason: 'Başvuru için uygunsun.');
   }
+
+  Map<SkillId, int> _missingSkills(PlayerState state, Job job) => {
+        for (final entry in job.scaledSkillRequirements.entries)
+          if (entry.value > state.skills[entry.key]) entry.key: entry.value,
+      };
 
   PlayerState apply(PlayerState state, Job job) {
     final checkResult = check(state, job);
@@ -89,6 +97,7 @@ class JobApplicationService {
   PlayerState _hire(PlayerState state, JobListing listing) {
     return state.copyWith(
       currentJobId: listing.job.id,
+      careerLevel: listing.job.level,
       employment: Employment(
         jobId: listing.job.id,
         cityId: listing.cityId,

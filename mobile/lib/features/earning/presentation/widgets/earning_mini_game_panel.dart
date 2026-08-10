@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import '../../../../app/theme/app_palette.dart';
 
+import '../../../../core/widgets/app_feedback.dart';
 import '../../../game/presentation/state/game_session_controller.dart';
 import '../../domain/services/earning_mini_game_service.dart';
 import '../state/earning_mini_game_controller.dart';
@@ -56,7 +58,7 @@ class _EarningMiniGamePanelState extends State<EarningMiniGamePanel> {
         SizedBox(
           width: double.infinity,
           child: FilledButton.icon(
-            onPressed: widget.session.isBusy || widget.session.state.activeActivity != null ? null : _game.start,
+            onPressed: widget.session.isBusy || !widget.session.state.hasActivityCapacity ? null : _game.start,
             icon: const Icon(Icons.bolt),
             label: const Text('Görevi başlat'),
           ),
@@ -106,7 +108,7 @@ class _EarningMiniGamePanelState extends State<EarningMiniGamePanel> {
         SizedBox(
           width: double.infinity,
           child: FilledButton.icon(
-            onPressed: widget.session.isBusy || widget.session.state.activeActivity != null ? null : _collect,
+            onPressed: widget.session.isBusy || !widget.session.state.hasActivityCapacity ? null : _collect,
             icon: const Icon(Icons.payments_outlined),
             label: const Text('Kazancı al'),
           ),
@@ -122,7 +124,7 @@ class _EarningMiniGamePanelState extends State<EarningMiniGamePanel> {
     }
     _game.reset();
     if (message != null) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+      AppFeedback.show(context, message);
     }
   }
 }
@@ -138,8 +140,8 @@ class _TargetCell extends StatelessWidget {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 180),
       decoration: BoxDecoration(
-        color: active ? const Color(0xFF17140A) : const Color(0xFF090909),
-        border: Border.all(color: active ? Theme.of(context).colorScheme.primary : const Color(0xFF302A12)),
+        color: active ? AppPalette.surfaceElevated : AppPalette.surfaceMuted,
+        border: Border.all(color: active ? Theme.of(context).colorScheme.primary : AppPalette.outlineMuted),
         borderRadius: BorderRadius.circular(10),
       ),
       child: Center(

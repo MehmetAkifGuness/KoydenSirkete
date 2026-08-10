@@ -42,7 +42,10 @@ class WorkService {
   }
 
   WorkResult complete(PlayerState state, Job job, WorkTask task, {int? salary}) {
-    final income = ((salary ?? job.salary) * task.salaryMultiplier * _performanceMultiplier(state.performance)).round();
+    final rewardMultiplier = state.wheelRewardBuffTasks > 0
+        ? 1 + state.wheelRewardBuffPercent / 100
+        : 1;
+    final income = ((salary ?? job.salary) * task.salaryMultiplier * _performanceMultiplier(state.performance) * rewardMultiplier).round();
     final nextState = state.copyWith(
       money: state.money + income,
       experience: state.experience + task.experienceGain,
@@ -50,6 +53,8 @@ class WorkService {
       workSessionsToday: state.workSessionsToday + 1,
       totalEarned: state.totalEarned + income,
       totalWorkSessions: state.totalWorkSessions + 1,
+      wheelRewardBuffTasks: state.wheelRewardBuffTasks > 0 ? state.wheelRewardBuffTasks - 1 : 0,
+      wheelRewardBuffPercent: state.wheelRewardBuffTasks <= 1 ? 0 : state.wheelRewardBuffPercent,
     );
     return WorkResult(state: nextState, income: income);
   }

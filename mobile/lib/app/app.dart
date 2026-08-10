@@ -7,6 +7,7 @@ import '../core/database/player_state_store.dart';
 import '../core/constants/app_features.dart';
 import '../core/widgets/app_gradient_background.dart';
 import '../core/widgets/storage_error_page.dart';
+import '../core/widgets/app_feedback.dart';
 import '../features/dashboard/presentation/pages/dashboard_page.dart';
 import '../features/earning/presentation/pages/earning_page.dart';
 import '../features/profile/presentation/pages/profile_page.dart';
@@ -29,6 +30,7 @@ import '../features/onboarding/presentation/pages/onboarding_page.dart';
 import 'router/app_navigation_state.dart';
 import 'router/app_router.dart';
 import 'theme/app_theme.dart';
+import 'theme/app_palette.dart';
 
 class CareerToCompanyApp extends StatelessWidget {
   const CareerToCompanyApp({this.playerStateStore, super.key});
@@ -37,12 +39,15 @@ class CareerToCompanyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Müdür',
-      theme: AppTheme.dark(),
-      builder: (context, child) => AppGradientBackground(child: child ?? const SizedBox.shrink()),
-      home: AppShell(playerStateStore: playerStateStore),
+    return AnimatedBuilder(
+      animation: AppPalette.listenable,
+      builder: (context, _) => MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'Müdür',
+        theme: AppTheme.dark(),
+        builder: (context, child) => AppGradientBackground(child: child ?? const SizedBox.shrink()),
+        home: AppShell(playerStateStore: playerStateStore),
+      ),
     );
   }
 }
@@ -73,6 +78,7 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
         repository: LocalPlayerStateRepository(database: _playerStateStore, mapper: PlayerStateMapper()),
       ),
     );
+    _session.addListener(_syncPalette);
     _clockTicker = ForegroundClockTicker(
       onTick: _tickClock,
       interval: GameClockService.realTickInterval,
@@ -85,6 +91,7 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
     _navigation.dispose();
     WidgetsBinding.instance.removeObserver(this);
     _clockTicker.dispose();
+    _session.removeListener(_syncPalette);
     _session.dispose();
     unawaited(_playerStateStore.close());
     super.dispose();
@@ -93,8 +100,8 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      if (!_showWelcome && _session.state.isOnboarded) {
-        _clockTicker.start();
+      if (!_showWelcome && _session.state.isOnboarded && _session.isReady) {
+        unawaited(_resumeGame());
       }
     } else {
       _clockTicker.stop();
@@ -145,18 +152,35 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
     );
   }
 
+  void _syncPalette() {
+    final paletteId = _session.state.themePaletteId;
+    if (AppPalette.current.id != paletteId) {
+      AppPalette.select(paletteId);
+    }
+  }
+
   void _enterGame() {
     if (!mounted) {
       return;
     }
     setState(() => _showWelcome = false);
-    _clockTicker.start();
+    unawaited(_resumeGame());
   }
 
   Future<void> _tickClock() async {
-    await _session.tick(hours: GameClockService.gameHoursPerRealTick);
+    final message = await _session.tick(hours: GameClockService.gameHoursPerRealTick);
+    if (mounted && message != null && message.isNotEmpty) {
+      AppFeedback.show(context, message);
+    }
     if (mounted && _session.state.isBankrupt) {
       _clockTicker.stop();
+    }
+  }
+
+  Future<void> _resumeGame() async {
+    await _session.recoverEnergy();
+    if (mounted && !_showWelcome && _session.state.isOnboarded) {
+      _clockTicker.start();
     }
   }
 

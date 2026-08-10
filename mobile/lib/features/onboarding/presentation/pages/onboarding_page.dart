@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../app/theme/app_palette.dart';
 
 import '../../../game/presentation/state/game_session_controller.dart';
 
@@ -41,7 +42,7 @@ class _OnboardingPageState extends State<OnboardingPage> with SingleTickerProvid
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: AppPalette.background,
       body: Stack(
         fit: StackFit.expand,
         children: [
@@ -50,15 +51,15 @@ class _OnboardingPageState extends State<OnboardingPage> with SingleTickerProvid
             child: Image.asset(
               'assets/images/mudurum_cover.png',
               fit: BoxFit.cover,
-              errorBuilder: (_, _, _) => const ColoredBox(color: Colors.black),
+              errorBuilder: (_, _, _) => ColoredBox(color: AppPalette.background),
             ),
           ),
-          const DecoratedBox(
+          DecoratedBox(
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [Color(0x99000000), Color(0x26000000), Color(0xF5000000)],
+                colors: [AppPalette.background.withValues(alpha: .60), AppPalette.surface.withValues(alpha: .15), AppPalette.background.withValues(alpha: .96)],
                 stops: [0, .42, 1],
               ),
             ),
@@ -100,7 +101,7 @@ class _OnboardingPageState extends State<OnboardingPage> with SingleTickerProvid
           height: 124,
           padding: const EdgeInsets.all(7),
           decoration: BoxDecoration(
-            color: const Color(0xCC080808),
+            color: AppPalette.surface.withValues(alpha: .80),
             border: Border.all(color: gold.withValues(alpha: .7)),
             borderRadius: BorderRadius.circular(12),
             boxShadow: [BoxShadow(color: gold.withValues(alpha: .2), blurRadius: 30, spreadRadius: 4)],
@@ -111,12 +112,12 @@ class _OnboardingPageState extends State<OnboardingPage> with SingleTickerProvid
           ),
         ),
         const SizedBox(height: 22),
-        Text('Müdür', style: TextStyle(color: gold, fontFamily: 'serif', fontSize: 32, fontWeight: FontWeight.w700, shadows: [Shadow(color: Colors.black, blurRadius: 12)])),
+        Text('Müdür', style: TextStyle(color: gold, fontFamily: 'serif', fontSize: 32, fontWeight: FontWeight.w700, shadows: [Shadow(color: AppPalette.background, blurRadius: 12)])),
         const SizedBox(height: 14),
-        const Text(
+        Text(
           'Köydeki ilk adımından kendi şirketine\nuzanan tamamen offline bir kariyer\nsimülasyonuna hoş geldin.',
           textAlign: TextAlign.center,
-          style: TextStyle(color: Color(0xFFE8E2D5), fontFamily: 'serif', fontSize: 17, height: 1.55, fontWeight: FontWeight.w600, shadows: [Shadow(color: Colors.black, blurRadius: 8)]),
+          style: TextStyle(color: AppPalette.textPrimary, fontFamily: 'serif', fontSize: 17, height: 1.55, fontWeight: FontWeight.w600, shadows: [Shadow(color: AppPalette.background, blurRadius: 8)]),
         ),
         const SizedBox(height: 38),
         SizedBox(

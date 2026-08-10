@@ -3,8 +3,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:kariyerden_sirkete/features/game/domain/entities/player_state.dart';
 import 'package:kariyerden_sirkete/features/game/domain/services/activity_service.dart';
 import 'package:kariyerden_sirkete/features/game/domain/services/game_clock_service.dart';
+import 'package:kariyerden_sirkete/features/game/domain/services/energy_recovery_service.dart';
 import 'package:kariyerden_sirkete/features/earning/domain/services/earning_service.dart';
 import 'package:kariyerden_sirkete/features/sport/domain/services/sport_service.dart';
+import 'package:kariyerden_sirkete/core/errors/game_rule_exception.dart';
 
 void main() {
   test('one game-hour clock tick advances one game hour', () {
@@ -16,33 +18,32 @@ void main() {
     expect(result.dayChanged, isFalse);
   });
 
-  test('20-second foreground tick advances one game hour', () {
+  test('20-second foreground tick advances two game hours at 2x speed', () {
     expect(GameClockService.realTickInterval, const Duration(seconds: 20));
+    expect(GameClockService.gameSpeedMultiplier, 2);
 
     final result = GameClockService().tick(
       PlayerState.initial,
       hours: GameClockService.gameHoursPerRealTick,
     );
 
-    expect(result.state.hour, 9);
+    expect(result.state.hour, 10);
     expect(result.state.energy, 100);
   });
 
-  test('energy recovers every three game hours and stays below max', () {
-    var state = PlayerState.initial.copyWith(energy: 70);
-    final clock = GameClockService();
+  test('energy recovers every real minute while the game is closed', () {
+    final anchor = DateTime(2026, 1, 1);
+    final service = EnergyRecoveryService();
+    var state = PlayerState.initial.copyWith(energy: 70, energyRecoveryAt: anchor);
 
-    state = clock.tick(state).state;
+    state = service.recover(state, now: anchor.add(const Duration(seconds: 59)));
     expect(state.energy, 70);
-    state = clock.tick(state).state;
-    expect(state.energy, 70);
-    state = clock.tick(state).state;
+    state = service.recover(state, now: anchor.add(const Duration(minutes: 1)));
     expect(state.energy, 80);
-
-    for (var index = 0; index < 4; index++) {
-      state = clock.tick(state).state;
-    }
+    state = service.recover(state, now: anchor.add(const Duration(minutes: 2)));
     expect(state.energy, 90);
+    state = service.recover(state, now: anchor.add(const Duration(hours: 2)));
+    expect(state.energy, 100);
   });
 
   test('negative money triggers bankruptcy after 24 game hours', () {
@@ -98,5 +99,26 @@ void main() {
     state = activities.complete(tick.state, tick.completedActivity!).state;
 
     expect(state.maxEnergy, PlayerState.initial.maxEnergy + SportService.maxEnergyGain);
+  });
+
+  test('career level controls concurrent activity capacity', () {
+    final activities = ActivityService();
+    final stateAtRankTwo = PlayerState.initial.copyWith(careerLevel: 2);
+    final earning = activities.startEarning(stateAtRankTwo);
+    final sport = activities.startSport(stateAtRankTwo);
+
+    var state = activities.activate(stateAtRankTwo, earning);
+    state = activities.activate(state, sport);
+
+    expect(state.activities, hasLength(2));
+    expect(state.hasActivityCapacity, isFalse);
+    expect(
+      () => activities.activate(state, activities.startEarning(state)),
+      throwsA(isA<GameRuleException>()),
+    );
+
+    final tick = GameClockService().tick(state);
+    expect(tick.completedActivities, hasLength(1));
+    expect(tick.state.activities, hasLength(1));
   });
 }
