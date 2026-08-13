@@ -5,6 +5,7 @@ import 'package:kariyerden_sirkete/app/app.dart';
 import 'package:kariyerden_sirkete/app/theme/app_theme.dart';
 import 'package:kariyerden_sirkete/core/database/player_state_store.dart';
 import 'package:kariyerden_sirkete/core/widgets/app_gradient_background.dart';
+import 'package:kariyerden_sirkete/core/widgets/game_top_bar.dart';
 import 'package:kariyerden_sirkete/features/assets/presentation/pages/assets_page.dart';
 import 'package:kariyerden_sirkete/features/career/presentation/pages/career_page.dart';
 import 'package:kariyerden_sirkete/features/company/presentation/pages/company_branches_page.dart';
@@ -91,6 +92,49 @@ void main() {
       expect(tester.takeException(), isNull, reason: page.runtimeType.toString());
     }
     session.dispose();
+  });
+
+  testWidgets('profile keeps reset under account and removes app metadata', (tester) async {
+    final session = await _readySession();
+    await tester.pumpWidget(MaterialApp(
+      theme: AppTheme.dark(),
+      home: AppGradientBackground(child: ProfilePage(session: session)),
+    ));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Hesabım'), findsOneWidget);
+    expect(find.text('Yeni oyuna başla'), findsOneWidget);
+    expect(find.text('Uygulama'), findsNothing);
+    expect(find.text('Operasyon görünümü'), findsNothing);
+    expect(find.text('Çevrimdışı mod'), findsNothing);
+    expect(find.text('Offline · SQLite'), findsNothing);
+    session.dispose();
+  });
+
+  testWidgets('clock speed controls expose 2x, 4x and pause', (tester) async {
+    var selectedSpeed = 1;
+    var running = true;
+    await tester.pumpWidget(MaterialApp(
+      theme: AppTheme.dark(),
+      home: AppGradientBackground(
+        child: Scaffold(
+          body: GameTopBar(
+            state: PlayerState.initial,
+            speed: selectedSpeed,
+            isRunning: running,
+            onSpeedChanged: (speed) => selectedSpeed = speed,
+            onToggleRunning: () => running = !running,
+          ),
+        ),
+      ),
+    ));
+    await tester.pumpAndSettle();
+
+    expect(find.text('2x'), findsOneWidget);
+    expect(find.text('4x'), findsOneWidget);
+    expect(find.byTooltip('Durdur'), findsOneWidget);
+    await tester.tap(find.text('4x'));
+    expect(selectedSpeed, 4);
   });
 }
 

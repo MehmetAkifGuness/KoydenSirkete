@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../../../app/theme/app_palette.dart';
 
+import '../../../../app/theme/app_palette.dart';
 import '../../../../core/widgets/app_feedback.dart';
+import '../../../../core/widgets/app_page.dart';
 import '../../../game/presentation/state/game_session_controller.dart';
 import '../../../jobs/domain/services/job_catalog.dart';
 import '../../../wheel/presentation/widgets/esnaf_wheel_panel.dart';
@@ -14,52 +15,151 @@ class EmploymentPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('İşim')),
-      body: AnimatedBuilder(
+    return AppPage(
+      title: 'İşim',
+      subtitle: 'Günlük ritmini ve performansını yönet',
+      child: AnimatedBuilder(
         animation: session,
         builder: (context, _) {
           final state = session.state;
           final employment = state.employment;
-          final job = JobCatalog.findById(employment?.jobId ?? state.currentJobId);
+          final job = JobCatalog.findById(
+            employment?.jobId ?? state.currentJobId,
+          );
           if (job == null || employment == null) {
             return ListView(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+              padding: const EdgeInsets.fromLTRB(18, 8, 18, 28),
               children: [
-                _EmptyEmployment(event: state.lastJobEvent),
+                const AppEmptyState(
+                  icon: Icons.work_off_rounded,
+                  title: 'Aktif işin yok',
+                  message:
+                      'İş fırsatları ekranından bir role başvur. Uygun bir işi seçtiğinde görevlerin burada görünecek.',
+                ),
                 const SizedBox(height: 16),
                 EsnafWheelPanel(session: session),
               ],
             );
           }
           return ListView(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+            padding: const EdgeInsets.fromLTRB(18, 8, 18, 28),
             children: [
-              Card(child: Padding(padding: const EdgeInsets.all(20), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text(employment.company, style: const TextStyle(fontSize: 13, color: AppPalette.textMuted)),
-                const SizedBox(height: 5),
-                Text(job.title, style: const TextStyle(fontFamily: 'serif', fontSize: 20, fontWeight: FontWeight.w700)),
-                const SizedBox(height: 12),
-                Text('Maaş ₺${employment.salary} · ${job.careerTrack} ${job.level}. rütbe'),
-                const SizedBox(height: 12),
-                LinearProgressIndicator(value: state.performance / 100, minHeight: 5, borderRadius: BorderRadius.circular(8)),
-                const SizedBox(height: 6),
-                Text('Performans %${state.performance} · Bugün ${state.workSessionsToday} görev'),
-                const SizedBox(height: 12),
-                Text('Son görev günü: ${employment.lastTaskDay}'),
-              ]))),
+              AppInfoCard(
+                accent: AppPalette.primary,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          width: 46,
+                          height: 46,
+                          decoration: BoxDecoration(
+                            color: AppPalette.primary.withValues(alpha: .13),
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          child: const Icon(
+                            Icons.business_center_rounded,
+                            color: AppPalette.primary,
+                            size: 24,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                job.title,
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                employment.company,
+                                style: const TextStyle(
+                                  color: AppPalette.primary,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        AppPill(
+                          label: '₺${employment.salary}',
+                          color: AppPalette.tertiary,
+                          icon: Icons.payments_outlined,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 21),
+                    Row(
+                      children: [
+                        const Text(
+                          'Performans',
+                          style: TextStyle(
+                            color: AppPalette.textSecondary,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const Spacer(),
+                        Text(
+                          '%${state.performance}',
+                          style: const TextStyle(
+                            color: AppPalette.primary,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 7),
+                    AppProgressLine(value: state.performance / 100),
+                    const SizedBox(height: 12),
+                    Text(
+                      'Gün ${state.day} · Bugün ${state.workSessionsToday} görev · Son görev günü ${employment.lastTaskDay}',
+                      style: const TextStyle(
+                        color: AppPalette.textMuted,
+                        fontSize: 11,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               const SizedBox(height: 14),
-              FilledButton.icon(
-                onPressed: session.isBusy || !state.hasActivityCapacity ? null : () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => WorkPage(session: session, job: job))),
-                icon: const Icon(Icons.assignment_outlined),
-                label: const Text('Günlük görevleri yönet'),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  onPressed: session.isBusy || !state.hasActivityCapacity
+                      ? null
+                      : () => Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) =>
+                                WorkPage(session: session, job: job),
+                          ),
+                        ),
+                  icon: const Icon(Icons.assignment_rounded),
+                  label: const Text('Günün görevlerini aç'),
+                ),
               ),
               const SizedBox(height: 10),
-              OutlinedButton(
-                onPressed: session.isBusy ? null : () => _leave(context),
-                child: const Text('İşten ayrıl'),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: session.isBusy ? null : () => _leave(context),
+                  icon: const Icon(Icons.logout_rounded),
+                  label: const Text('İşten ayrıl'),
+                ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
+              const AppSectionHeader(
+                title: 'Ekstra fırsat',
+                caption: 'Şansını dene, günlük avantaj kazan.',
+              ),
+              const SizedBox(height: 12),
               EsnafWheelPanel(session: session),
             ],
           );
@@ -70,25 +170,6 @@ class EmploymentPage extends StatelessWidget {
 
   Future<void> _leave(BuildContext context) async {
     final message = await session.leaveJob();
-    if (!context.mounted || message == null) return;
-    AppFeedback.show(context, message);
-  }
-}
-
-class _EmptyEmployment extends StatelessWidget {
-  const _EmptyEmployment({this.event});
-
-  final String? event;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(child: Padding(padding: const EdgeInsets.all(24), child: Card(child: Padding(padding: const EdgeInsets.all(20), child: Column(mainAxisSize: MainAxisSize.min, children: [
-      const Icon(Icons.work_off_outlined, size: 46),
-      const SizedBox(height: 12),
-      const Text('Aktif işin yok', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
-      if (event != null) ...[const SizedBox(height: 10), Text(event!, textAlign: TextAlign.center)],
-      const SizedBox(height: 10),
-      const Text('Yeni bir işe başvurmak için Panel > İş ilanları bölümünü aç.'),
-    ])))));
+    if (context.mounted && message != null) AppFeedback.show(context, message);
   }
 }

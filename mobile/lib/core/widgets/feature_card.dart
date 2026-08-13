@@ -11,30 +11,58 @@ class FeatureCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final active = feature.unlocked;
+    final color = active ? feature.color : AppPalette.textMuted;
     return Card(
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
+        onTap: active ? onTap : null,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
-          child: Row(
+          padding: const EdgeInsets.all(14),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: feature.color.withValues(alpha: .65))),
-                child: Icon(feature.unlocked ? feature.icon : Icons.lock_outline, color: feature.color, size: 20),
+              Row(
+                children: [
+                  Container(
+                    width: 38,
+                    height: 38,
+                    decoration: BoxDecoration(
+                      color: color.withValues(alpha: .14),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      active ? feature.icon : Icons.lock_outline,
+                      color: color,
+                      size: 19,
+                    ),
+                  ),
+                  const Spacer(),
+                  Icon(
+                    Icons.chevron_right_rounded,
+                    color: AppPalette.textMuted,
+                    size: 18,
+                  ),
+                ],
               ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(feature.title, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
-                  ],
+              const Spacer(),
+              Text(
+                feature.title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: active ? AppPalette.textPrimary : AppPalette.textMuted,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 15,
                 ),
               ),
-              Icon(Icons.chevron_right, color: AppPalette.outlineMuted),
+              const SizedBox(height: 3),
+              Text(
+                feature.subtitle,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(color: AppPalette.textMuted, fontSize: 11),
+              ),
             ],
           ),
         ),

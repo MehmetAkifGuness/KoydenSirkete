@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+
 import '../../../../app/theme/app_palette.dart';
+import '../../../../core/widgets/app_page.dart';
 
 class BankruptcyPage extends StatefulWidget {
   const BankruptcyPage({required this.onRestart, super.key});
@@ -15,39 +17,51 @@ class _BankruptcyPageState extends State<BankruptcyPage> {
 
   @override
   Widget build(BuildContext context) {
-    final gold = Theme.of(context).colorScheme.primary;
-    return Scaffold(
-      body: SafeArea(
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Card(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(24, 32, 24, 24),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.warning_amber_rounded, size: 58, color: gold),
-                    const SizedBox(height: 18),
-                    Text('İflas ettin', style: TextStyle(color: gold, fontFamily: 'serif', fontSize: 28, fontWeight: FontWeight.w700)),
-                    const SizedBox(height: 12),
-                    const Text(
-                      'Paran 24 oyun saati boyunca negatif kaldı.\nKariyer planın sıfırlanıyor.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: AppPalette.textSecondary, height: 1.5),
-                    ),
-                    const SizedBox(height: 26),
-                    SizedBox(
-                      width: double.infinity,
-                      child: FilledButton.icon(
-                        onPressed: _isRestarting ? null : _restart,
-                        icon: const Icon(Icons.restart_alt),
-                        label: const Text('Baştan başla'),
-                      ),
-                    ),
-                  ],
+    return AppPage(
+      title: 'Kariyer durdu',
+      subtitle: 'Finansal durum yeniden kurulmalı.',
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(22),
+          child: AppInfoCard(
+            accent: AppPalette.error,
+            padding: const EdgeInsets.fromLTRB(22, 26, 22, 22),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Icon(
+                  Icons.warning_amber_outlined,
+                  size: 36,
+                  color: AppPalette.error,
                 ),
-              ),
+                const SizedBox(height: 18),
+                const Text(
+                  'Finansal kriz',
+                  style: TextStyle(
+                    color: AppPalette.error,
+                    fontSize: 27,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                const Text(
+                  'Paran 24 oyun saati boyunca negatif kaldı. Bu kariyer döngüsünü kapatıp yeni bir başlangıç yapmalısın.',
+                  style: TextStyle(
+                    color: AppPalette.textSecondary,
+                    height: 1.5,
+                    fontSize: 13,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.icon(
+                    onPressed: _isRestarting ? null : _restart,
+                    icon: const Icon(Icons.restart_alt_rounded),
+                    label: const Text('Yeni kariyer başlat'),
+                  ),
+                ),
+              ],
             ),
           ),
         ),

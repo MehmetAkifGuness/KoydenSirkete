@@ -1,6 +1,8 @@
 import '../entities/company_employee.dart';
 
 abstract final class CompanyEmployeeCatalog {
+  static const minimumCityCandidates = 3;
+
   static const candidates = <CompanyEmployee>[
     CompanyEmployee(id: 1, name: 'Ayşe Demir', role: 'Operasyon uzmanı', performance: 62, dailySalary: 30),
     CompanyEmployee(id: 2, name: 'Mehmet Kaya', role: 'Satış temsilcisi', performance: 74, dailySalary: 40),
@@ -30,9 +32,79 @@ abstract final class CompanyEmployeeCatalog {
 
   static List<CompanyEmployee> available(int companyLevel, Iterable<int> hiredIds) {
     final hired = hiredIds.toSet();
-    return candidates
+    final rotating = _generatedCandidates(
+      cityId: 0,
+      count: hired.length + minimumCityCandidates,
+    );
+    return [...candidates, ...rotating]
         .where((candidate) => candidate.requiredCompanyLevel <= companyLevel && !hired.contains(candidate.id))
         .toList(growable: false);
+  }
+
+  static List<CompanyEmployee> availableForCity({
+    required int cityId,
+    required int occupiedSlots,
+    required Iterable<int> hiredIds,
+  }) {
+    final hired = hiredIds.toSet();
+    return _generatedCandidates(
+      cityId: cityId,
+      count: occupiedSlots + minimumCityCandidates,
+    ).where((candidate) => !hired.contains(candidate.id)).toList(growable: false);
+  }
+
+  static List<CompanyEmployee> _generatedCandidates({
+    required int cityId,
+    required int count,
+  }) {
+    const firstNames = <String>[
+      'Ayşe',
+      'Mehmet',
+      'Zeynep',
+      'Ali',
+      'Elif',
+      'Can',
+      'Seda',
+      'Burak',
+      'Derya',
+      'Emre',
+    ];
+    const lastNames = <String>[
+      'Demir',
+      'Kaya',
+      'Yılmaz',
+      'Şahin',
+      'Çelik',
+      'Aydın',
+      'Arslan',
+      'Koç',
+      'Acar',
+      'Yıldız',
+    ];
+    const roles = <String>[
+      'Operasyon uzmanı',
+      'Satış temsilcisi',
+      'Lojistik sorumlusu',
+      'Müşteri ilişkileri',
+      'Saha operasyonu',
+      'Veri destek uzmanı',
+    ];
+
+    return List<CompanyEmployee>.generate(count, (index) {
+      final seed = cityId * 43 + index * 17 + 11;
+      final performance = 45 + seed % 53;
+      final salary = 18 + (seed * 7) % 78;
+      final id = cityId == 0
+          ? 900000 + index
+          : 100000 + cityId * 1000 + index;
+      return CompanyEmployee(
+        id: id,
+        name: '${firstNames[seed % firstNames.length]} ${lastNames[(seed ~/ 3) % lastNames.length]}',
+        role: roles[seed % roles.length],
+        performance: performance,
+        dailySalary: salary,
+      );
+    }, growable: false);
   }
 
   static List<CompanyEmployee> legacyDefaults(int count) {

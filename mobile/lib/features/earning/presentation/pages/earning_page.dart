@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../../app/theme/app_palette.dart';
 
+import '../../../../app/theme/app_palette.dart';
+import '../../../../core/widgets/app_page.dart';
 import '../../../game/presentation/state/game_session_controller.dart';
 import '../widgets/earning_mini_game_panel.dart';
 
@@ -11,47 +12,85 @@ class EarningPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Para kazan')),
-      body: AnimatedBuilder(
+    return AppPage(
+      title: 'Kazanç',
+      subtitle: 'İlk sermayeni kendi emeğinle oluştur',
+      child: AnimatedBuilder(
         animation: session,
-        builder: (context, _) => ListView(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-          children: [
-            _EarningSummary(session: session),
-            const SizedBox(height: 24),
-            const Text('Aktivite 2 oyun saati sürer ve 20 enerji harcar.', textAlign: TextAlign.center, style: TextStyle(color: AppPalette.textMuted)),
-            const SizedBox(height: 18),
-            EarningMiniGamePanel(session: session),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _EarningSummary extends StatelessWidget {
-  const _EarningSummary({required this.session});
-
-  final GameSessionController session;
-
-  @override
-  Widget build(BuildContext context) {
-    final state = session.state;
-    final earningSessions = state.earningSessionsToday;
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('GÜNLÜK KAZANÇ PLANI', style: TextStyle(color: AppPalette.textMuted, fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: .5)),
-            const SizedBox(height: 12),
-            Text('₺${state.money}', style: Theme.of(context).textTheme.displaySmall?.copyWith(color: Theme.of(context).colorScheme.primary, fontFamily: 'serif', fontWeight: FontWeight.w900)),
-            const SizedBox(height: 8),
-            Text('Bugün $earningSessions tur', style: const TextStyle(color: AppPalette.textMuted)),
-          ],
-        ),
+        builder: (context, _) {
+          final state = session.state;
+          return ListView(
+            padding: const EdgeInsets.fromLTRB(18, 8, 18, 28),
+            children: [
+              AppInfoCard(
+                accent: AppPalette.primary,
+                padding: const EdgeInsets.fromLTRB(19, 19, 19, 17),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Expanded(
+                          child: Text(
+                            'Cüzdanın',
+                            style: TextStyle(
+                              color: AppPalette.textMuted,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                        const AppPill(
+                          label: 'OFFLINE',
+                          color: AppPalette.primary,
+                          icon: Icons.cloud_off_rounded,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      '₺${state.money}',
+                      style: const TextStyle(
+                        fontSize: 36,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: -1,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            'Bugün ${state.earningSessionsToday} tur tamamlandı',
+                            style: const TextStyle(
+                              color: AppPalette.textSecondary,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                        Text(
+                          '${state.energy}/${state.maxEnergy} enerji',
+                          style: const TextStyle(
+                            color: AppPalette.tertiary,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+              const AppSectionHeader(
+                title: 'Hızlı kazanç',
+                caption: '10 saniyelik refleks oyunu ile bonus kazan.',
+              ),
+              const SizedBox(height: 12),
+              EarningMiniGamePanel(session: session),
+            ],
+          );
+        },
       ),
     );
   }

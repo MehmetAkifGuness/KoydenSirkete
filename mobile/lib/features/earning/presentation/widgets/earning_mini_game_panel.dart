@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../../../app/theme/app_palette.dart';
 
+import '../../../../app/theme/app_palette.dart';
 import '../../../../core/widgets/app_feedback.dart';
+import '../../../../core/widgets/app_page.dart';
 import '../../../game/presentation/state/game_session_controller.dart';
 import '../../domain/services/earning_mini_game_service.dart';
 import '../state/earning_mini_game_controller.dart';
@@ -30,11 +31,10 @@ class _EarningMiniGamePanelState extends State<EarningMiniGamePanel> {
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: _game,
-      builder: (context, _) => Card(
-        child: Padding(
-          padding: const EdgeInsets.all(18),
-          child: _content(context, _game.state),
-        ),
+      builder: (context, _) => AppInfoCard(
+        accent: AppPalette.primary,
+        padding: const EdgeInsets.all(18),
+        child: _content(context, _game.state),
       ),
     );
   }
@@ -51,15 +51,49 @@ class _EarningMiniGamePanelState extends State<EarningMiniGamePanel> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Hızlı görev', style: TextStyle(fontFamily: 'serif', fontWeight: FontWeight.w700, fontSize: 18)),
-        const SizedBox(height: 8),
-        const Text('10 saniye içinde hedefe dokun. Seri yaptıkça kazanç bonusun artar.'),
-        const SizedBox(height: 16),
+        Row(
+          children: [
+            Container(
+              width: 42,
+              height: 42,
+              decoration: BoxDecoration(
+                color: AppPalette.primary.withValues(alpha: .13),
+                borderRadius: BorderRadius.circular(13),
+              ),
+              child: const Icon(
+                Icons.touch_app_rounded,
+                color: AppPalette.primary,
+              ),
+            ),
+            const SizedBox(width: 12),
+            const Expanded(
+              child: Text(
+                'Hızlı görev',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+              ),
+            ),
+            const AppPill(label: '+ bonus', color: AppPalette.tertiary),
+          ],
+        ),
+        const SizedBox(height: 13),
+        const Text(
+          'Hedef hücreye dokun. Serin yükseldikçe tur sonu kazancın da büyür.',
+          style: TextStyle(
+            color: AppPalette.textSecondary,
+            fontSize: 13,
+            height: 1.45,
+          ),
+        ),
+        const SizedBox(height: 17),
         SizedBox(
           width: double.infinity,
           child: FilledButton.icon(
-            onPressed: widget.session.isBusy || !widget.session.state.hasActivityCapacity ? null : _game.start,
-            icon: const Icon(Icons.bolt),
+            onPressed:
+                widget.session.isBusy ||
+                    !widget.session.state.hasActivityCapacity
+                ? null
+                : _game.start,
+            icon: const Icon(Icons.play_arrow_rounded),
             label: const Text('Görevi başlat'),
           ),
         ),
@@ -68,19 +102,33 @@ class _EarningMiniGamePanelState extends State<EarningMiniGamePanel> {
   }
 
   Widget _playing(BuildContext context, EarningMiniGameState state) {
-    final activeCell = state.targetCell;
     return Column(
       children: [
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Süre: ${state.secondsRemaining}s'),
-            Text('Seri: ${state.hits}', style: TextStyle(color: Theme.of(context).colorScheme.primary)),
+            const AppPill(
+              label: 'HEDEFİ BUL',
+              color: AppPalette.primary,
+              icon: Icons.track_changes_rounded,
+            ),
+            const Spacer(),
+            Text(
+              '${state.secondsRemaining}s',
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
+            ),
+            const SizedBox(width: 12),
+            Text(
+              '${state.hits} seri',
+              style: const TextStyle(
+                color: AppPalette.tertiary,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
           ],
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 15),
         SizedBox(
-          height: 230,
+          height: 228,
           child: GridView.builder(
             physics: const NeverScrollableScrollPhysics(),
             itemCount: _targetCellCount,
@@ -90,7 +138,10 @@ class _EarningMiniGamePanelState extends State<EarningMiniGamePanel> {
               mainAxisSpacing: 8,
               mainAxisExtent: 70,
             ),
-            itemBuilder: (context, index) => _TargetCell(active: index == activeCell, onTap: _game.hit),
+            itemBuilder: (context, index) => _TargetCell(
+              active: index == state.targetCell,
+              onTap: _game.hit,
+            ),
           ),
         ),
       ],
@@ -101,15 +152,51 @@ class _EarningMiniGamePanelState extends State<EarningMiniGamePanel> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Tur tamamlandı', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
-        const SizedBox(height: 8),
-        Text('${state.hits} dokunuş · +%${_game.bonusPercent} seri bonusu'),
+        Row(
+          children: [
+            Container(
+              width: 42,
+              height: 42,
+              decoration: BoxDecoration(
+                color: AppPalette.tertiary.withValues(alpha: .13),
+                borderRadius: BorderRadius.circular(13),
+              ),
+              child: const Icon(
+                Icons.celebration_rounded,
+                color: AppPalette.tertiary,
+              ),
+            ),
+            const SizedBox(width: 12),
+            const Expanded(
+              child: Text(
+                'Tur tamamlandı',
+                style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800),
+              ),
+            ),
+            Text(
+              '+%${_game.bonusPercent}',
+              style: const TextStyle(
+                color: AppPalette.tertiary,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        Text(
+          '${state.hits} doğru dokunuş yaptın. Bonusun hazır.',
+          style: const TextStyle(color: AppPalette.textSecondary, fontSize: 13),
+        ),
         const SizedBox(height: 16),
         SizedBox(
           width: double.infinity,
           child: FilledButton.icon(
-            onPressed: widget.session.isBusy || !widget.session.state.hasActivityCapacity ? null : _collect,
-            icon: const Icon(Icons.payments_outlined),
+            onPressed:
+                widget.session.isBusy ||
+                    !widget.session.state.hasActivityCapacity
+                ? null
+                : _collect,
+            icon: const Icon(Icons.payments_rounded),
             label: const Text('Kazancı al'),
           ),
         ),
@@ -118,14 +205,12 @@ class _EarningMiniGamePanelState extends State<EarningMiniGamePanel> {
   }
 
   Future<void> _collect() async {
-    final message = await widget.session.earnMoney(performance: _game.performance);
-    if (!mounted) {
-      return;
-    }
+    final message = await widget.session.earnMoney(
+      performance: _game.performance,
+    );
+    if (!mounted) return;
     _game.reset();
-    if (message != null) {
-      AppFeedback.show(context, message);
-    }
+    if (message != null) AppFeedback.show(context, message);
   }
 }
 
@@ -140,9 +225,14 @@ class _TargetCell extends StatelessWidget {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 180),
       decoration: BoxDecoration(
-        color: active ? AppPalette.surfaceElevated : AppPalette.surfaceMuted,
-        border: Border.all(color: active ? Theme.of(context).colorScheme.primary : AppPalette.outlineMuted),
-        borderRadius: BorderRadius.circular(10),
+        color: active
+            ? AppPalette.primary.withValues(alpha: .13)
+            : AppPalette.surfaceMuted,
+        border: Border.all(
+          color: active ? AppPalette.primary : AppPalette.outlineMuted,
+          width: active ? 1.5 : 1,
+        ),
+        borderRadius: BorderRadius.circular(15),
       ),
       child: Center(
         child: AnimatedSwitcher(
@@ -150,12 +240,15 @@ class _TargetCell extends StatelessWidget {
           child: active
               ? SizedBox(
                   key: const ValueKey('target'),
-                  width: 56,
-                  height: 56,
+                  width: 54,
+                  height: 54,
                   child: FilledButton(
                     onPressed: onTap,
-                    style: FilledButton.styleFrom(shape: const CircleBorder(), padding: EdgeInsets.zero),
-                    child: const Icon(Icons.touch_app_outlined, size: 25),
+                    style: FilledButton.styleFrom(
+                      shape: const CircleBorder(),
+                      padding: EdgeInsets.zero,
+                    ),
+                    child: const Icon(Icons.touch_app_rounded, size: 24),
                   ),
                 )
               : const SizedBox(key: ValueKey('empty')),

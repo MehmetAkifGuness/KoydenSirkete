@@ -6,8 +6,16 @@ import '../entities/player_state.dart';
 
 class GameClockService {
   static const realTickInterval = Duration(seconds: 20);
-  static const gameSpeedMultiplier = 2;
-  static const gameHoursPerRealTick = gameSpeedMultiplier;
+  static const gameSpeedMultiplier = 1;
+  static const gameHoursPerRealTick = 1;
+
+  static Duration intervalForSpeed(int speed) {
+    return switch (speed) {
+      2 => const Duration(seconds: 10),
+      4 => const Duration(seconds: 5),
+      _ => realTickInterval,
+    };
+  }
 
   ClockTickResult tick(PlayerState state, {int hours = 1}) {
     if (hours < 1) {

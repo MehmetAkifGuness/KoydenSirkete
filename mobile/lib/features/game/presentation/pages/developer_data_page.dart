@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../../../../app/theme/app_palette.dart';
+import '../../../../core/widgets/app_page.dart';
 import '../../domain/entities/debug_state_patch.dart';
 import '../../../skills/domain/entities/skill_id.dart';
 import '../../../skills/domain/entities/skill_profile.dart';
@@ -35,7 +37,10 @@ class _DeveloperDataPageState extends State<DeveloperDataPage> {
       'companyFunds': TextEditingController(text: '${state.companyFunds}'),
       'performance': TextEditingController(text: '${state.performance}'),
     };
-    _skillFields = {for (final skill in SkillId.values) skill: TextEditingController(text: '${state.skills[skill]}')};
+    _skillFields = {
+      for (final skill in SkillId.values)
+        skill: TextEditingController(text: '${state.skills[skill]}'),
+    };
   }
 
   @override
@@ -54,86 +59,103 @@ class _DeveloperDataPageState extends State<DeveloperDataPage> {
     if (!kDebugMode) {
       return const SizedBox.shrink();
     }
-    return Scaffold(
-      appBar: AppBar(title: const Text('Geliştirici verileri')),
-      body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Text('Bu ekran yalnızca debug APK içinde bulunur. Değerler oyun kurallarındaki güvenli sınırlar içinde kaydedilir.', style: Theme.of(context).textTheme.bodyMedium),
-              ),
+    return AppPage(
+      title: 'Geliştirici verileri',
+      subtitle: 'Yalnızca debug sürümünde kullanılabilir',
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(18, 8, 18, 28),
+        children: [
+          AppInfoCard(
+            accent: AppPalette.warning,
+            child: const Row(
+              children: [
+                Icon(Icons.warning_amber_rounded, color: AppPalette.warning),
+                SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    'Değerler güvenli oyun sınırları içinde kaydedilir.',
+                    style: TextStyle(
+                      color: AppPalette.textSecondary,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 12),
-            _field('money', 'Para'),
-            _field('energy', 'Enerji'),
-            _field('maxEnergy', 'Maksimum enerji'),
-            _field('knowledge', 'Genel bilgi'),
-            _field('experience', 'Tecrübe'),
-            _field('day', 'Oyun günü'),
-            _field('hour', 'Oyun saati (0-23)'),
-            _field('careerLevel', 'Kariyer seviyesi'),
-            _field('companyFunds', 'Şirket kasası'),
-            _field('performance', 'Performans (0-100)'),
-            const Padding(
-              padding: EdgeInsets.only(top: 8, bottom: 10),
-              child: Text('Yetenekler', style: TextStyle(fontFamily: 'serif', fontSize: 20, fontWeight: FontWeight.w700)),
-            ),
-            for (final skill in SkillId.values) _skillField(skill),
-            const SizedBox(height: 8),
-            FilledButton.icon(
-              onPressed: widget.session.isBusy ? null : _save,
-              icon: const Icon(Icons.save_outlined),
-              label: const Text('Verileri kaydet'),
-            ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 22),
+          const AppSectionHeader(
+            title: 'Oyun durumu',
+            caption: 'Temel ilerleme değerleri',
+          ),
+          const SizedBox(height: 12),
+          for (final entry in _fields.entries)
+            _field(entry.key, _label(entry.key)),
+          const SizedBox(height: 12),
+          const AppSectionHeader(
+            title: 'Yetenekler',
+            caption: '0–1000 arası değerler',
+          ),
+          const SizedBox(height: 12),
+          for (final skill in SkillId.values) _skillField(skill),
+          const SizedBox(height: 8),
+          FilledButton.icon(
+            onPressed: widget.session.isBusy ? null : _save,
+            icon: const Icon(Icons.save_rounded),
+            label: const Text('Verileri kaydet'),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _field(String key, String label) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: TextField(
-        controller: _fields[key],
-        keyboardType: const TextInputType.numberWithOptions(signed: true),
-        decoration: InputDecoration(labelText: label, border: const OutlineInputBorder()),
-      ),
-    );
-  }
+  String _label(String key) => const {
+    'money': 'Para',
+    'energy': 'Enerji',
+    'maxEnergy': 'Maksimum enerji',
+    'knowledge': 'Genel bilgi',
+    'experience': 'Tecrübe',
+    'day': 'Oyun günü',
+    'hour': 'Oyun saati (0–23)',
+    'careerLevel': 'Kariyer seviyesi',
+    'companyFunds': 'Şirket kasası',
+    'performance': 'Performans (0–100)',
+  }[key]!;
 
-  Widget _skillField(SkillId skill) {
-    return _fieldController(_skillFields[skill]!, '${skill.label} (0-${SkillProfile.maxValue})');
-  }
+  Widget _field(String key, String label) => Padding(
+    padding: const EdgeInsets.only(bottom: 9),
+    child: TextField(
+      controller: _fields[key],
+      keyboardType: const TextInputType.numberWithOptions(signed: true),
+      decoration: InputDecoration(labelText: label),
+    ),
+  );
 
-  Widget _fieldController(TextEditingController controller, String label) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: TextField(
-        controller: controller,
-        keyboardType: const TextInputType.numberWithOptions(signed: false),
-        decoration: InputDecoration(labelText: label, border: const OutlineInputBorder()),
+  Widget _skillField(SkillId skill) => Padding(
+    padding: const EdgeInsets.only(bottom: 9),
+    child: TextField(
+      controller: _skillFields[skill],
+      keyboardType: const TextInputType.numberWithOptions(signed: false),
+      decoration: InputDecoration(
+        labelText: '${skill.label} (0–${SkillProfile.maxValue})',
       ),
-    );
-  }
+    ),
+  );
 
   Future<void> _save() async {
     final values = <String, int?>{
-      for (final entry in _fields.entries) entry.key: int.tryParse(entry.value.text.trim()),
+      for (final entry in _fields.entries)
+        entry.key: int.tryParse(entry.value.text.trim()),
     };
     if (values.values.any((value) => value == null)) {
-      _show('Tüm alanlara geçerli tam sayı gir.');
-      return;
+      return _show('Tüm alanlara geçerli tam sayı gir.');
     }
     final skillValues = <SkillId, int?>{
-      for (final entry in _skillFields.entries) entry.key: int.tryParse(entry.value.text.trim()),
+      for (final entry in _skillFields.entries)
+        entry.key: int.tryParse(entry.value.text.trim()),
     };
     if (skillValues.values.any((value) => value == null)) {
-      _show('Tüm yetenek alanlarına geçerli tam sayı gir.');
-      return;
+      return _show('Tüm yetenek alanlarına geçerli tam sayı gir.');
     }
     final message = await widget.session.updateDebugState(
       DebugStatePatch(
@@ -147,15 +169,15 @@ class _DeveloperDataPageState extends State<DeveloperDataPage> {
         careerLevel: values['careerLevel']!,
         companyFunds: values['companyFunds']!,
         performance: values['performance']!,
-        skills: {for (final entry in skillValues.entries) entry.key: entry.value!},
+        skills: {
+          for (final entry in skillValues.entries) entry.key: entry.value!,
+        },
       ),
     );
-    if (mounted && message != null) {
-      _show(message);
-    }
+    if (mounted && message != null) _show(message);
   }
 
-  void _show(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
-  }
+  void _show(String message) => ScaffoldMessenger.of(
+    context,
+  ).showSnackBar(SnackBar(content: Text(message)));
 }

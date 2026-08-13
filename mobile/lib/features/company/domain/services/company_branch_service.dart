@@ -26,9 +26,10 @@ class CompanyBranchService {
       ...CompanyService.employeesFor(state).map((employee) => employee.id),
       for (final current in state.branches) ...current.employees.map((employee) => employee.id),
     };
-    return CompanyEmployeeCatalog.available(
-      state.companyLevel,
-      hiredIds,
+    return CompanyEmployeeCatalog.availableForCity(
+      cityId: branch.cityId,
+      occupiedSlots: branch.employees.length,
+      hiredIds: hiredIds,
     );
   }
 

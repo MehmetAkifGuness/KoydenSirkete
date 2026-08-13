@@ -2,35 +2,36 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../core/constants/app_features.dart';
 import '../core/database/app_database.dart';
 import '../core/database/player_state_store.dart';
-import '../core/constants/app_features.dart';
-import '../core/widgets/app_gradient_background.dart';
-import '../core/widgets/storage_error_page.dart';
 import '../core/widgets/app_feedback.dart';
-import '../features/dashboard/presentation/pages/dashboard_page.dart';
-import '../features/earning/presentation/pages/earning_page.dart';
-import '../features/profile/presentation/pages/profile_page.dart';
-import '../features/game/data/mappers/player_state_mapper.dart';
-import '../features/game/data/repositories/local_player_state_repository.dart';
-import '../features/game/application/game_session_application_service.dart';
-import '../features/game/domain/services/game_clock_service.dart';
-import '../features/game/presentation/state/game_session_controller.dart';
-import '../features/game/presentation/state/foreground_clock_ticker.dart';
-import '../features/game/presentation/pages/bankruptcy_page.dart';
-import '../features/training/presentation/pages/training_page.dart';
-import '../features/skills/presentation/pages/skills_page.dart';
-import '../features/sport/presentation/pages/sport_page.dart';
-import '../features/jobs/presentation/pages/jobs_page.dart';
+import '../core/widgets/app_gradient_background.dart';
+import '../core/widgets/game_bottom_nav.dart';
+import '../core/widgets/game_top_bar.dart';
+import '../core/widgets/storage_error_page.dart';
 import '../features/career/presentation/pages/career_page.dart';
 import '../features/cities/presentation/pages/cities_page.dart';
 import '../features/company/presentation/pages/company_page.dart';
+import '../features/dashboard/presentation/pages/dashboard_page.dart';
+import '../features/earning/presentation/pages/earning_page.dart';
 import '../features/employment/presentation/pages/employment_page.dart';
+import '../features/game/application/game_session_application_service.dart';
+import '../features/game/data/mappers/player_state_mapper.dart';
+import '../features/game/data/repositories/local_player_state_repository.dart';
+import '../features/game/domain/services/game_clock_service.dart';
+import '../features/game/presentation/pages/bankruptcy_page.dart';
+import '../features/game/presentation/state/foreground_clock_ticker.dart';
+import '../features/game/presentation/state/game_session_controller.dart';
+import '../features/jobs/presentation/pages/jobs_page.dart';
 import '../features/onboarding/presentation/pages/onboarding_page.dart';
+import '../features/profile/presentation/pages/profile_page.dart';
+import '../features/skills/presentation/pages/skills_page.dart';
+import '../features/sport/presentation/pages/sport_page.dart';
+import '../features/training/presentation/pages/training_page.dart';
 import 'router/app_navigation_state.dart';
 import 'router/app_router.dart';
 import 'theme/app_theme.dart';
-import 'theme/app_palette.dart';
 
 class CareerToCompanyApp extends StatelessWidget {
   const CareerToCompanyApp({this.playerStateStore, super.key});
@@ -39,15 +40,13 @@ class CareerToCompanyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: AppPalette.listenable,
-      builder: (context, _) => MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'Müdür',
-        theme: AppTheme.dark(),
-        builder: (context, child) => AppGradientBackground(child: child ?? const SizedBox.shrink()),
-        home: AppShell(playerStateStore: playerStateStore),
-      ),
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Müdür',
+      theme: AppTheme.dark(),
+      builder: (context, child) =>
+          AppGradientBackground(child: child ?? const SizedBox.shrink()),
+      home: AppShell(playerStateStore: playerStateStore),
     );
   }
 }
@@ -67,6 +66,8 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
   late final PlayerStateStore _playerStateStore;
   late final GameSessionController _session;
   bool _showWelcome = true;
+  int _gameSpeed = 1;
+  bool _clockPaused = false;
 
   @override
   void initState() {
@@ -75,13 +76,15 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
     _playerStateStore = widget.playerStateStore ?? AppDatabase();
     _session = GameSessionController(
       applicationService: GameSessionApplicationService(
-        repository: LocalPlayerStateRepository(database: _playerStateStore, mapper: PlayerStateMapper()),
+        repository: LocalPlayerStateRepository(
+          database: _playerStateStore,
+          mapper: PlayerStateMapper(),
+        ),
       ),
     );
-    _session.addListener(_syncPalette);
     _clockTicker = ForegroundClockTicker(
       onTick: _tickClock,
-      interval: GameClockService.realTickInterval,
+      interval: GameClockService.intervalForSpeed(_gameSpeed),
     );
     _session.initialize();
   }
@@ -91,7 +94,6 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
     _navigation.dispose();
     WidgetsBinding.instance.removeObserver(this);
     _clockTicker.dispose();
-    _session.removeListener(_syncPalette);
     _session.dispose();
     unawaited(_playerStateStore.close());
     super.dispose();
@@ -100,7 +102,7 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      if (!_showWelcome && _session.state.isOnboarded && _session.isReady) {
+      if (!_clockPaused && !_showWelcome && _session.state.isOnboarded && _session.isReady) {
         unawaited(_resumeGame());
       }
     } else {
@@ -114,10 +116,15 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
       animation: Listenable.merge([_navigation, _session]),
       builder: (context, _) {
         if (!_session.isReady) {
-          return const Scaffold(body: Center(child: CircularProgressIndicator()));
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
         }
         if (_session.errorMessage != null) {
-          return StorageErrorPage(message: _session.errorMessage!, onRetry: _session.retryInitialization);
+          return StorageErrorPage(
+            message: _session.errorMessage!,
+            onRetry: _session.retryInitialization,
+          );
         }
         if (_session.state.isBankrupt) {
           return BankruptcyPage(onRestart: _restartAfterBankruptcy);
@@ -126,55 +133,75 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
           return OnboardingPage(session: _session, onStart: _enterGame);
         }
         return Scaffold(
-          body: IndexedStack(
-            index: _navigation.currentIndex,
+          body: Column(
             children: [
-              DashboardPage(session: _session, onFeatureTap: _openFeature),
-              CareerPage(session: _session),
-              EmploymentPage(session: _session),
-              CompanyPage(session: _session),
-              ProfilePage(session: _session),
+              GameTopBar(
+                state: _session.state,
+                speed: _gameSpeed,
+                isRunning: !_clockPaused && _clockTicker.isRunning,
+                onSpeedChanged: _changeGameSpeed,
+                onToggleRunning: _toggleClock,
+              ),
+              Expanded(
+                child: MediaQuery.removePadding(
+                  context: context,
+                  removeTop: true,
+                  child: _currentPage(),
+                ),
+              ),
             ],
           ),
-          bottomNavigationBar: NavigationBar(
+          bottomNavigationBar: GameBottomNav(
             selectedIndex: _navigation.currentIndex,
-            onDestinationSelected: _navigation.select,
-            destinations: const [
-              NavigationDestination(icon: Icon(Icons.dashboard_outlined), selectedIcon: Icon(Icons.dashboard), label: 'Panel'),
-              NavigationDestination(icon: Icon(Icons.trending_up), label: 'Kariyer'),
-              NavigationDestination(icon: Icon(Icons.work_outline), selectedIcon: Icon(Icons.work), label: 'İşim'),
-              NavigationDestination(icon: Icon(Icons.business_outlined), selectedIcon: Icon(Icons.business), label: 'Şirketim'),
-              NavigationDestination(icon: Icon(Icons.person_outline), selectedIcon: Icon(Icons.person), label: 'Profil'),
-            ],
+            onSelected: _navigation.select,
           ),
         );
       },
     );
   }
 
-  void _syncPalette() {
-    final paletteId = _session.state.themePaletteId;
-    if (AppPalette.current.id != paletteId) {
-      AppPalette.select(paletteId);
-    }
-  }
+  Widget _currentPage() => switch (_navigation.currentIndex) {
+    0 => DashboardPage(session: _session, onFeatureTap: _openFeature),
+    1 => CareerPage(session: _session),
+    2 => EmploymentPage(session: _session),
+    3 => CompanyPage(session: _session),
+    _ => ProfilePage(session: _session),
+  };
 
   void _enterGame() {
-    if (!mounted) {
-      return;
-    }
+    if (!mounted) return;
     setState(() => _showWelcome = false);
     unawaited(_resumeGame());
   }
 
+  void _changeGameSpeed(int speed) {
+    if (_gameSpeed == speed) {
+      return;
+    }
+    setState(() => _gameSpeed = speed);
+    _clockTicker.updateInterval(GameClockService.intervalForSpeed(speed));
+  }
+
+  void _toggleClock() {
+    if (_clockPaused) {
+      setState(() => _clockPaused = false);
+      if (_session.isReady && _session.state.isOnboarded && !_showWelcome) {
+        _clockTicker.start();
+      }
+      return;
+    }
+    setState(() => _clockPaused = true);
+    _clockTicker.stop();
+  }
+
   Future<void> _tickClock() async {
-    final message = await _session.tick(hours: GameClockService.gameHoursPerRealTick);
+    final message = await _session.tick(
+      hours: GameClockService.gameHoursPerRealTick,
+    );
     if (mounted && message != null && message.isNotEmpty) {
       AppFeedback.show(context, message);
     }
-    if (mounted && _session.state.isBankrupt) {
-      _clockTicker.stop();
-    }
+    if (mounted && _session.state.isBankrupt) _clockTicker.stop();
   }
 
   Future<void> _resumeGame() async {
@@ -187,37 +214,36 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
   Future<void> _restartAfterBankruptcy() async {
     _clockTicker.stop();
     await _session.resetGame();
-    if (!mounted) {
-      return;
-    }
-    setState(() => _showWelcome = true);
+    if (!mounted) return;
+    setState(() {
+      _showWelcome = true;
+      _clockPaused = false;
+      _gameSpeed = 1;
+    });
   }
 
   void _openFeature(AppFeature feature) {
-    if (feature.title == AppFeatures.earning.title) {
-      Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => EarningPage(session: _session)));
-      return;
-    }
-    if (feature.title == AppFeatures.training.title) {
-      Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => TrainingPage(session: _session)));
-      return;
-    }
-    if (feature.title == AppFeatures.skills.title) {
-      Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => SkillsPage(session: _session)));
-      return;
-    }
-    if (feature.title == AppFeatures.sport.title) {
-      Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => SportPage(session: _session)));
-      return;
-    }
-    if (feature.title == AppFeatures.jobs.title) {
-      Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => JobsPage(session: _session)));
-      return;
-    }
-    if (feature.title == AppFeatures.cities.title) {
-      Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => CitiesPage(session: _session)));
-      return;
-    }
-    Navigator.of(context).push(AppRouter.placeholderRoute(feature));
+    final route = switch (feature.title) {
+      _ when feature.title == AppFeatures.earning.title => MaterialPageRoute<void>(
+          builder: (_) => EarningPage(session: _session),
+        ),
+      _ when feature.title == AppFeatures.training.title => MaterialPageRoute<void>(
+          builder: (_) => TrainingPage(session: _session),
+        ),
+      _ when feature.title == AppFeatures.skills.title => MaterialPageRoute<void>(
+          builder: (_) => SkillsPage(session: _session),
+        ),
+      _ when feature.title == AppFeatures.sport.title => MaterialPageRoute<void>(
+          builder: (_) => SportPage(session: _session),
+        ),
+      _ when feature.title == AppFeatures.jobs.title => MaterialPageRoute<void>(
+          builder: (_) => JobsPage(session: _session),
+        ),
+      _ when feature.title == AppFeatures.cities.title => MaterialPageRoute<void>(
+          builder: (_) => CitiesPage(session: _session),
+        ),
+      _ => AppRouter.placeholderRoute(feature),
+    };
+    Navigator.of(context).push(route);
   }
 }

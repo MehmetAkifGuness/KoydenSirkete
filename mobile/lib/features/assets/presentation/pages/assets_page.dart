@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 
+import '../../../../app/theme/app_palette.dart';
 import '../../../../core/widgets/app_feedback.dart';
+import '../../../../core/widgets/app_page.dart';
 import '../../../../core/widgets/feature_error_view.dart';
-import '../../../cities/domain/services/city_catalog.dart';
 import '../../../cities/domain/entities/city.dart';
+import '../../../cities/domain/services/city_catalog.dart';
 import '../../../game/presentation/state/game_session_controller.dart';
 import '../../domain/entities/car_asset.dart';
 import '../../domain/entities/home_asset.dart';
@@ -17,50 +19,122 @@ class AssetsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Varlıklarım')),
-      body: SafeArea(
-        child: AnimatedBuilder(
-          animation: session,
-          builder: (context, _) {
-            try {
-              final state = session.state;
-          final city = CityCatalog.findById(state.currentCityId);
-          final ownedHomes = state.ownedHomeIds.map(HomeCatalog.findById).whereType<HomeAsset>().toList(growable: false);
-          final ownedCar = CarCatalog.findById(state.ownedCarId);
-              return ListView(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-                children: [
-              Text('Para: ₺${state.money}', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
-              const SizedBox(height: 8),
-              Text(city == null ? 'Şehir bulunamadı.' : 'Mevcut şehir: ${city.name} · Ev alınca bu şehirde kira ödemezsin.'),
-              const SizedBox(height: 20),
-              const Text('Evler', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900)),
-              const SizedBox(height: 8),
-              if (ownedHomes.isNotEmpty) ...[
-                for (final home in ownedHomes) _OwnedHomeTile(home: home),
-                const SizedBox(height: 4),
-              ],
-              if (city != null) for (final home in HomeCatalog.forCity(city)) _HomeTile(home: home, session: session, city: city),
-              const SizedBox(height: 20),
-              const Text('Arabalar', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900)),
-              const SizedBox(height: 8),
-              if (ownedCar != null) _OwnedCarTile(car: ownedCar),
-              for (final car in CarCatalog.cars) _CarTile(car: car, session: session),
+    return AppPage(
+      title: 'Varlıklarım',
+      subtitle: 'Geleceğin için kalıcı yatırımlar',
+      child: AnimatedBuilder(
+        animation: session,
+        builder: (context, _) {
+          try {
+            final state = session.state;
+            final city = CityCatalog.findById(state.currentCityId);
+            final ownedHomes = state.ownedHomeIds
+                .map(HomeCatalog.findById)
+                .whereType<HomeAsset>()
+                .toList(growable: false);
+            final ownedCar = CarCatalog.findById(state.ownedCarId);
+            return ListView(
+              padding: const EdgeInsets.fromLTRB(18, 8, 18, 28),
+              children: [
+                AppInfoCard(
+                  accent: AppPalette.tertiary,
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 44,
+                        height: 44,
+                        decoration: BoxDecoration(
+                          color: AppPalette.tertiary.withValues(alpha: .14),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: const Icon(
+                          Icons.account_balance_wallet_rounded,
+                          color: AppPalette.tertiary,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Yatırım bütçen',
+                              style: TextStyle(
+                                color: AppPalette.textMuted,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            const SizedBox(height: 3),
+                            Text(
+                              '₺${state.money}',
+                              style: const TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              city == null ? 'Konum bulunamadı' : city.name,
+                              style: const TextStyle(
+                                color: AppPalette.textSecondary,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 26),
+                const AppSectionHeader(
+                  title: 'Evler',
+                  caption: 'Kira giderini azalt, konforunu artır.',
+                ),
+                const SizedBox(height: 12),
+                if (ownedHomes.isNotEmpty) ...[
+                  for (final home in ownedHomes) ...[
+                    _OwnedHomeCard(home: home),
+                    const SizedBox(height: 10),
+                  ],
                 ],
-              );
-            } on Object {
-              return const FeatureErrorView(title: 'Varlık bilgileri okunamadı.');
-            }
-          },
-        ),
+                if (city != null)
+                  for (final home in HomeCatalog.forCity(city)) ...[
+                    _HomeCard(home: home, session: session, city: city),
+                    const SizedBox(height: 10),
+                  ],
+                const SizedBox(height: 18),
+                const AppSectionHeader(
+                  title: 'Arabalar',
+                  caption: 'Şehir değişimlerinde avantaj kazan.',
+                ),
+                const SizedBox(height: 12),
+                if (ownedCar != null) ...[
+                  _OwnedCarCard(car: ownedCar),
+                  const SizedBox(height: 10),
+                ],
+                for (final car in CarCatalog.cars) ...[
+                  _CarCard(car: car, session: session),
+                  const SizedBox(height: 10),
+                ],
+              ],
+            );
+          } on Object {
+            return const FeatureErrorView(title: 'Varlık bilgileri okunamadı.');
+          }
+        },
       ),
     );
   }
 }
 
-class _HomeTile extends StatelessWidget {
-  const _HomeTile({required this.home, required this.session, required this.city});
+class _HomeCard extends StatelessWidget {
+  const _HomeCard({
+    required this.home,
+    required this.session,
+    required this.city,
+  });
 
   final HomeAsset home;
   final GameSessionController session;
@@ -70,20 +144,68 @@ class _HomeTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final check = session.checkHome(home, city);
     final owned = session.state.ownedHomeIds.contains(home.id);
-    return Card(
-      margin: const EdgeInsets.only(bottom: 8),
-      child: ListTile(
-        title: Text(home.name),
-        subtitle: Text('${home.description}\nKonfor: ${home.comfort}/100 · ₺${home.price} · ${check.reason}'),
-        isThreeLine: true,
-        trailing: SizedBox(
-          width: 92,
-          child: FilledButton.tonal(
-            style: FilledButton.styleFrom(minimumSize: const Size(0, 44), padding: const EdgeInsets.symmetric(horizontal: 6)),
-            onPressed: owned || !check.isEligible || session.isBusy ? null : () => _buy(context),
-            child: FittedBox(child: Text(owned ? 'Sahipsin' : 'Satın al')),
+    return AppInfoCard(
+      accent: AppPalette.primary,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(
+              color: AppPalette.primary.withValues(alpha: .12),
+              borderRadius: BorderRadius.circular(13),
+            ),
+            child: const Icon(Icons.home_rounded, color: AppPalette.primary),
           ),
-        ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  home.name,
+                  style: const TextStyle(fontWeight: FontWeight.w800),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  home.description,
+                  style: const TextStyle(
+                    color: AppPalette.textSecondary,
+                    fontSize: 12,
+                    height: 1.35,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Konfor ${home.comfort}/100 · ₺${home.price}',
+                  style: const TextStyle(
+                    color: AppPalette.textMuted,
+                    fontSize: 11,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  check.reason,
+                  style: TextStyle(
+                    color: check.isEligible
+                        ? AppPalette.success
+                        : AppPalette.warning,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          FilledButton.tonal(
+            onPressed: owned || !check.isEligible || session.isBusy
+                ? null
+                : () => _buy(context),
+            child: Text(owned ? 'Sahipsin' : 'Al'),
+          ),
+        ],
       ),
     );
   }
@@ -94,24 +216,52 @@ class _HomeTile extends StatelessWidget {
   }
 }
 
-class _OwnedHomeTile extends StatelessWidget {
-  const _OwnedHomeTile({required this.home});
+class _OwnedHomeCard extends StatelessWidget {
+  const _OwnedHomeCard({required this.home});
 
   final HomeAsset home;
 
   @override
-  Widget build(BuildContext context) => Card(
-        child: ListTile(
-          leading: const Icon(Icons.home_outlined),
-          title: Text('${home.name} · Kira muafiyeti'),
-          subtitle: Text('Şehir ID: ${home.cityId} · Konfor: ${home.comfort}/100'),
-          trailing: const Icon(Icons.check_circle_outline),
+  Widget build(BuildContext context) => AppInfoCard(
+    accent: AppPalette.primary,
+    child: Row(
+      children: [
+        Container(
+          width: 42,
+          height: 42,
+          decoration: BoxDecoration(
+            color: AppPalette.primary.withValues(alpha: .13),
+            borderRadius: BorderRadius.circular(13),
+          ),
+          child: const Icon(Icons.verified_rounded, color: AppPalette.primary),
         ),
-      );
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                home.name,
+                style: const TextStyle(fontWeight: FontWeight.w800),
+              ),
+              const SizedBox(height: 3),
+              Text(
+                'Kira muafiyeti · Konfor ${home.comfort}/100',
+                style: const TextStyle(
+                  color: AppPalette.textSecondary,
+                  fontSize: 12,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
 }
 
-class _CarTile extends StatelessWidget {
-  const _CarTile({required this.car, required this.session});
+class _CarCard extends StatelessWidget {
+  const _CarCard({required this.car, required this.session});
 
   final CarAsset car;
   final GameSessionController session;
@@ -119,20 +269,71 @@ class _CarTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final check = session.checkCar(car);
-    return Card(
-      margin: const EdgeInsets.only(bottom: 8),
-      child: ListTile(
-        title: Text(car.name),
-        subtitle: Text('${car.description}\nTaşınma avantajı: %${car.moveDiscountPercent} · ₺${car.price}\n${check.reason}'),
-        isThreeLine: true,
-        trailing: SizedBox(
-          width: 92,
-          child: FilledButton.tonal(
-            style: FilledButton.styleFrom(minimumSize: const Size(0, 44), padding: const EdgeInsets.symmetric(horizontal: 6)),
-            onPressed: check.isEligible && !session.isBusy ? () => _buy(context) : null,
-            child: const FittedBox(child: Text('Satın al')),
+    return AppInfoCard(
+      accent: AppPalette.secondary,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(
+              color: AppPalette.secondary.withValues(alpha: .12),
+              borderRadius: BorderRadius.circular(13),
+            ),
+            child: const Icon(
+              Icons.directions_car_rounded,
+              color: AppPalette.secondary,
+            ),
           ),
-        ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  car.name,
+                  style: const TextStyle(fontWeight: FontWeight.w800),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  car.description,
+                  style: const TextStyle(
+                    color: AppPalette.textSecondary,
+                    fontSize: 12,
+                    height: 1.35,
+                  ),
+                ),
+                const SizedBox(height: 7),
+                Text(
+                  'Taşınma avantajı %${car.moveDiscountPercent} · ₺${car.price}',
+                  style: const TextStyle(
+                    color: AppPalette.textMuted,
+                    fontSize: 11,
+                  ),
+                ),
+                const SizedBox(height: 5),
+                Text(
+                  check.reason,
+                  style: TextStyle(
+                    color: check.isEligible
+                        ? AppPalette.success
+                        : AppPalette.warning,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          FilledButton.tonal(
+            onPressed: check.isEligible && !session.isBusy
+                ? () => _buy(context)
+                : null,
+            child: const Text('Al'),
+          ),
+        ],
       ),
     );
   }
@@ -143,18 +344,49 @@ class _CarTile extends StatelessWidget {
   }
 }
 
-class _OwnedCarTile extends StatelessWidget {
-  const _OwnedCarTile({required this.car});
+class _OwnedCarCard extends StatelessWidget {
+  const _OwnedCarCard({required this.car});
 
   final CarAsset car;
 
   @override
-  Widget build(BuildContext context) => Card(
-        child: ListTile(
-          leading: const Icon(Icons.directions_car_outlined),
-          title: Text('${car.name} · Sahip olduğun araç'),
-          subtitle: Text('Şehir değişim maliyeti %${car.moveDiscountPercent} azalır.'),
-          trailing: const Icon(Icons.check_circle_outline),
+  Widget build(BuildContext context) => AppInfoCard(
+    accent: AppPalette.secondary,
+    child: Row(
+      children: [
+        Container(
+          width: 42,
+          height: 42,
+          decoration: BoxDecoration(
+            color: AppPalette.secondary.withValues(alpha: .13),
+            borderRadius: BorderRadius.circular(13),
+          ),
+          child: const Icon(
+            Icons.verified_rounded,
+            color: AppPalette.secondary,
+          ),
         ),
-      );
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                car.name,
+                style: const TextStyle(fontWeight: FontWeight.w800),
+              ),
+              const SizedBox(height: 3),
+              Text(
+                'Sahipsin · Taşınma maliyeti %${car.moveDiscountPercent} azalır.',
+                style: const TextStyle(
+                  color: AppPalette.textSecondary,
+                  fontSize: 12,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
 }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../../app/theme/app_palette.dart';
 
+import '../../../../app/theme/app_palette.dart';
 import '../../../game/presentation/state/game_session_controller.dart';
 
 class OnboardingPage extends StatefulWidget {
@@ -13,24 +13,24 @@ class OnboardingPage extends StatefulWidget {
   State<OnboardingPage> createState() => _OnboardingPageState();
 }
 
-class _OnboardingPageState extends State<OnboardingPage> with SingleTickerProviderStateMixin {
+class _OnboardingPageState extends State<OnboardingPage>
+    with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
-  late final Animation<double> _backgroundOpacity;
-  late final Animation<double> _contentOpacity;
-  late final Animation<double> _contentScale;
-  late final Animation<Offset> _contentOffset;
+  late final Animation<double> _opacity;
+  late final Animation<Offset> _offset;
   bool _isStarting = false;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 1800));
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 850),
+    )..forward();
     final curve = CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic);
-    _backgroundOpacity = Tween<double>(begin: .08, end: .78).animate(curve);
-    _contentOpacity = Tween<double>(begin: 0, end: 1).animate(CurvedAnimation(parent: _controller, curve: const Interval(.24, 1, curve: Curves.easeOut)));
-    _contentScale = Tween<double>(begin: .88, end: 1).animate(CurvedAnimation(parent: _controller, curve: const Interval(.18, 1, curve: Curves.easeOutCubic)));
-    _contentOffset = Tween<Offset>(begin: const Offset(0, .08), end: Offset.zero).animate(CurvedAnimation(parent: _controller, curve: const Interval(.18, 1, curve: Curves.easeOutCubic)));
-    _controller.forward();
+    _opacity = Tween<double>(begin: 0, end: 1).animate(curve);
+    _offset = Tween<Offset>(begin: const Offset(0, .06), end: Offset.zero)
+        .animate(curve);
   }
 
   @override
@@ -43,88 +43,137 @@ class _OnboardingPageState extends State<OnboardingPage> with SingleTickerProvid
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppPalette.background,
-      body: Stack(
-        fit: StackFit.expand,
-        children: [
-          FadeTransition(
-            opacity: _backgroundOpacity,
-            child: Image.asset(
-              'assets/images/mudurum_cover.png',
-              fit: BoxFit.cover,
-              errorBuilder: (_, _, _) => ColoredBox(color: AppPalette.background),
+      body: SafeArea(
+        child: FadeTransition(
+          opacity: _opacity,
+          child: SlideTransition(
+            position: _offset,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(22, 14, 22, 20),
+              child: _content(context),
             ),
           ),
-          DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [AppPalette.background.withValues(alpha: .60), AppPalette.surface.withValues(alpha: .15), AppPalette.background.withValues(alpha: .96)],
-                stops: [0, .42, 1],
-              ),
-            ),
-          ),
-          SafeArea(
-            child: LayoutBuilder(
-              builder: (context, constraints) => SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 24),
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(minHeight: constraints.maxHeight - 48),
-                  child: Center(
-                    child: FadeTransition(
-                      opacity: _contentOpacity,
-                      child: SlideTransition(
-                        position: _contentOffset,
-                        child: ScaleTransition(
-                          scale: _contentScale,
-                          child: _content(context),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
 
   Widget _content(BuildContext context) {
-    final gold = Theme.of(context).colorScheme.primary;
     return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        Row(
+          children: [
+            Container(width: 10, height: 10, color: AppPalette.primary),
+            const SizedBox(width: 8),
+            const Text(
+              'Müdür / Başlangıç',
+              style: TextStyle(
+                color: AppPalette.textSecondary,
+                fontSize: 10,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 1,
+              ),
+            ),
+            const Spacer(),
+            const Text(
+              '01 — 04',
+              style: TextStyle(
+                color: AppPalette.textMuted,
+                fontSize: 10,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 18),
         Container(
-          width: 124,
-          height: 124,
-          padding: const EdgeInsets.all(7),
-          decoration: BoxDecoration(
-            color: AppPalette.surface.withValues(alpha: .80),
-            border: Border.all(color: gold.withValues(alpha: .7)),
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [BoxShadow(color: gold.withValues(alpha: .2), blurRadius: 30, spreadRadius: 4)],
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(7),
-            child: Image.asset('assets/images/mudurum_cover.png', fit: BoxFit.cover),
+          height: 158,
+          width: double.infinity,
+          color: AppPalette.secondary,
+          child: Stack(
+            children: [
+              Positioned(
+                top: 18,
+                right: 18,
+                child: Text(
+                  'CAREER\nTO COMPANY',
+                  textAlign: TextAlign.right,
+                  style: TextStyle(
+                    color: AppPalette.surfaceMuted.withValues(alpha: .65),
+                    fontSize: 10,
+                    fontWeight: FontWeight.w900,
+                    height: 1.3,
+                    letterSpacing: 1,
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 22,
+                bottom: 16,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Container(
+                      width: 82,
+                      height: 82,
+                      padding: const EdgeInsets.all(7),
+                      color: AppPalette.surface,
+                      child: Image.asset(
+                        'assets/images/mudurum_cover.png',
+                        cacheWidth: 512,
+                        cacheHeight: 512,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, _, _) => const Icon(
+                          Icons.business_center_rounded,
+                          color: AppPalette.primary,
+                          size: 42,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 14),
+                    const Text(
+                      'Müdür',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 1.4,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
-        const SizedBox(height: 22),
-        Text('Müdür', style: TextStyle(color: gold, fontFamily: 'serif', fontSize: 32, fontWeight: FontWeight.w700, shadows: [Shadow(color: AppPalette.background, blurRadius: 12)])),
-        const SizedBox(height: 14),
+        const SizedBox(height: 20),
         Text(
-          'Köydeki ilk adımından kendi şirketine\nuzanan tamamen offline bir kariyer\nsimülasyonuna hoş geldin.',
-          textAlign: TextAlign.center,
-          style: TextStyle(color: AppPalette.textPrimary, fontFamily: 'serif', fontSize: 17, height: 1.55, fontWeight: FontWeight.w600, shadows: [Shadow(color: AppPalette.background, blurRadius: 8)]),
+          'Kendi hikâyeni\nkurmaya başla.',
+          style: Theme.of(context).textTheme.displaySmall,
         ),
-        const SizedBox(height: 38),
+        const SizedBox(height: 10),
+        const Text(
+          'Köydeki ilk adımından kendi şirketine uzanan, kararlarınla şekillenen offline kariyer simülasyonu.',
+          style: TextStyle(
+            color: AppPalette.textSecondary,
+            fontSize: 15,
+            height: 1.5,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: 14),
+        const Divider(height: 1),
+        const SizedBox(height: 4),
+        const _WelcomeLine(index: '01', label: 'Kariyerini planla'),
+        const _WelcomeLine(index: '02', label: 'Doğru fırsatı seç'),
+        const _WelcomeLine(index: '03', label: 'Kendi işini büyüt'),
+        const SizedBox(height: 18),
         SizedBox(
-          width: 240,
+          width: double.infinity,
           child: FilledButton.icon(
             onPressed: _isStarting || widget.session.isBusy ? null : _start,
-            icon: const Icon(Icons.play_arrow_rounded),
+            icon: const Icon(Icons.arrow_forward_rounded),
             label: const Text('Oyuna başla'),
           ),
         ),
@@ -133,15 +182,48 @@ class _OnboardingPageState extends State<OnboardingPage> with SingleTickerProvid
   }
 
   Future<void> _start() async {
-    if (_isStarting) {
-      return;
-    }
+    if (_isStarting) return;
     setState(() => _isStarting = true);
     if (!widget.session.state.isOnboarded) {
       await widget.session.completeOnboarding();
     }
-    if (mounted) {
-      widget.onStart?.call();
-    }
+    if (mounted) widget.onStart?.call();
+  }
+}
+
+class _WelcomeLine extends StatelessWidget {
+  const _WelcomeLine({required this.index, required this.label});
+
+  final String index;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Row(
+        children: [
+          Text(
+            index,
+            style: const TextStyle(
+              color: AppPalette.primary,
+              fontSize: 11,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Text(
+            label,
+            style: const TextStyle(
+              color: AppPalette.textPrimary,
+              fontSize: 13,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const Spacer(),
+          const Icon(Icons.north_east_rounded, size: 16, color: AppPalette.textMuted),
+        ],
+      ),
+    );
   }
 }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../app/theme/app_palette.dart';
 import '../constants/app_features.dart';
+import 'app_page.dart';
 
 class FeaturePlaceholderPage extends StatelessWidget {
   const FeaturePlaceholderPage({required this.feature, super.key});
@@ -10,24 +10,20 @@ class FeaturePlaceholderPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(feature.title)),
-      body: Center(
+    return AppPage(
+      title: feature.title,
+      subtitle: feature.subtitle,
+      child: Center(
         child: Padding(
-          padding: const EdgeInsets.all(28),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              CircleAvatar(radius: 42, backgroundColor: feature.color.withValues(alpha: .15), child: Icon(feature.icon, size: 40, color: feature.color)),
-              const SizedBox(height: 24),
-              Text(feature.title, style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w900)),
-              const SizedBox(height: 12),
-              Text(
-                feature.unlocked ? 'Bu ekran tasarım taslağıdır.' : 'Bu özellik sonraki sürüm planında açılacak.',
-                textAlign: TextAlign.center,
-                style: const TextStyle(color: AppPalette.textSecondary, height: 1.5),
-              ),
-            ],
+          padding: const EdgeInsets.all(24),
+          child: AppEmptyState(
+            icon: feature.icon,
+            title: feature.unlocked
+                ? 'Bu alan hazırlanıyor'
+                : 'Bu alan kilitli',
+            message: feature.unlocked
+                ? 'Bu özellik yeni kariyer akışının bir sonraki adımında açılacak.'
+                : 'Kariyerindeki ilerleme bu alanın kilidini açacak.',
           ),
         ),
       ),

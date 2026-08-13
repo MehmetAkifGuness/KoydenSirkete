@@ -18,16 +18,19 @@ void main() {
     expect(result.dayChanged, isFalse);
   });
 
-  test('20-second foreground tick advances two game hours at 2x speed', () {
+  test('speed controls map real-time intervals to one game hour', () {
     expect(GameClockService.realTickInterval, const Duration(seconds: 20));
-    expect(GameClockService.gameSpeedMultiplier, 2);
+    expect(GameClockService.gameSpeedMultiplier, 1);
+    expect(GameClockService.gameHoursPerRealTick, 1);
+    expect(GameClockService.intervalForSpeed(2), const Duration(seconds: 10));
+    expect(GameClockService.intervalForSpeed(4), const Duration(seconds: 5));
 
     final result = GameClockService().tick(
       PlayerState.initial,
       hours: GameClockService.gameHoursPerRealTick,
     );
 
-    expect(result.state.hour, 10);
+    expect(result.state.hour, 9);
     expect(result.state.energy, 100);
   });
 
