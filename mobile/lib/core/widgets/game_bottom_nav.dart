@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 
 import '../../app/theme/app_palette.dart';
+import '../../app/theme/app_motion.dart';
 
 class GameBottomNav extends StatelessWidget {
-  const GameBottomNav({required this.selectedIndex, required this.onSelected, super.key});
+  const GameBottomNav({
+    required this.selectedIndex,
+    required this.onSelected,
+    super.key,
+  });
 
   final int selectedIndex;
   final ValueChanged<int> onSelected;
@@ -62,34 +67,63 @@ class _NavItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = selected ? AppPalette.primary : AppPalette.textMuted;
-    return InkWell(
-      onTap: onTap,
-      child: SizedBox(
-        height: 70,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            if (selected)
-              Positioned(
-                top: 0,
-                child: Container(width: 32, height: 2, color: AppPalette.primary),
-              ),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(selected ? selectedIcon : icon, size: 21, color: color),
-                const SizedBox(height: 4),
-                Text(
-                  label,
-                  style: TextStyle(
-                    color: color,
-                    fontSize: 10,
-                    fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(3, 5, 3, 5),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(14),
+        child: AnimatedContainer(
+          duration: AppMotion.standard,
+          curve: AppMotion.enterCurve,
+          height: 60,
+          decoration: BoxDecoration(
+            color: selected
+                ? AppPalette.primary.withValues(alpha: .11)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: selected
+                  ? AppPalette.primary.withValues(alpha: .25)
+                  : Colors.transparent,
+            ),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              AnimatedSwitcher(
+                duration: AppMotion.fast,
+                transitionBuilder: (child, animation) => FadeTransition(
+                  opacity: animation,
+                  child: ScaleTransition(
+                    scale: Tween<double>(begin: .72, end: 1).animate(
+                      CurvedAnimation(
+                        parent: animation,
+                        curve: AppMotion.enterCurve,
+                      ),
+                    ),
+                    child: child,
                   ),
                 ),
-              ],
-            ),
-          ],
+                child: Icon(
+                  selected ? selectedIcon : icon,
+                  key: ValueKey(selected),
+                  size: 21,
+                  color: color,
+                ),
+              ),
+              const SizedBox(height: 4),
+              AnimatedDefaultTextStyle(
+                duration: AppMotion.fast,
+                curve: AppMotion.enterCurve,
+                style: TextStyle(
+                  color: color,
+                  fontSize: 10,
+                  fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
+                ),
+                child: Text(label),
+              ),
+            ],
+          ),
         ),
       ),
     );

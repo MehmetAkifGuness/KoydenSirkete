@@ -5,6 +5,7 @@ import '../../../../core/widgets/app_feedback.dart';
 import '../../../../core/widgets/app_page.dart';
 import '../../../game/presentation/state/game_session_controller.dart';
 import '../../../jobs/domain/services/job_catalog.dart';
+import '../../../cities/domain/services/city_catalog.dart';
 import '../../../wheel/presentation/widgets/esnaf_wheel_panel.dart';
 import '../../../work/presentation/pages/work_page.dart';
 
@@ -26,6 +27,8 @@ class EmploymentPage extends StatelessWidget {
           final job = JobCatalog.findById(
             employment?.jobId ?? state.currentJobId,
           );
+          final salaryMultiplier =
+              CityCatalog.findById(state.currentCityId)?.salaryMultiplier ?? 1;
           if (job == null || employment == null) {
             return ListView(
               padding: const EdgeInsets.fromLTRB(18, 8, 18, 28),
@@ -120,7 +123,7 @@ class EmploymentPage extends StatelessWidget {
                     AppProgressLine(value: state.performance / 100),
                     const SizedBox(height: 12),
                     Text(
-                      'Gün ${state.day} · Bugün ${state.workSessionsToday} görev · Son görev günü ${employment.lastTaskDay}',
+                      'Gün ${state.day} · Şehir maaşı x${salaryMultiplier.toStringAsFixed(2)} · Bugün ${state.workSessionsToday} görev · Son görev günü ${employment.lastTaskDay}',
                       style: const TextStyle(
                         color: AppPalette.textMuted,
                         fontSize: 11,

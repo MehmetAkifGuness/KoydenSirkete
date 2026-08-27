@@ -8,7 +8,10 @@ import 'company_employee_catalog.dart';
 import 'company_service.dart';
 
 class CompanyBranchOperationResult {
-  const CompanyBranchOperationResult({required this.state, required this.messages});
+  const CompanyBranchOperationResult({
+    required this.state,
+    required this.messages,
+  });
 
   final PlayerState state;
   final List<String> messages;
@@ -17,14 +20,19 @@ class CompanyBranchOperationResult {
 class CompanyBranchService {
   static const maxBranchLevel = 3;
 
-  static int openingCost(City city) => (city.dailyCost * 4 + city.marketLevel * 500).clamp(3000, 150000);
+  static int openingCost(City city) =>
+      (city.dailyCost * 4 + city.marketLevel * 500).clamp(3000, 150000);
 
   static int employeeCapacity(CompanyBranch branch) => branch.level * 3;
 
-  List<CompanyEmployee> availableEmployees(PlayerState state, CompanyBranch branch) {
+  List<CompanyEmployee> availableEmployees(
+    PlayerState state,
+    CompanyBranch branch,
+  ) {
     final hiredIds = <int>{
       ...CompanyService.employeesFor(state).map((employee) => employee.id),
-      for (final current in state.branches) ...current.employees.map((employee) => employee.id),
+      for (final current in state.branches)
+        ...current.employees.map((employee) => employee.id),
     };
     return CompanyEmployeeCatalog.availableForCity(
       cityId: branch.cityId,
@@ -35,16 +43,28 @@ class CompanyBranchService {
 
   CompanyCheckResult checkOpen(PlayerState state, City city) {
     if (state.companyLevel == 0) {
-      return const CompanyCheckResult(isEligible: false, reason: 'Önce şirketini kurmalısın.');
+      return const CompanyCheckResult(
+        isEligible: false,
+        reason: 'Önce şirketini kurmalısın.',
+      );
     }
     if (state.branches.any((branch) => branch.cityId == city.id)) {
-      return const CompanyCheckResult(isEligible: false, reason: 'Bu şehirde zaten bir bayin var.');
+      return const CompanyCheckResult(
+        isEligible: false,
+        reason: 'Bu şehirde zaten bir bayin var.',
+      );
     }
     final cost = openingCost(city);
     if (state.companyFunds < cost) {
-      return CompanyCheckResult(isEligible: false, reason: 'Bayi açmak için şirket kasasında ₺$cost olmalı.');
+      return CompanyCheckResult(
+        isEligible: false,
+        reason: 'Bayi açmak için şirket kasasında ₺$cost olmalı.',
+      );
     }
-    return const CompanyCheckResult(isEligible: true, reason: 'Bayi açmaya hazırsın.');
+    return const CompanyCheckResult(
+      isEligible: true,
+      reason: 'Bayi açmaya hazırsın.',
+    );
   }
 
   PlayerState open(PlayerState state, City city) {
@@ -67,11 +87,22 @@ class CompanyBranchService {
     if (branch.employees.length >= employeeCapacity(branch)) {
       throw const GameRuleException('Bu bayinin çalışan kapasitesi dolu.');
     }
-    final alreadyHired = CompanyService.employeesFor(state).any((item) => item.id == employee.id) || state.branches.any((item) => item.employees.any((current) => current.id == employee.id));
+    final alreadyHired =
+        CompanyService.employeesFor(
+          state,
+        ).any((item) => item.id == employee.id) ||
+        state.branches.any(
+          (item) => item.employees.any((current) => current.id == employee.id),
+        );
     if (employee.requiredCompanyLevel > state.companyLevel || alreadyHired) {
       throw const GameRuleException('Bu çalışan şu anda bayiye alınamaz.');
     }
-    return _replaceBranch(state, branch.copyWith(employees: <CompanyEmployee>[...branch.employees, employee]));
+    return _replaceBranch(
+      state,
+      branch.copyWith(
+        employees: <CompanyEmployee>[...branch.employees, employee],
+      ),
+    );
   }
 
   PlayerState dismiss(PlayerState state, int cityId, int employeeId) {
@@ -79,7 +110,9 @@ class CompanyBranchService {
     if (branch == null) {
       throw const GameRuleException('Bayi bulunamadı.');
     }
-    final employees = branch.employees.where((employee) => employee.id != employeeId).toList(growable: false);
+    final employees = branch.employees
+        .where((employee) => employee.id != employeeId)
+        .toList(growable: false);
     if (employees.length == branch.employees.length) {
       throw const GameRuleException('Bu çalışan bayide bulunamadı.');
     }
@@ -89,11 +122,22 @@ class CompanyBranchService {
   int dailyRevenue(CompanyBranch branch) {
     final city = CityCatalog.findById(branch.cityId);
     if (city == null || branch.employees.isEmpty) return 0;
-    final marketIncome = 60 + city.marketLevel * 20 + city.opportunityCount * 10 + branch.level * 50;
-    return marketIncome + branch.employees.fold(0, (total, employee) => total + 80 + employee.performance ~/ 5);
+    final marketIncome =
+        60 +
+        city.marketLevel * 20 +
+        city.opportunityCount * 10 +
+        branch.level * 50;
+    return marketIncome +
+        branch.employees.fold(
+          0,
+          (total, employee) => total + 80 + employee.performance ~/ 5,
+        );
   }
 
-  int dailyPayroll(CompanyBranch branch) => branch.employees.fold(0, (total, employee) => total + employee.dailySalary);
+  int dailyPayroll(CompanyBranch branch) => branch.employees.fold(
+    0,
+    (total, employee) => total + employee.dailySalary,
+  );
 
   CompanyBranch? _find(PlayerState state, int cityId) {
     for (final branch in state.branches) {
@@ -104,13 +148,22 @@ class CompanyBranchService {
 
   PlayerState _replaceBranch(PlayerState state, CompanyBranch replacement) {
     return state.copyWith(
-      branches: <CompanyBranch>[for (final branch in state.branches) branch.id == replacement.id ? replacement : branch],
+      branches: <CompanyBranch>[
+        for (final branch in state.branches)
+          branch.id == replacement.id ? replacement : branch,
+      ],
     );
   }
 
-  CompanyBranchOperationResult processDailyOperations(PlayerState state, {int days = 1}) {
+  CompanyBranchOperationResult processDailyOperations(
+    PlayerState state, {
+    int days = 1,
+  }) {
     if (days < 1 || state.branches.isEmpty) {
-      return CompanyBranchOperationResult(state: state, messages: const <String>[]);
+      return CompanyBranchOperationResult(
+        state: state,
+        messages: const <String>[],
+      );
     }
     var current = state;
     final messages = <String>[];
@@ -121,7 +174,11 @@ class CompanyBranchService {
       }
       if (net != 0) {
         current = current.copyWith(companyFunds: current.companyFunds + net);
-        messages.add(net > 0 ? 'Bayiler şirkete +₺$net kazandırdı.' : 'Bayi giderleri şirket kasasından ₺${net.abs()} aldı.');
+        messages.add(
+          net > 0
+              ? 'Bayiler şirkete +₺$net kazandırdı.'
+              : 'Bayi giderleri şirket kasasından ₺${net.abs()} aldı.',
+        );
       }
     }
     return CompanyBranchOperationResult(state: current, messages: messages);

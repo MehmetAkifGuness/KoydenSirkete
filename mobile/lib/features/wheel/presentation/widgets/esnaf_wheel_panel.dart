@@ -264,65 +264,32 @@ class _WheelView extends StatelessWidget {
 class _WheelPainter extends CustomPainter {
   const _WheelPainter();
 
-  static const _labels = [
-    'İHALE',
-    'BOŞ',
-    '-50',
-    'BOŞ',
-    '-50',
-    'ŞANS',
-    'BOŞ',
-    '-50',
-    'BOŞ',
-    'BOŞ',
-    '100',
-    'BOŞ',
-    '-50',
-    'BOŞ',
-    'BOŞ',
-    '100',
-    'BOŞ',
-    '-50',
-    'BOŞ',
-    'BOŞ',
-  ];
-  static const _colors = [
-    AppPalette.primaryBright,
-    AppPalette.wheelRisk,
-    AppPalette.wheelNeutral,
-    AppPalette.surfaceElevated,
-    AppPalette.wheelRisk,
-    AppPalette.primaryDim,
-    AppPalette.wheelRisk,
-    AppPalette.wheelNeutral,
-    AppPalette.surfaceElevated,
-    AppPalette.wheelRisk,
-    AppPalette.primary,
-    AppPalette.wheelNeutral,
-    AppPalette.wheelRisk,
-    AppPalette.surfaceElevated,
-    AppPalette.wheelRisk,
-    AppPalette.primaryBright,
-    AppPalette.wheelNeutral,
-    AppPalette.wheelRisk,
-    AppPalette.surfaceElevated,
-    AppPalette.wheelRisk,
-  ];
-
   @override
   void paint(Canvas canvas, Size size) {
+    final sectors = EsnafWheelRewardCatalog.sectorTypes;
     final center = size.center(Offset.zero);
     final radius = size.shortestSide / 2;
     final rect = Rect.fromCircle(center: center, radius: radius - 3);
-    final slice = math.pi * 2 / _labels.length;
-    for (var index = 0; index < _labels.length; index++) {
+    final slice = math.pi * 2 / sectors.length;
+    for (var index = 0; index < sectors.length; index++) {
+      final type = sectors[index];
       final start = -math.pi / 2 + index * slice;
-      canvas.drawArc(rect, start, slice, true, Paint()..color = _colors[index]);
+      canvas.drawArc(rect, start, slice, true, Paint()..color = _color(type));
+      canvas.drawArc(
+        rect,
+        start,
+        slice,
+        true,
+        Paint()
+          ..color = AppPalette.background.withValues(alpha: .72)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 2,
+      );
       final textPainter = TextPainter(
         text: TextSpan(
-          text: _labels[index],
+          text: EsnafWheelRewardCatalog.byType(type).title.toUpperCase(),
           style: TextStyle(
-            color: index == 0 || index == 5 || index == 10 || index == 15
+            color: type == EsnafWheelRewardType.bigTender
                 ? AppPalette.background
                 : AppPalette.textPrimary,
             fontSize: 7,
@@ -332,14 +299,14 @@ class _WheelPainter extends CustomPainter {
         textDirection: TextDirection.ltr,
       )..layout();
       final angle = start + slice / 2;
-      final offset = Offset(
-        center.dx + math.cos(angle) * radius * .61,
-        center.dy + math.sin(angle) * radius * .61,
-      );
+      canvas.save();
+      canvas.translate(center.dx, center.dy);
+      canvas.rotate(angle);
       textPainter.paint(
         canvas,
-        offset - Offset(textPainter.width / 2, textPainter.height / 2),
+        Offset(radius * .58 - textPainter.width / 2, -textPainter.height / 2),
       );
+      canvas.restore();
     }
     canvas.drawCircle(
       center,
@@ -350,6 +317,16 @@ class _WheelPainter extends CustomPainter {
         ..strokeWidth = 3,
     );
   }
+
+  Color _color(EsnafWheelRewardType type) => switch (type) {
+    EsnafWheelRewardType.empty => AppPalette.wheelEmpty,
+    EsnafWheelRewardType.bigTender => AppPalette.wheelTender,
+    EsnafWheelRewardType.luckyDay => AppPalette.wheelChance,
+    EsnafWheelRewardType.tipRain => AppPalette.wheelGain,
+    EsnafWheelRewardType.smallTip => AppPalette.wheelSmallGain,
+    EsnafWheelRewardType.customerPenalty => AppPalette.wheelPenalty,
+    EsnafWheelRewardType.majorPenalty => AppPalette.wheelMajorPenalty,
+  };
 
   @override
   bool shouldRepaint(covariant _WheelPainter oldDelegate) => false;

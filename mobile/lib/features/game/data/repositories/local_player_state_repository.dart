@@ -9,13 +9,14 @@ import '../mappers/employment_codec.dart';
 import '../mappers/company_employee_codec.dart';
 import '../mappers/company_branch_codec.dart';
 import '../mappers/owned_asset_ids_codec.dart';
+import '../mappers/finance_ledger_codec.dart';
 
 class LocalPlayerStateRepository implements PlayerStateRepository {
   LocalPlayerStateRepository({
     required PlayerStateStore database,
     required PlayerStateMapper mapper,
-  })  : _database = database,
-        _mapper = mapper;
+  }) : _database = database,
+       _mapper = mapper;
 
   final PlayerStateStore _database;
   final PlayerStateMapper _mapper;
@@ -44,10 +45,8 @@ class LocalPlayerStateRepository implements PlayerStateRepository {
         hour: model.hour,
         earningSessionsToday: model.earningSessionsToday,
         maxEnergy: model.maxEnergy,
-        energyRecoveryRemainder: model.energyRecoveryRemainder,
         energyRecoveryAt: model.energyRecoveryAt,
         negativeMoneyHours: model.negativeMoneyHours,
-        wheelCooldownSeconds: model.wheelCooldownSeconds,
         wheelMajorRewardsToday: model.wheelMajorRewardsToday,
         wheelDurationBuffPercent: model.wheelDurationBuffPercent,
         wheelDurationBuffTasks: model.wheelDurationBuffTasks,
@@ -55,14 +54,17 @@ class LocalPlayerStateRepository implements PlayerStateRepository {
         wheelEnergyBuffTasks: model.wheelEnergyBuffTasks,
         wheelRewardBuffPercent: model.wheelRewardBuffPercent,
         wheelRewardBuffTasks: model.wheelRewardBuffTasks,
-        themePaletteId: model.themePaletteId,
         activeActivityJson: ActiveActivityCodec().encode(model.activeActivity),
-        activeActivitiesJson: ActiveActivityCodec().encodeList(model.activeActivities),
+        activeActivitiesJson: ActiveActivityCodec().encodeList(
+          model.activeActivities,
+        ),
         skillsJson: SkillProfileCodec().encode(model.skills),
         employmentJson: EmploymentCodec().encode(model.employment),
         employeesJson: CompanyEmployeeCodec().encodeList(model.employees),
         branchesJson: CompanyBranchCodec().encodeList(model.branches),
         ownedHomeIdsJson: OwnedAssetIdsCodec().encode(model.ownedHomeIds),
+        rentedHomeIdsJson: OwnedAssetIdsCodec().encode(model.rentedHomeIds),
+        financeLedgerJson: FinanceLedgerCodec().encode(model.financeLedger),
         ownedCarId: model.ownedCarId,
         applicationBlockedJobId: model.applicationBlockedJobId,
         applicationBlockedUntilDay: model.applicationBlockedUntilDay,

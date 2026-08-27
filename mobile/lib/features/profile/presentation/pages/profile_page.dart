@@ -186,7 +186,10 @@ class _ProfileAction extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(title, style: const TextStyle(fontWeight: FontWeight.w900)),
+                      Text(
+                        title,
+                        style: const TextStyle(fontWeight: FontWeight.w900),
+                      ),
                       const SizedBox(height: 3),
                       Text(subtitle, style: const TextStyle(fontSize: 12)),
                     ],

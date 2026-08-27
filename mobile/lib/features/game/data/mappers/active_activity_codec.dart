@@ -37,15 +37,15 @@ class ActiveActivityCodec {
   }
 
   Map<String, dynamic> _toJson(ActiveActivity activity) => {
-        'type': activity.type.name,
-        'source_id': activity.sourceId,
-        'remaining_hours': activity.remainingHours,
-        'total_hours': activity.totalHours,
-        'energy_cost': activity.energyCost,
-        'started_day': activity.startedDay,
-        'started_hour': activity.startedHour,
-        'payload': activity.payload,
-      };
+    'type': activity.type.name,
+    'source_id': activity.sourceId,
+    'remaining_hours': activity.remainingHours,
+    'total_hours': activity.totalHours,
+    'energy_cost': activity.energyCost,
+    'started_day': activity.startedDay,
+    'started_hour': activity.startedHour,
+    'payload': activity.payload,
+  };
 
   ActiveActivity? decode(String? value) {
     if (value == null || value.isEmpty) {

@@ -20,7 +20,6 @@ void main() {
 
   test('speed controls map real-time intervals to one game hour', () {
     expect(GameClockService.realTickInterval, const Duration(seconds: 20));
-    expect(GameClockService.gameSpeedMultiplier, 1);
     expect(GameClockService.gameHoursPerRealTick, 1);
     expect(GameClockService.intervalForSpeed(2), const Duration(seconds: 10));
     expect(GameClockService.intervalForSpeed(4), const Duration(seconds: 5));
@@ -37,9 +36,15 @@ void main() {
   test('energy recovers every real minute while the game is closed', () {
     final anchor = DateTime(2026, 1, 1);
     final service = EnergyRecoveryService();
-    var state = PlayerState.initial.copyWith(energy: 70, energyRecoveryAt: anchor);
+    var state = PlayerState.initial.copyWith(
+      energy: 70,
+      energyRecoveryAt: anchor,
+    );
 
-    state = service.recover(state, now: anchor.add(const Duration(seconds: 59)));
+    state = service.recover(
+      state,
+      now: anchor.add(const Duration(seconds: 59)),
+    );
     expect(state.energy, 70);
     state = service.recover(state, now: anchor.add(const Duration(minutes: 1)));
     expect(state.energy, 80);
@@ -65,9 +70,9 @@ void main() {
   });
 
   test('positive money resets the bankruptcy timer', () {
-    final state = GameClockService().tick(
-      PlayerState.initial.copyWith(money: 10, negativeMoneyHours: 23),
-    ).state;
+    final state = GameClockService()
+        .tick(PlayerState.initial.copyWith(money: 10, negativeMoneyHours: 23))
+        .state;
 
     expect(state.negativeMoneyHours, 0);
     expect(state.isBankrupt, isFalse);
@@ -79,7 +84,10 @@ void main() {
     var state = activities.activate(PlayerState.initial, earning);
     final clock = GameClockService();
 
-    expect(state.energy, PlayerState.initial.energy - EarningService.energyCost);
+    expect(
+      state.energy,
+      PlayerState.initial.energy - EarningService.energyCost,
+    );
     expect(state.money, PlayerState.initial.money);
     state = clock.tick(state).state;
     expect(state.activeActivity, isNotNull);
@@ -101,7 +109,10 @@ void main() {
     final tick = clock.tick(state);
     state = activities.complete(tick.state, tick.completedActivity!).state;
 
-    expect(state.maxEnergy, PlayerState.initial.maxEnergy + SportService.maxEnergyGain);
+    expect(
+      state.maxEnergy,
+      PlayerState.initial.maxEnergy + SportService.maxEnergyGain,
+    );
   });
 
   test('career level controls concurrent activity capacity', () {

@@ -77,7 +77,7 @@ class CareerPage extends StatelessWidget {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                currentJob.company,
+                                state.employment?.company ?? currentJob.company,
                                 style: const TextStyle(
                                   color: AppPalette.secondary,
                                   fontSize: 12,
@@ -153,7 +153,7 @@ class CareerPage extends StatelessWidget {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        '${nextJob.company} · ${nextJob.careerTrack} ${nextJob.level}. rütbe',
+                        '${state.employment?.company ?? nextJob.company} · ${nextJob.careerTrack} ${nextJob.level}. rütbe',
                         style: const TextStyle(
                           color: AppPalette.textSecondary,
                           fontSize: 12,

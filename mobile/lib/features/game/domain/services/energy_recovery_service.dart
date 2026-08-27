@@ -20,7 +20,10 @@ class EnergyRecoveryService {
 
     final completedIntervals = elapsed.inSeconds ~/ recoveryInterval.inSeconds;
     final remainder = elapsed.inSeconds % recoveryInterval.inSeconds;
-    final recoveredEnergy = math.min(state.maxEnergy, state.energy + completedIntervals * recoveryAmount);
+    final recoveredEnergy = math.min(
+      state.maxEnergy,
+      state.energy + completedIntervals * recoveryAmount,
+    );
     return state.copyWith(
       energy: recoveredEnergy,
       energyRecoveryAt: currentTime.subtract(Duration(seconds: remainder)),

@@ -43,5 +43,6 @@ class ActiveActivity {
     );
   }
 
-  double get progress => ((totalHours - remainingHours) / totalHours).clamp(0, 1).toDouble();
+  double get progress =>
+      ((totalHours - remainingHours) / totalHours).clamp(0, 1).toDouble();
 }

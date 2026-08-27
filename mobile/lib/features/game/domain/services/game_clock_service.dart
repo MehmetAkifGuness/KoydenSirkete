@@ -3,10 +3,10 @@ import 'dart:math' as math;
 import '../entities/active_activity.dart';
 import '../entities/clock_tick_result.dart';
 import '../entities/player_state.dart';
+import '../entities/player_state_clock_extension.dart';
 
 class GameClockService {
   static const realTickInterval = Duration(seconds: 20);
-  static const gameSpeedMultiplier = 1;
   static const gameHoursPerRealTick = 1;
 
   static Duration intervalForSpeed(int speed) {
@@ -33,7 +33,9 @@ class GameClockService {
     }
     return ClockTickResult(
       state: current,
-      completedActivity: completedActivities.isEmpty ? null : completedActivities.first,
+      completedActivity: completedActivities.isEmpty
+          ? null
+          : completedActivities.first,
       completedActivities: completedActivities,
       dayChanged: dayChanged,
     );
@@ -42,7 +44,12 @@ class GameClockService {
   ClockTickResult _tickHour(PlayerState state) {
     final advanced = state.advanceGameHour();
     final dayChanged = advanced.day != state.day;
-    final negativeMoneyHours = advanced.money < 0 ? math.min(PlayerState.bankruptcyDurationHours, advanced.negativeMoneyHours + 1) : 0;
+    final negativeMoneyHours = advanced.money < 0
+        ? math.min(
+            PlayerState.bankruptcyDurationHours,
+            advanced.negativeMoneyHours + 1,
+          )
+        : 0;
     final activities = advanced.activities;
     if (activities.isEmpty) {
       return ClockTickResult(

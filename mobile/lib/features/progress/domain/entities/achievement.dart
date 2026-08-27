@@ -1,7 +1,14 @@
 import '../../../game/domain/entities/player_state.dart';
 
 class Achievement {
-  const Achievement({required this.id, required this.title, required this.description, required this.reward, required this.measure, required this.target});
+  const Achievement({
+    required this.id,
+    required this.title,
+    required this.description,
+    required this.reward,
+    required this.measure,
+    required this.target,
+  });
 
   final int id;
   final String title;
@@ -10,7 +17,8 @@ class Achievement {
   final int target;
   final int Function(PlayerState state) measure;
 
-  bool isUnlocked(PlayerState state) => state.unlockedAchievementsMask & (1 << (id - 1)) != 0;
+  bool isUnlocked(PlayerState state) =>
+      state.unlockedAchievementsMask & (1 << (id - 1)) != 0;
   int progress(PlayerState state) => measure(state).clamp(0, target);
 }
 

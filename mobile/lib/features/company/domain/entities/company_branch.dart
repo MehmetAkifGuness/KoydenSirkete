@@ -13,10 +13,8 @@ class CompanyBranch {
   final int level;
   final List<CompanyEmployee> employees;
 
-  CompanyBranch copyWith({
-    int? level,
-    List<CompanyEmployee>? employees,
-  }) => CompanyBranch(
+  CompanyBranch copyWith({int? level, List<CompanyEmployee>? employees}) =>
+      CompanyBranch(
         id: id,
         cityId: cityId,
         level: level ?? this.level,

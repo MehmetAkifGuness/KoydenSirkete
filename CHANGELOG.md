@@ -1,5 +1,43 @@
 # Changelog
 
+## 2.5.0
+
+- Son 30 günü kategori bazında saklayan kalıcı finans günlüğü ve Finans ekranı eklendi.
+- Konut, yemek, fatura, ulaşım, kira geliri ve kiralık ev bakım giderleri günlük bütçede ayrıştırıldı.
+- Gelire bağlı yaşam standardı yumuşatıldı; enflasyon artışı aylık %1 ve en fazla %25 olacak şekilde dengelendi.
+- Şirket değerlemesi, itibar, pazar payı, altı uzun vadeli hedef ve üç büyük sözleşme eklendi.
+- Ev, kiralama ve şirket büyümesine bağlı başarı kataloğu 12 hedefe genişletildi.
+- SQLite kayıt şeması finans geçmişi için v25'e yükseltildi.
+- Esnaf Çarkı 20 dilime çıkarıldı: 7 boş, 5 adet -50 TL, 3 adet -100 TL ve istenen ödül dağılımı uygulandı.
+- Hızlı görev ödülü 10 doğruda ₺150, 11 doğruda ₺165 olacak ve en fazla ₺300 temel ödüle ulaşacak şekilde dengelendi.
+
+## 2.4.0
+
+- Koyu tema metin ve vurgu renkleri erişilebilir kontrast için yenilendi.
+- İkincil vurgu renginin yüzeyle aynı olması nedeniyle kaybolan metin ve ikonlar düzeltildi.
+- Alt navigasyon, uygulama durumları ve sayfa açılışlarına fade/slide/scale geçişleri eklendi.
+- Kart ve ilerleme değişimleri animasyonlu hale getirildi; azaltılmış hareket tercihi desteklendi.
+
+## 2.3.0
+
+- Ev sahipliği tüm şehirlerde günlük kişisel gider muafiyeti sağlayacak şekilde güncellendi.
+- Ev fiyatları ₺200.000, ₺400.000 ve ₺600.000 olarak sabitlendi.
+- Tüm şirket projeleri ilk şirket seviyesinde açıldı; proje değişiminde ilerleme güvenli biçimde sıfırlanır.
+
+## 2.2.0
+
+- Şehir kartlarındaki kira göstergesi gerçek kira hesabıyla ortaklaştırıldı; ev sahibi olunan her şehir doğru biçimde kira muaf gösterilir.
+- Ev ve araba satışları, onay ekranı ve %70 ikinci el değeriyle eklendi.
+- Şehir maaş katsayısı `0.90–1.50x` aralığına dengelendi; kayıtlı istihdam maaşları açılışta yenilenir.
+
+## 2.1.0
+
+- Şehir maaş katsayısı ilan, işe giriş, terfi, taşınma ve eski kayıt yükleme akışlarında ortaklaştırıldı.
+- Ev sahipliğinin günlük kirayı kaldırması ve araç sahipliğinin taşınma maliyetini düşürmesi doğrulandı.
+- Varlık etkileri şehir ve iş ekranlarında görünür hale getirildi.
+- Kullanılmayan kalıcı alanlar ve sahte tema seçenekleri kaldırıldı.
+- Merkezi oturum sınıfları sorumluluklarına ayrıldı; kod tabanı standart Dart biçimine getirildi.
+
 ## 2.0.0
 
 - Foreground gerçek zamanlı saat eklendi: 20 gerçek saniye = 1 oyun saati; arka planda zaman ilerlemiyor.

@@ -11,7 +11,9 @@ class AppFeedback {
 
     final state = _states[messenger] ??= _FeedbackState();
     final now = DateTime.now();
-    if (state.message == message && state.shownAt != null && now.difference(state.shownAt!) < const Duration(milliseconds: 700)) {
+    if (state.message == message &&
+        state.shownAt != null &&
+        now.difference(state.shownAt!) < const Duration(milliseconds: 700)) {
       return;
     }
     state.message = message;

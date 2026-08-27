@@ -65,7 +65,8 @@ class DashboardPage extends StatelessWidget {
                 const SizedBox(height: 28),
                 SectionTitle(
                   title: 'Devam edenler',
-                  action: '${activities.length}/${session.state.activityCapacity}',
+                  action:
+                      '${activities.length}/${session.state.activityCapacity}',
                 ),
                 const SizedBox(height: 12),
                 for (final activity in activities) ...[
@@ -79,7 +80,7 @@ class DashboardPage extends StatelessWidget {
               GridView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
-                itemCount: 6,
+                itemCount: 8,
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
                   mainAxisExtent: 126,
@@ -89,6 +90,8 @@ class DashboardPage extends StatelessWidget {
                 itemBuilder: (_, index) {
                   final feature = [
                     AppFeatures.earning,
+                    AppFeatures.finance,
+                    AppFeatures.assets,
                     AppFeatures.training,
                     AppFeatures.skills,
                     AppFeatures.sport,
@@ -255,10 +258,16 @@ class _ActivityCard extends StatelessWidget {
               children: [
                 Text(
                   _title(activity.type.name),
-                  style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 14),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w900,
+                    fontSize: 14,
+                  ),
                 ),
                 const SizedBox(height: 8),
-                AppProgressLine(value: activity.progress, color: AppPalette.secondary),
+                AppProgressLine(
+                  value: activity.progress,
+                  color: AppPalette.secondary,
+                ),
               ],
             ),
           ),

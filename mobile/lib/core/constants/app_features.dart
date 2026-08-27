@@ -68,6 +68,20 @@ abstract final class AppFeatures {
     color: AppPalette.primary,
     unlocked: true,
   );
+  static AppFeature get finance => AppFeature(
+    title: 'Finans',
+    subtitle: 'Gelir ve giderlerini izle',
+    icon: Icons.account_balance_wallet_outlined,
+    color: AppPalette.primary,
+    unlocked: true,
+  );
+  static AppFeature get assets => AppFeature(
+    title: 'Varlıklar',
+    subtitle: 'Ev ve araçlarını yönet',
+    icon: Icons.real_estate_agent_outlined,
+    color: AppPalette.primary,
+    unlocked: true,
+  );
   static AppFeature get company => AppFeature(
     title: 'Şirket',
     subtitle: 'Geleceğin işini kur',

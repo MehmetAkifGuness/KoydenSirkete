@@ -4,6 +4,7 @@ import '../../../game/domain/entities/active_activity.dart';
 import '../../../jobs/domain/entities/job.dart';
 import '../entities/work_task.dart';
 import 'task_efficiency_service.dart';
+import '../../../finance/domain/entities/finance_ledger.dart';
 
 class WorkResult {
   const WorkResult({required this.state, required this.income});
@@ -13,7 +14,8 @@ class WorkResult {
 }
 
 class WorkService {
-  WorkService({TaskEfficiencyService? efficiencyService}) : _efficiencyService = efficiencyService ?? TaskEfficiencyService();
+  WorkService({TaskEfficiencyService? efficiencyService})
+    : _efficiencyService = efficiencyService ?? TaskEfficiencyService();
 
   final TaskEfficiencyService _efficiencyService;
 
@@ -41,11 +43,21 @@ class WorkService {
     );
   }
 
-  WorkResult complete(PlayerState state, Job job, WorkTask task, {int? salary}) {
+  WorkResult complete(
+    PlayerState state,
+    Job job,
+    WorkTask task, {
+    int? salary,
+  }) {
     final rewardMultiplier = state.wheelRewardBuffTasks > 0
         ? 1 + state.wheelRewardBuffPercent / 100
         : 1;
-    final income = ((salary ?? job.salary) * task.salaryMultiplier * _performanceMultiplier(state.performance) * rewardMultiplier).round();
+    final income =
+        ((salary ?? job.salary) *
+                task.salaryMultiplier *
+                _performanceMultiplier(state.performance) *
+                rewardMultiplier)
+            .round();
     final nextState = state.copyWith(
       money: state.money + income,
       experience: state.experience + task.experienceGain,
@@ -53,15 +65,28 @@ class WorkService {
       workSessionsToday: state.workSessionsToday + 1,
       totalEarned: state.totalEarned + income,
       totalWorkSessions: state.totalWorkSessions + 1,
-      wheelRewardBuffTasks: state.wheelRewardBuffTasks > 0 ? state.wheelRewardBuffTasks - 1 : 0,
-      wheelRewardBuffPercent: state.wheelRewardBuffTasks <= 1 ? 0 : state.wheelRewardBuffPercent,
+      financeLedger: state.financeLedger.record(
+        day: state.day,
+        category: FinanceCategory.salaryIncome,
+        amount: income,
+      ),
+      wheelRewardBuffTasks: state.wheelRewardBuffTasks > 0
+          ? state.wheelRewardBuffTasks - 1
+          : 0,
+      wheelRewardBuffPercent: state.wheelRewardBuffTasks <= 1
+          ? 0
+          : state.wheelRewardBuffPercent,
     );
     return WorkResult(state: nextState, income: income);
   }
 
   WorkResult execute(PlayerState state, Job job, WorkTask task) {
     final activity = start(state, job, task);
-    return complete(state.copyWith(energy: state.energy - activity.energyCost), job, task);
+    return complete(
+      state.copyWith(energy: state.energy - activity.energyCost),
+      job,
+      task,
+    );
   }
 
   double _performanceMultiplier(int performance) {

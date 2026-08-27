@@ -1,43 +1,48 @@
 import 'package:flutter/material.dart';
 
 import 'app_palette.dart';
+import 'app_page_transitions_builder.dart';
 
 abstract final class AppTheme {
   static ThemeData dark() {
-    final colors = ColorScheme.fromSeed(
-      seedColor: AppPalette.primary,
-      brightness: Brightness.dark,
-      surface: AppPalette.background,
-    ).copyWith(
-      primary: AppPalette.primary,
-      onPrimary: AppPalette.background,
-      primaryContainer: AppPalette.surfaceMuted,
-      onPrimaryContainer: AppPalette.textPrimary,
-      secondary: AppPalette.secondary,
-      onSecondary: AppPalette.textPrimary,
-      secondaryContainer: AppPalette.surfaceMuted,
-      onSecondaryContainer: AppPalette.textPrimary,
-      tertiary: AppPalette.tertiary,
-      onTertiary: AppPalette.background,
-      surface: AppPalette.background,
-      surfaceContainer: AppPalette.surface,
-      surfaceContainerHighest: AppPalette.surfaceElevated,
-      onSurface: AppPalette.textPrimary,
-      onSurfaceVariant: AppPalette.textSecondary,
-      outline: AppPalette.outline,
-      error: AppPalette.error,
-    );
+    final colors =
+        ColorScheme.fromSeed(
+          seedColor: AppPalette.primary,
+          brightness: Brightness.dark,
+          surface: AppPalette.background,
+        ).copyWith(
+          primary: AppPalette.primary,
+          onPrimary: AppPalette.background,
+          primaryContainer: AppPalette.surfaceMuted,
+          onPrimaryContainer: AppPalette.textPrimary,
+          secondary: AppPalette.secondary,
+          onSecondary: AppPalette.background,
+          secondaryContainer: AppPalette.surfaceMuted,
+          onSecondaryContainer: AppPalette.textPrimary,
+          tertiary: AppPalette.tertiary,
+          onTertiary: AppPalette.background,
+          surface: AppPalette.background,
+          surfaceContainer: AppPalette.surface,
+          surfaceContainerHighest: AppPalette.surfaceElevated,
+          onSurface: AppPalette.textPrimary,
+          onSurfaceVariant: AppPalette.textSecondary,
+          outline: AppPalette.outline,
+          error: AppPalette.error,
+        );
 
     return ThemeData(
       useMaterial3: true,
       colorScheme: colors,
-      scaffoldBackgroundColor: AppPalette.background,
+      scaffoldBackgroundColor: Colors.transparent,
       canvasColor: AppPalette.background,
       fontFamily: 'sans-serif',
       pageTransitionsTheme: const PageTransitionsTheme(
         builders: {
-          TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
-          TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+          TargetPlatform.android: AppPageTransitionsBuilder(),
+          TargetPlatform.iOS: AppPageTransitionsBuilder(),
+          TargetPlatform.windows: AppPageTransitionsBuilder(),
+          TargetPlatform.macOS: AppPageTransitionsBuilder(),
+          TargetPlatform.linux: AppPageTransitionsBuilder(),
         },
       ),
       textTheme: const TextTheme(
@@ -120,10 +125,12 @@ abstract final class AppTheme {
           backgroundColor: AppPalette.primary,
           foregroundColor: AppPalette.background,
           disabledBackgroundColor: AppPalette.surfaceMuted,
-          disabledForegroundColor: AppPalette.textMuted,
+          disabledForegroundColor: AppPalette.textDisabled,
           minimumSize: const Size(0, 46),
           padding: const EdgeInsets.symmetric(horizontal: 17),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800),
         ),
       ),
@@ -133,7 +140,9 @@ abstract final class AppTheme {
           minimumSize: const Size(0, 44),
           padding: const EdgeInsets.symmetric(horizontal: 16),
           side: const BorderSide(color: AppPalette.outline),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           textStyle: const TextStyle(fontWeight: FontWeight.w700),
         ),
       ),
@@ -141,7 +150,9 @@ abstract final class AppTheme {
         style: TextButton.styleFrom(
           foregroundColor: AppPalette.primary,
           minimumSize: const Size(0, 42),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
           textStyle: const TextStyle(fontWeight: FontWeight.w800),
         ),
       ),
@@ -192,7 +203,7 @@ abstract final class AppTheme {
       ),
       chipTheme: ChipThemeData(
         backgroundColor: AppPalette.surfaceMuted,
-        selectedColor: AppPalette.primary,
+        selectedColor: AppPalette.primary.withValues(alpha: .18),
         side: const BorderSide(color: AppPalette.outlineMuted),
         labelStyle: const TextStyle(
           color: AppPalette.textSecondary,

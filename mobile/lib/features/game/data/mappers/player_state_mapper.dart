@@ -13,10 +13,8 @@ class PlayerStateMapper {
       hour: model.hour,
       earningSessionsToday: model.earningSessionsToday,
       maxEnergy: model.maxEnergy,
-      energyRecoveryRemainder: model.energyRecoveryRemainder,
       energyRecoveryAt: model.energyRecoveryAt,
       negativeMoneyHours: model.negativeMoneyHours,
-      wheelCooldownSeconds: model.wheelCooldownSeconds,
       wheelMajorRewardsToday: model.wheelMajorRewardsToday,
       wheelDurationBuffPercent: model.wheelDurationBuffPercent,
       wheelDurationBuffTasks: model.wheelDurationBuffTasks,
@@ -24,7 +22,6 @@ class PlayerStateMapper {
       wheelEnergyBuffTasks: model.wheelEnergyBuffTasks,
       wheelRewardBuffPercent: model.wheelRewardBuffPercent,
       wheelRewardBuffTasks: model.wheelRewardBuffTasks,
-      themePaletteId: model.themePaletteId,
       activeActivity: model.activeActivity,
       activeActivities: model.activeActivities,
       skills: model.skills,
@@ -49,6 +46,8 @@ class PlayerStateMapper {
       employees: model.employees,
       branches: model.branches,
       ownedHomeIds: model.ownedHomeIds,
+      rentedHomeIds: model.rentedHomeIds,
+      financeLedger: model.financeLedger,
       ownedCarId: model.ownedCarId,
       projectProgress: model.projectProgress,
       totalEarned: model.totalEarned,
@@ -61,5 +60,6 @@ class PlayerStateMapper {
     );
   }
 
-  PlayerStateModel toModel(PlayerState entity) => PlayerStateModel.fromEntity(entity);
+  PlayerStateModel toModel(PlayerState entity) =>
+      PlayerStateModel.fromEntity(entity);
 }

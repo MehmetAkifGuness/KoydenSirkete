@@ -27,10 +27,15 @@ class _OnboardingPageState extends State<OnboardingPage>
       vsync: this,
       duration: const Duration(milliseconds: 850),
     )..forward();
-    final curve = CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic);
+    final curve = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeOutCubic,
+    );
     _opacity = Tween<double>(begin: 0, end: 1).animate(curve);
-    _offset = Tween<Offset>(begin: const Offset(0, .06), end: Offset.zero)
-        .animate(curve);
+    _offset = Tween<Offset>(
+      begin: const Offset(0, .06),
+      end: Offset.zero,
+    ).animate(curve);
   }
 
   @override
@@ -42,15 +47,34 @@ class _OnboardingPageState extends State<OnboardingPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppPalette.background,
+      backgroundColor: Colors.transparent,
       body: SafeArea(
         child: FadeTransition(
           opacity: _opacity,
           child: SlideTransition(
             position: _offset,
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(22, 14, 22, 20),
-              child: _content(context),
+            child: Column(
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.fromLTRB(22, 14, 22, 16),
+                    child: _content(context),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(22, 8, 22, 20),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: FilledButton.icon(
+                      onPressed: _isStarting || widget.session.isBusy
+                          ? null
+                          : _start,
+                      icon: const Icon(Icons.arrow_forward_rounded),
+                      label: const Text('Oyuna başla'),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ),
@@ -87,64 +111,48 @@ class _OnboardingPageState extends State<OnboardingPage>
           ],
         ),
         const SizedBox(height: 18),
-        Container(
-          height: 158,
-          width: double.infinity,
-          color: AppPalette.secondary,
-          child: Stack(
-            children: [
-              Positioned(
-                top: 18,
-                right: 18,
-                child: Text(
-                  'CAREER\nTO COMPANY',
-                  textAlign: TextAlign.right,
-                  style: TextStyle(
-                    color: AppPalette.surfaceMuted.withValues(alpha: .65),
-                    fontSize: 10,
-                    fontWeight: FontWeight.w900,
-                    height: 1.3,
-                    letterSpacing: 1,
+        Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 440),
+            child: AspectRatio(
+              aspectRatio: 1,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(28),
+                  border: Border.all(
+                    color: AppPalette.secondary.withValues(alpha: .42),
                   ),
-                ),
-              ),
-              Positioned(
-                left: 22,
-                bottom: 16,
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Container(
-                      width: 82,
-                      height: 82,
-                      padding: const EdgeInsets.all(7),
-                      color: AppPalette.surface,
-                      child: Image.asset(
-                        'assets/images/mudurum_cover.png',
-                        cacheWidth: 512,
-                        cacheHeight: 512,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, _, _) => const Icon(
-                          Icons.business_center_rounded,
-                          color: AppPalette.primary,
-                          size: 42,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 14),
-                    const Text(
-                      'Müdür',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 24,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 1.4,
-                      ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: .28),
+                      blurRadius: 24,
+                      offset: const Offset(0, 12),
                     ),
                   ],
                 ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(27),
+                  child: Semantics(
+                    image: true,
+                    label: 'Müdür uygulama logosu',
+                    child: Image.asset(
+                      'assets/images/mudurum_cover.png',
+                      cacheWidth: 1024,
+                      cacheHeight: 1024,
+                      fit: BoxFit.contain,
+                      errorBuilder: (_, _, _) => const ColoredBox(
+                        color: AppPalette.surfaceElevated,
+                        child: Icon(
+                          Icons.business_center_rounded,
+                          color: AppPalette.primary,
+                          size: 72,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
               ),
-            ],
+            ),
           ),
         ),
         const SizedBox(height: 20),
@@ -168,15 +176,6 @@ class _OnboardingPageState extends State<OnboardingPage>
         const _WelcomeLine(index: '01', label: 'Kariyerini planla'),
         const _WelcomeLine(index: '02', label: 'Doğru fırsatı seç'),
         const _WelcomeLine(index: '03', label: 'Kendi işini büyüt'),
-        const SizedBox(height: 18),
-        SizedBox(
-          width: double.infinity,
-          child: FilledButton.icon(
-            onPressed: _isStarting || widget.session.isBusy ? null : _start,
-            icon: const Icon(Icons.arrow_forward_rounded),
-            label: const Text('Oyuna başla'),
-          ),
-        ),
       ],
     );
   }
@@ -221,7 +220,11 @@ class _WelcomeLine extends StatelessWidget {
             ),
           ),
           const Spacer(),
-          const Icon(Icons.north_east_rounded, size: 16, color: AppPalette.textMuted),
+          const Icon(
+            Icons.north_east_rounded,
+            size: 16,
+            color: AppPalette.textMuted,
+          ),
         ],
       ),
     );

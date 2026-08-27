@@ -77,7 +77,7 @@ class _EarningMiniGamePanelState extends State<EarningMiniGamePanel> {
         ),
         const SizedBox(height: 13),
         const Text(
-          'Hedef hücreye dokun. Serin yükseldikçe tur sonu kazancın da büyür.',
+          'İlk 10 doğru dokunuş kazancı %50 artırır. Sonraki seri %10 büyür; ödül en fazla 3 katına çıkar.',
           style: TextStyle(
             color: AppPalette.textSecondary,
             fontSize: 13,
@@ -184,7 +184,7 @@ class _EarningMiniGamePanelState extends State<EarningMiniGamePanel> {
         ),
         const SizedBox(height: 10),
         Text(
-          '${state.hits} doğru dokunuş yaptın. Bonusun hazır.',
+          '${state.hits} doğru dokunuş yaptın. Seri bonusun kazanca eklendi.',
           style: const TextStyle(color: AppPalette.textSecondary, fontSize: 13),
         ),
         const SizedBox(height: 16),

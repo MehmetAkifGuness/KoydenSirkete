@@ -1,5 +1,13 @@
 class HomeAsset {
-  const HomeAsset({required this.id, required this.cityId, required this.name, required this.description, required this.price, required this.comfort, required this.requiredCareerLevel});
+  const HomeAsset({
+    required this.id,
+    required this.cityId,
+    required this.name,
+    required this.description,
+    required this.price,
+    required this.comfort,
+    required this.requiredCareerLevel,
+  });
 
   final int id;
   final int cityId;

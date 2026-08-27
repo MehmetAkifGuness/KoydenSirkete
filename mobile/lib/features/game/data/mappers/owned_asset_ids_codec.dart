@@ -6,7 +6,9 @@ class OwnedAssetIdsCodec {
   List<int> decode(String? value) {
     if (value == null || value.isEmpty) return const <int>[];
     try {
-      return List<int>.unmodifiable((jsonDecode(value) as List<dynamic>).cast<int>());
+      return List<int>.unmodifiable(
+        (jsonDecode(value) as List<dynamic>).cast<int>(),
+      );
     } on Object {
       return const <int>[];
     }

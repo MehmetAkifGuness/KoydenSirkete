@@ -1,21 +1,27 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:kariyerden_sirkete/app/theme/app_palette.dart';
 import 'package:kariyerden_sirkete/features/assets/domain/services/asset_service.dart';
 import 'package:kariyerden_sirkete/features/assets/domain/services/car_catalog.dart';
 import 'package:kariyerden_sirkete/features/assets/domain/services/home_catalog.dart';
 import 'package:kariyerden_sirkete/features/cities/domain/services/city_service.dart';
+import 'package:kariyerden_sirkete/features/cities/domain/services/city_salary_service.dart';
 import 'package:kariyerden_sirkete/features/cities/domain/services/living_cost_service.dart';
 import 'package:kariyerden_sirkete/features/company/domain/services/company_branch_service.dart';
 import 'package:kariyerden_sirkete/features/company/domain/services/company_service.dart';
+import 'package:kariyerden_sirkete/features/company/domain/services/company_growth_service.dart';
+import 'package:kariyerden_sirkete/features/company/domain/services/company_project_catalog.dart';
+import 'package:kariyerden_sirkete/features/company/domain/entities/company_branch.dart';
 import 'package:kariyerden_sirkete/features/cities/domain/services/city_catalog.dart';
 import 'package:kariyerden_sirkete/features/cities/domain/services/city_opportunity_service.dart';
 import 'package:kariyerden_sirkete/features/employment/domain/entities/employment.dart';
 import 'package:kariyerden_sirkete/features/employment/domain/services/employment_service.dart';
 import 'package:kariyerden_sirkete/features/game/domain/entities/player_state.dart';
+import 'package:kariyerden_sirkete/features/finance/domain/entities/finance_ledger.dart';
 import 'package:kariyerden_sirkete/features/jobs/domain/entities/job_listing.dart';
 import 'package:kariyerden_sirkete/features/jobs/domain/services/competition_service.dart';
+import 'package:kariyerden_sirkete/features/jobs/domain/services/job_application_service.dart';
 import 'package:kariyerden_sirkete/features/jobs/domain/services/job_catalog.dart';
+import 'package:kariyerden_sirkete/features/jobs/domain/services/job_employer_catalog.dart';
 import 'package:kariyerden_sirkete/features/skills/domain/entities/skill_id.dart';
 import 'package:kariyerden_sirkete/features/skills/domain/entities/skill_profile.dart';
 import 'package:kariyerden_sirkete/features/sport/domain/services/sport_service.dart';
@@ -25,69 +31,225 @@ import 'package:kariyerden_sirkete/features/work/domain/services/employer_task_g
 import 'package:kariyerden_sirkete/features/work/domain/services/task_efficiency_service.dart';
 
 void main() {
-  test('offline theme catalog exposes ten unique palettes', () {
-    expect(AppPalette.schemes, hasLength(10));
-    expect(AppPalette.schemes.map((scheme) => scheme.id).toSet(), hasLength(10));
-    expect(AppPalette.schemes.map((scheme) => scheme.name).toSet(), hasLength(10));
-    expect(AppPalette.schemes.map((scheme) => scheme.background).toSet(), hasLength(10));
-    expect(AppPalette.schemes.map((scheme) => scheme.surface).toSet(), hasLength(10));
-  });
-
   test('catalogs expose the locked content counts', () {
     expect(SkillId.values, hasLength(10));
     expect(JobCatalog.jobs, hasLength(20));
+    expect(JobEmployerCatalog.employers, hasLength(24));
+    expect(JobEmployerCatalog.employers.toSet(), hasLength(24));
     expect(TrainingCatalog.courses.length, greaterThanOrEqualTo(10));
     expect(CityCatalog.cities, hasLength(81));
     expect(CityCatalog.cities.map((city) => city.name).toSet(), hasLength(81));
-    expect(CityCatalog.cities.every((city) => city.population > 0 && city.technologyLevel >= 20), isTrue);
-    expect(CityCatalog.cities[2].technologyLevel, greaterThan(CityCatalog.cities[0].technologyLevel));
-    expect(CityCatalog.cities[2].opportunityCount, greaterThan(CityCatalog.cities[0].opportunityCount));
-    expect(CityCatalog.cities[2].salaryMultiplier, greaterThan(CityCatalog.cities[0].salaryMultiplier));
+    expect(
+      CityCatalog.cities.every(
+        (city) => city.population > 0 && city.technologyLevel >= 20,
+      ),
+      isTrue,
+    );
+    expect(
+      CityCatalog.cities[2].technologyLevel,
+      greaterThan(CityCatalog.cities[0].technologyLevel),
+    );
+    expect(
+      CityCatalog.cities[2].opportunityCount,
+      greaterThan(CityCatalog.cities[0].opportunityCount),
+    );
+    expect(
+      CityCatalog.cities[2].salaryMultiplier,
+      greaterThan(CityCatalog.cities[0].salaryMultiplier),
+    );
+    expect(
+      CityCatalog.cities.map((city) => city.salaryMultiplier),
+      everyElement(inInclusiveRange(.9, 1.5)),
+    );
   });
 
-  test('city rent follows population and rank requirements stay progressive', () {
-    expect(CityCatalog.dailyCostForPopulation(100000), 50);
-    expect(CityCatalog.dailyCostForPopulation(1000000), 500);
-    expect(JobCatalog.findById(13)!.scaledSkillRequirements[SkillId.operations], 228);
-    expect(JobCatalog.findById(15)!.scaledSkillRequirements[SkillId.operations], greaterThan(228));
-  });
+  test(
+    'city rent follows population and rank requirements stay progressive',
+    () {
+      expect(CityCatalog.dailyCostForPopulation(100000), 50);
+      expect(CityCatalog.dailyCostForPopulation(1000000), 500);
+      expect(
+        JobCatalog.findById(13)!.scaledSkillRequirements[SkillId.operations],
+        228,
+      );
+      expect(
+        JobCatalog.findById(15)!.scaledSkillRequirements[SkillId.operations],
+        greaterThan(228),
+      );
+    },
+  );
 
   test('city opportunities and bots are deterministic for the same day', () {
     final cityService = CityOpportunityService();
     final first = cityService.listings(cityId: 3, day: 4);
     final second = cityService.listings(cityId: 3, day: 4);
-    expect(first.map((listing) => listing.id), orderedEquals(second.map((listing) => listing.id)));
+    expect(
+      first.map((listing) => listing.id),
+      orderedEquals(second.map((listing) => listing.id)),
+    );
+    expect(
+      first.map((listing) => listing.company),
+      orderedEquals(second.map((listing) => listing.company)),
+    );
 
-    final listing = JobListing(job: JobCatalog.jobs.first, cityId: 3, salary: 120, opportunityIndex: 0);
+    final listing = JobListing(
+      job: JobCatalog.jobs.first,
+      cityId: 3,
+      salary: 120,
+      opportunityIndex: 0,
+    );
     final competition = CompetitionService();
     final botsA = competition.generateBots(listing, day: 4);
     final botsB = competition.generateBots(listing, day: 4);
     expect(botsA.length, inInclusiveRange(12, 24));
-    expect(botsA.map((bot) => bot.score), orderedEquals(botsB.map((bot) => bot.score)));
+    expect(
+      botsA.map((bot) => bot.score),
+      orderedEquals(botsB.map((bot) => bot.score)),
+    );
   });
+
+  test('every job rank keeps a meaningful candidate competition', () {
+    final competition = CompetitionService();
+    for (final job in JobCatalog.jobs) {
+      final listing = JobListing(
+        job: job,
+        cityId: 3,
+        salary: job.salary,
+        opportunityIndex: 0,
+      );
+      final eligible = PlayerState.initial.copyWith(
+        knowledge: job.minimumKnowledge,
+        experience: job.minimumExperience,
+        skills: SkillProfile(job.scaledSkillRequirements),
+      );
+      final outcomes = [
+        for (var day = 1; day <= 500; day++)
+          competition.resolve(eligible, listing, day: day).playerWon,
+      ];
+
+      expect(
+        outcomes,
+        contains(true),
+        reason: '${job.title} hiç kazanılamıyor.',
+      );
+      expect(
+        outcomes,
+        contains(false),
+        reason: '${job.title} hep kazanılıyor.',
+      );
+    }
+  });
+
+  test('a connection hire blocks fifteen percent of won competitions', () {
+    final job = JobCatalog.jobs.first;
+    final listing = JobListing(
+      job: job,
+      cityId: 1,
+      salary: job.salary,
+      opportunityIndex: 0,
+      employer: 'Pusula Perakende',
+    );
+    final state = PlayerState.initial.copyWith(
+      knowledge: 1000,
+      experience: 1000,
+      performance: 100,
+      skills: SkillProfile({
+        for (final skill in SkillId.values) skill: SkillProfile.maxValue,
+      }),
+    );
+    final competition = CompetitionService();
+    final results = [
+      for (var day = 1; day <= 100; day++)
+        competition.resolve(state, listing, day: day),
+    ];
+    final connectionDay =
+        results.indexWhere((result) => result.employerConnectionHired) + 1;
+    final rejected = JobApplicationService().complete(
+      state,
+      listing,
+      competitionDay: connectionDay,
+    );
+
+    expect(results.every((result) => result.playerWon), isTrue);
+    expect(
+      results.where((result) => result.employerConnectionHired),
+      hasLength(CompetitionService.employerConnectionChancePercent),
+    );
+    expect(rejected.employment, isNull);
+    expect(rejected.lastJobEvent, contains('patronun tanıdığı işe alındı'));
+  });
+
+  test(
+    'city salary applies to listings and follows the player when moving',
+    () {
+      final city = CityCatalog.cities[1];
+      final salaryService = CitySalaryService();
+      final listing = CityOpportunityService()
+          .listings(cityId: city.id, day: 1)
+          .first;
+      final job = listing.job;
+      final employed = PlayerState.initial.copyWith(
+        money: city.moveCost * 2,
+        careerLevel: 3,
+        currentJobId: job.id,
+        employment: Employment(
+          jobId: job.id,
+          cityId: 1,
+          salary: job.salary,
+          company: job.company,
+          startedDay: 1,
+        ),
+      );
+
+      final moved = CityService().move(employed, city);
+
+      expect(listing.salary, salaryService.calculate(job, city.id));
+      expect(moved.employment?.cityId, city.id);
+      expect(moved.employment?.salary, salaryService.calculate(job, city.id));
+    },
+  );
 
   test('city listings vary by career track and respect city rank limits', () {
     final service = CityOpportunityService();
-    final smallCity = CityCatalog.cities.firstWhere((city) => city.maximumJobLevel == 2);
+    final smallCity = CityCatalog.cities.firstWhere(
+      (city) => city.maximumJobLevel == 2,
+    );
     final smallListings = service.listings(cityId: smallCity.id, day: 4);
     final largeListings = service.listings(cityId: 3, day: 4);
 
-    expect(smallListings.every((listing) => listing.job.level <= smallCity.maximumJobLevel), isTrue);
-    expect(smallListings.map((listing) => listing.job.careerTrack).toSet(), hasLength(smallListings.length));
+    expect(
+      smallListings.every(
+        (listing) => listing.job.level <= smallCity.maximumJobLevel,
+      ),
+      isTrue,
+    );
+    expect(
+      smallListings.map((listing) => listing.job.careerTrack).toSet(),
+      hasLength(smallListings.length),
+    );
     expect(largeListings.any((listing) => listing.job.level >= 4), isTrue);
   });
 
-  test('training applies skill gains without changing general knowledge rules', () {
-    final course = TrainingCatalog.findById('commercial-negotiation')!;
-    final service = TrainingService();
-    final started = service.start(PlayerState.initial.copyWith(money: 500), course);
-    final completed = service.complete(PlayerState.initial.copyWith(money: 500), course);
+  test(
+    'training applies skill gains without changing general knowledge rules',
+    () {
+      final course = TrainingCatalog.findById('commercial-negotiation')!;
+      final service = TrainingService();
+      final started = service.start(
+        PlayerState.initial.copyWith(money: 500),
+        course,
+      );
+      final completed = service.complete(
+        PlayerState.initial.copyWith(money: 500),
+        course,
+      );
 
-    expect(started.totalHours, course.durationHours);
-    expect(completed.knowledge, course.knowledge);
-    expect(completed.skills[SkillId.sales], 8);
-    expect(completed.skills[SkillId.negotiation], 8);
-  });
+      expect(started.totalHours, course.durationHours);
+      expect(completed.knowledge, course.knowledge);
+      expect(completed.skills[SkillId.sales], 8);
+      expect(completed.skills[SkillId.negotiation], 8);
+    },
+  );
 
   test('skill profiles use the 1000 point career scale', () {
     final profile = SkillProfile({SkillId.operations: 1500});
@@ -95,33 +257,50 @@ void main() {
   });
 
   test('skills reduce task cost and duration within configured limits', () {
-    final task = EmployerTaskGenerator().generate(job: JobCatalog.jobs[2], cityId: 3, day: 1).first;
-    final state = PlayerState.initial.copyWith(skills: SkillProfile({
-      for (final skill in SkillId.values) skill: SkillProfile.maxValue,
-    }));
+    final task = EmployerTaskGenerator()
+        .generate(job: JobCatalog.jobs[2], cityId: 3, day: 1)
+        .first;
+    final state = PlayerState.initial.copyWith(
+      skills: SkillProfile({
+        for (final skill in SkillId.values) skill: SkillProfile.maxValue,
+      }),
+    );
     final effective = TaskEfficiencyService().calculate(state, task);
 
-    expect(effective.durationHours, lessThanOrEqualTo((task.durationHours * .65).ceil()));
-    expect(effective.energyCost, lessThanOrEqualTo((task.energyCost * .70).ceil()));
+    expect(
+      effective.durationHours,
+      lessThanOrEqualTo((task.durationHours * .65).ceil()),
+    );
+    expect(
+      effective.energyCost,
+      lessThanOrEqualTo((task.energyCost * .70).ceil()),
+    );
     expect(effective.durationHours, greaterThanOrEqualTo(1));
     expect(effective.energyCost, greaterThanOrEqualTo(5));
   });
 
-  test('employer tasks use the six locked base schedules', () {
+  test('employer tasks use the six balanced base schedules', () {
     const expected = {
+      '8/1/4',
       '10/2/5',
       '12/3/6',
       '14/4/7',
       '16/5/8',
       '18/6/9',
-      '20/7/10',
     };
     final generator = EmployerTaskGenerator();
     final schedules = <String>{};
     for (final job in JobCatalog.jobs) {
       for (var cityId = 1; cityId <= 5; cityId++) {
         for (var day = 1; day <= 10; day++) {
-          schedules.addAll(generator.generate(job: job, cityId: cityId, day: day).map((task) => '${task.energyCost}/${task.durationHours}/${task.experienceGain}'));
+          schedules.addAll(
+            generator
+                .generate(job: job, cityId: cityId, day: day)
+                .map(
+                  (task) =>
+                      '${task.energyCost}/${task.durationHours}/${task.experienceGain}',
+                ),
+          );
         }
       }
     }
@@ -130,7 +309,9 @@ void main() {
   });
 
   test('city branch recruits employees and produces daily company income', () {
-    final company = CompanyService().establish(PlayerState.initial.copyWith(money: 1500, careerLevel: 3)).copyWith(companyFunds: 100000);
+    final company = CompanyService()
+        .establish(PlayerState.initial.copyWith(money: 1500, careerLevel: 3))
+        .copyWith(companyFunds: 100000);
     final city = CityCatalog.cities[1];
     final branchService = CompanyBranchService();
     final opened = branchService.open(company, city);
@@ -144,26 +325,184 @@ void main() {
     expect(operated.state.companyFunds, greaterThan(staffed.companyFunds));
   });
 
-  test('owned home removes rent in its city and car reduces moving cost', () {
+  test('residence removes housing and car reduces moving cost', () {
     final city = CityCatalog.cities.first;
     final home = HomeCatalog.forCity(city).first;
     final assetService = AssetService();
-    final homeState = assetService.buyHome(PlayerState.initial.copyWith(money: home.price), home, city);
-    final settled = LivingCostService().settle(homeState.copyWith(day: 2));
+    final homeState = assetService.buyHome(
+      PlayerState.initial.copyWith(money: home.price),
+      home,
+      city,
+    );
+    final livingCosts = LivingCostService();
+    final dueState = homeState.copyWith(day: 2);
+    final costs = livingCosts.breakdown(dueState, city.id);
+    final settled = livingCosts.settle(dueState);
     final car = CarCatalog.cars.first;
     final target = CityCatalog.cities[1];
-    final carState = assetService.buyCar(PlayerState.initial.copyWith(money: car.price + target.moveCost, careerLevel: 3), car);
+    final carState = assetService.buyCar(
+      PlayerState.initial.copyWith(
+        money: car.price + target.moveCost,
+        careerLevel: 3,
+      ),
+      car,
+    );
     final moved = CityService().move(carState, target);
 
-    expect(settled.money, homeState.money);
+    expect(costs.housing, 0);
+    expect(costs.totalExpenses, greaterThan(0));
+    expect(settled.money, homeState.money - costs.totalExpenses);
     expect(moved.money, carState.money - (target.moveCost * .8).ceil());
+  });
+
+  test('residence removes housing only in its own city', () {
+    final city = CityCatalog.cities[2];
+    final home = HomeCatalog.forCity(city).first;
+    final state = PlayerState.initial.copyWith(ownedHomeIds: [home.id]);
+    final service = LivingCostService();
+
+    expect(service.breakdown(state, city.id).housing, 0);
+    expect(service.breakdown(state, state.currentCityId).housing, greaterThan(0));
+  });
+
+  test('rented homes pay one percent monthly and stop being residences', () {
+    final city = CityCatalog.cities.first;
+    final homes = HomeCatalog.forCity(city);
+    final home = homes.first;
+    final assetService = AssetService();
+    final livingCosts = LivingCostService(assetService: assetService);
+    final rented = assetService.rentOutHome(
+      PlayerState.initial.copyWith(ownedHomeIds: [home.id]),
+      home,
+    );
+    final dueState = rented.copyWith(day: 2);
+    final costs = livingCosts.breakdown(dueState, city.id);
+    final settled = livingCosts.settle(dueState);
+
+    expect(homes.map(assetService.monthlyRent), [2000, 4000, 6000]);
+    expect(assetService.dailyRent(home), 67);
+    expect(costs.housing, greaterThan(0));
+    expect(costs.rentalIncome, 67);
+    expect(costs.rentalMaintenance, 5);
+    expect(assetService.monthlyNetRentalIncome(rented), 1840);
+    expect(
+      settled.money,
+      rented.money - costs.totalExpenses + costs.rentalIncome,
+    );
+    expect(settled.totalEarned, rented.totalEarned + costs.rentalIncome);
+    expect(
+      settled.financeLedger.entries.map((entry) => entry.category),
+      containsAll([
+        FinanceCategory.rentalIncome,
+        FinanceCategory.rentalMaintenance,
+        FinanceCategory.housing,
+      ]),
+    );
+  });
+
+  test('finance ledger aggregates categories and retains thirty days', () {
+    var ledger = const FinanceLedger();
+    ledger = ledger.record(
+      day: 1,
+      category: FinanceCategory.casualIncome,
+      amount: 100,
+    );
+    ledger = ledger.record(
+      day: 1,
+      category: FinanceCategory.casualIncome,
+      amount: 50,
+    );
+    expect(ledger.forDay(1).single.amount, 150);
+    ledger = ledger.record(
+      day: 31,
+      category: FinanceCategory.food,
+      amount: -20,
+    );
+
+    expect(ledger.forDay(1), isEmpty);
+    expect(ledger.forDay(31).single.amount, -20);
+    expect(ledger.totals(fromDay: 2, toDay: 31).expense, 20);
+  });
+
+  test('company growth exposes valuation and long-term goals', () {
+    final state = PlayerState.initial.copyWith(
+      companyLevel: 3,
+      companyFunds: 50000,
+      completedProjects: 10,
+      branches: const [
+        CompanyBranch(id: 2, cityId: 2),
+        CompanyBranch(id: 3, cityId: 3),
+        CompanyBranch(id: 4, cityId: 4),
+      ],
+    );
+    final service = CompanyGrowthService();
+
+    expect(service.valuation(state), greaterThan(state.companyFunds));
+    expect(service.reputation(state), greaterThan(0));
+    expect(service.marketShare(state), greaterThan(0));
+    expect(CompanyGrowthService.goals, hasLength(6));
+    expect(CompanyProjectCatalog.projects, hasLength(6));
+    expect(CompanyProjectCatalog.projects.last.progressPerEmployee, 2);
+  });
+
+  test('living expenses scale with income, time, and car ownership', () {
+    final city = CityCatalog.cities.first;
+    final service = LivingCostService();
+    final base = service.breakdown(PlayerState.initial, city.id);
+    final rich = service.breakdown(
+      PlayerState.initial.copyWith(totalEarned: 6000),
+      city.id,
+    );
+    final late = service.breakdown(
+      PlayerState.initial.copyWith(day: 61),
+      city.id,
+    );
+    final car = service.breakdown(
+      PlayerState.initial.copyWith(ownedCarId: CarCatalog.cars.last.id),
+      city.id,
+    );
+
+    expect(rich.food, greaterThan(base.food));
+    expect(rich.utilities, greaterThan(base.utilities));
+    expect(late.totalExpenses, greaterThan(base.totalExpenses));
+    expect(car.transportation, lessThan(base.transportation));
+  });
+
+  test('home tiers use fixed prices', () {
+    final homes = HomeCatalog.forCity(CityCatalog.cities[2]);
+
+    expect(homes.map((home) => home.price), [200000, 400000, 600000]);
+  });
+
+  test('homes and cars sell for seventy percent of purchase price', () {
+    final city = CityCatalog.cities.first;
+    final home = HomeCatalog.forCity(city).first;
+    final car = CarCatalog.cars.first;
+    final service = AssetService();
+    final initial = PlayerState.initial.copyWith(money: home.price + car.price);
+    final withHome = service.buyHome(initial, home, city);
+    final withAssets = service.buyCar(withHome, car);
+
+    final withoutHome = service.sellHome(withAssets, home);
+    final sold = service.sellCar(withoutHome, car);
+
+    expect(withoutHome.ownedHomeIds, isEmpty);
+    expect(sold.ownedCarId, isNull);
+    expect(sold.money, service.homeSaleValue(home) + service.carSaleValue(car));
   });
 
   test('employment is dismissed after two active game days without a task', () {
     final state = PlayerState.initial.copyWith(
       day: 3,
       currentJobId: 1,
-      employment: const Employment(jobId: 1, cityId: 1, salary: 120, company: 'Test', startedDay: 1, lastTaskDay: 1),
+      employment: const Employment(
+        jobId: 1,
+        cityId: 1,
+        salary: 120,
+        company: 'Test',
+        startedDay: 1,
+        lastTaskDay: 1,
+      ),
     );
     final dismissed = EmploymentService().checkAttendance(state);
 
@@ -177,10 +516,18 @@ void main() {
     final state = PlayerState.initial.copyWith(
       day: 2,
       currentJobId: 1,
-      employment: const Employment(jobId: 1, cityId: 1, salary: 120, company: 'Test', startedDay: 2),
+      employment: const Employment(
+        jobId: 1,
+        cityId: 1,
+        salary: 120,
+        company: 'Test',
+        startedDay: 2,
+      ),
     );
     final nextDay = EmploymentService().checkAttendance(state.copyWith(day: 3));
-    final dismissed = EmploymentService().checkAttendance(state.copyWith(day: 4));
+    final dismissed = EmploymentService().checkAttendance(
+      state.copyWith(day: 4),
+    );
 
     expect(nextDay.employment, isNotNull);
     expect(dismissed.employment, isNull);
@@ -188,8 +535,12 @@ void main() {
 
   test('sport cannot increase max energy over 1000', () {
     final service = SportService();
-    final activity = service.start(PlayerState.initial.copyWith(maxEnergy: 998, energy: 998));
-    final completed = service.complete(PlayerState.initial.copyWith(maxEnergy: 998, energy: 998));
+    final activity = service.start(
+      PlayerState.initial.copyWith(maxEnergy: 998, energy: 998),
+    );
+    final completed = service.complete(
+      PlayerState.initial.copyWith(maxEnergy: 998, energy: 998),
+    );
     expect(activity.energyCost, 20);
     expect(completed.maxEnergy, 1000);
   });

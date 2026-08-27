@@ -31,7 +31,7 @@ AppDatabase / SQLite
 
 ## Feature sırası
 
-`earning → training → skills → sport → jobs → career → cities → employment → company → daily_goals → progress`
+`earning → training → skills → sport → jobs → career → cities → finance → employment → company → daily_goals → progress`
 
 ## Sürüm 1.2–1.4 sınırları
 
@@ -40,4 +40,4 @@ AppDatabase / SQLite
 - `company`: şirket seviyesi, kapasite ve proje kataloğu.
 - Yeni kurallar application service üzerinden persist edilir; widget'lar yalnızca state ve komut çağırır.
 
-2.0.0 itibarıyla tüm oyun kuralları offline oynanabilir durumdadır. Foreground ticker yalnızca açık uygulamada saat tick'i üretir; aktif aktivite, yetenek, işveren ve istihdam verileri SQLite v15'e data katmanında JSON/alan bazlı olarak yazılır.
+2.5.0 itibarıyla tüm oyun kuralları offline oynanabilir durumdadır. Foreground ticker yalnızca açık uygulamada saat tick'i üretir; aktivite, yetenek, işveren, istihdam, varlık ve son 30 günlük finans verileri SQLite v25'e data katmanında JSON/alan bazlı olarak yazılır. Şehre bağlı maaş ve yaşam bütçesi ortak domain servislerinden sağlanır. Kirada olmayan mevcut şehir evi konut giderini kaldırır; diğer yaşam giderleri gelir ve zamana göre dengelenir. Varlık alım/satım/kiralama kuralları asset, değerleme ve büyüme hedefleri company domain servisinde tutulur. Sunum katmanında kontrast paleti ve erişilebilir hareket süreleri merkezi tema bileşenlerinden sağlanır.

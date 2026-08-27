@@ -15,7 +15,14 @@ class Employment {
   final int startedDay;
   final int lastTaskDay;
 
-  Employment copyWith({int? jobId, int? cityId, int? salary, String? company, int? startedDay, int? lastTaskDay}) {
+  Employment copyWith({
+    int? jobId,
+    int? cityId,
+    int? salary,
+    String? company,
+    int? startedDay,
+    int? lastTaskDay,
+  }) {
     return Employment(
       jobId: jobId ?? this.jobId,
       cityId: cityId ?? this.cityId,

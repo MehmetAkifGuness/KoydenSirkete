@@ -1,7 +1,19 @@
 import '../../../skills/domain/entities/skill_id.dart';
 
 class DebugStatePatch {
-  const DebugStatePatch({this.money, this.energy, this.maxEnergy, this.knowledge, this.experience, this.day, this.hour, this.careerLevel, this.companyFunds, this.performance, this.skills});
+  const DebugStatePatch({
+    this.money,
+    this.energy,
+    this.maxEnergy,
+    this.knowledge,
+    this.experience,
+    this.day,
+    this.hour,
+    this.careerLevel,
+    this.companyFunds,
+    this.performance,
+    this.skills,
+  });
 
   final int? money;
   final int? energy;

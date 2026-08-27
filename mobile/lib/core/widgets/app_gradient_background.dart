@@ -9,6 +9,20 @@ class AppGradientBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ColoredBox(color: AppPalette.background, child: child);
+    return DecoratedBox(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            AppPalette.background,
+            AppPalette.backgroundElevated,
+            AppPalette.background,
+          ],
+          stops: [0, .48, 1],
+        ),
+      ),
+      child: child,
+    );
   }
 }

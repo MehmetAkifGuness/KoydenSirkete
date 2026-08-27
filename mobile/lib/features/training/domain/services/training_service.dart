@@ -3,9 +3,11 @@ import '../../../game/domain/entities/player_state.dart';
 import '../../../game/domain/entities/active_activity.dart';
 import '../entities/course.dart';
 import '../../../skills/domain/services/skill_service.dart';
+import '../../../finance/domain/entities/finance_ledger.dart';
 
 class TrainingService {
-  TrainingService({SkillService? skillService}) : _skillService = skillService ?? SkillService();
+  TrainingService({SkillService? skillService})
+    : _skillService = skillService ?? SkillService();
 
   final SkillService _skillService;
 
@@ -14,7 +16,9 @@ class TrainingService {
       throw GameRuleException('${course.name} için yeterli paran yok.');
     }
     if (state.energy < course.energyCost) {
-      throw GameRuleException('${course.name} için en az ${course.energyCost} enerji gerekir.');
+      throw GameRuleException(
+        '${course.name} için en az ${course.energyCost} enerji gerekir.',
+      );
     }
 
     return ActiveActivity(
@@ -35,6 +39,11 @@ class TrainingService {
       experience: state.experience + course.experience,
       trainingSessionsToday: state.trainingSessionsToday + 1,
       totalTrainingSessions: state.totalTrainingSessions + 1,
+      financeLedger: state.financeLedger.record(
+        day: state.day,
+        category: FinanceCategory.training,
+        amount: -course.cost,
+      ),
     );
     return _skillService.improve(trained, course.skillDeltas);
   }

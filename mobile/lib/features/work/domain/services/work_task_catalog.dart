@@ -79,7 +79,8 @@ abstract final class WorkTaskCatalog {
       id: 7,
       jobId: 6,
       title: 'Rota planı',
-      description: 'Sevkiyat rotalarını planla ve teslimat verimliliğini artır.',
+      description:
+          'Sevkiyat rotalarını planla ve teslimat verimliliğini artır.',
       energyCost: 20,
       durationHours: 7,
       salaryMultiplier: 1.1,
@@ -89,7 +90,8 @@ abstract final class WorkTaskCatalog {
     ),
   ];
 
-  static List<WorkTask> forJob(int jobId) => tasks.where((task) => task.jobId == jobId).toList(growable: false);
+  static List<WorkTask> forJob(int jobId) =>
+      tasks.where((task) => task.jobId == jobId).toList(growable: false);
 
   static WorkTask? findById(int id) {
     for (final task in tasks) {

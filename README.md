@@ -71,14 +71,50 @@ Android-first, tamamen offline kariyer ve şirket simülasyonu.
 ## v2.0.0 offline gerçek zamanlı sürüm
 
 - Yalnızca foreground'da ilerleyen oyun saati: 20 gerçek saniye = 1 oyun saati.
-- Tek aktif aktivite, gerçek her 60 saniyede 10 enerji yenilenmesi ve sporla 200'e kadar maksimum enerji.
+- Eş zamanlı aktivite, gerçek her 60 saniyede 10 enerji yenilenmesi ve sporla 1000'e kadar maksimum enerji.
 - Uygulama kapalıyken de enerji açılışta geçen gerçek süreye göre tamamlanır.
 - 10 mesleki yetenek, 1000 üst sınır, çoklu yetenek eğitimleri ve göreve göre süre/enerji verimliliği.
 - Türkiye'nin 81 ili, 2025 ADNKS nüfuslarıyla nüfusa bağlı teknoloji, ekonomi, maaş ve iş fırsatları.
 - 20 rol, cihaz içinde seed tabanlı gizli bot rekabeti ve günlük başvuru sonucu.
 - Ayrı `İşim` ve `Şirketim` ekranları; her oyun gününde değişen işveren görevleri.
 - İki oyun günü görev başlatılmadığında yalnızca foreground gün geçişinde işten çıkarılma.
-- SQLite şema v18; eski v10 kayıtları sıfırlanmadan okunur. Para 24 oyun saati boyunca negatif kalırsa iflas sistemi devreye girer. Aktif işlerde 50 TL bedelli, bekleme süresi olmayan 20 dilimli Esnaf Çarkı kullanılabilir.
+- SQLite şema v23; eski kayıtlar sıfırlanmadan okunur. Para 24 oyun saati boyunca negatif kalırsa iflas sistemi devreye girer. Aktif işlerde 50 TL bedelli, bekleme süresi olmayan 20 dilimli Esnaf Çarkı kullanılabilir.
+
+## v2.1.0 ekonomi tutarlılığı ve sadeleştirme
+
+- Şehir maaş katsayısı ilan, işe giriş, terfi, şehir değişikliği ve eski kayıt yükleme akışlarının tamamında uygulanır.
+- Yaşanılan şehirde sahip olunan ev günlük kirayı kaldırır.
+- Sahip olunan araç şehirler arası taşınma maliyetini araç seviyesine göre düşürür.
+- Kullanılmayan kayıt alanları ve sahte tema seçenekleri kaldırıldı; merkezi sınıflar sorumluluklarına ayrıldı.
+
+## v2.2.0 varlık ekonomisi
+
+- Ev sahipliği hem gerçek kira hesabında hem şehir kartlarında aynı kuralla değerlendirilir.
+- Ev ve arabalar onay sonrasında alış fiyatının %70'i karşılığında satılabilir.
+- Şehir maaş katsayısı dengeli `0.90–1.50x` aralığına indirildi.
+
+## v2.3.0 ev ve proje dengesi
+
+- Herhangi bir eve sahip olmak tüm şehirlerde günlük kişisel gideri sıfırlar.
+- Ev fiyatları sabit olarak ₺200.000, ₺400.000 ve ₺600.000 seviyelerine getirildi.
+- Şirket kurulduğunda tüm proje türleri seçilebilir; proje değişiminde mevcut ilerleme onayla sıfırlanır.
+
+## v2.4.0 okunabilirlik ve hareket
+
+- Ana, ikincil ve soluk metin renkleri koyu yüzeylerde en az `4.5:1` kontrast sağlayacak şekilde yenilendi.
+- Yüzeyle aynı olan ikincil vurgu rengi, okunabilir açık mavi vurguya dönüştürüldü.
+- Alt sekmeler, özellik sayfaları, ekran durumları, kartlar ve ilerleme çubukları akıcı geçişlerle güncellendi.
+- Sistem animasyonları kapatıldığında hareket efektleri otomatik devre dışı kalır.
+
+## v2.5.0 finans ve uzun vadeli büyüme
+
+- Son 30 günlük gerçek para hareketlerini kategori bazında saklayan Finans ekranı.
+- Konut, yemek, fatura, ulaşım, kiralık ev bakımı ve kira gelirinden oluşan günlük bütçe.
+- Gelire göre yumuşak yaşam standardı artışı ve en fazla %25'e çıkan kontrollü enflasyon.
+- Aylık ev fiyatının %1'i brüt kira ve %8 bakım sonrası net getiri.
+- Şirket değerlemesi, itibar, pazar payı, altı büyüme hedefi ve üç büyük sözleşme.
+- Ev, kiralama ve şirket büyümesi dahil 12 ödüllü başarı.
+- SQLite v25 geriye dönük kayıt geçişi.
 
 ## Çalıştırma
 

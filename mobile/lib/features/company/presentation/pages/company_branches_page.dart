@@ -235,7 +235,10 @@ class _BranchCardState extends State<_BranchCard> {
     final session = widget.session;
     final city = CityCatalog.findById(branch.cityId);
     final allCandidates = session.branchCandidates(branch);
-    final candidates = filterEmployeeCandidates(allCandidates, _candidateFilter);
+    final candidates = filterEmployeeCandidates(
+      allCandidates,
+      _candidateFilter,
+    );
     final capacity = CompanyBranchService.employeeCapacity(branch);
     final service = CompanyBranchService();
     return AppInfoCard(

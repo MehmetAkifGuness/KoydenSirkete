@@ -3,6 +3,8 @@ import '../../../skills/domain/entities/skill_profile.dart';
 import '../../../employment/domain/entities/employment.dart';
 import '../../../company/domain/entities/company_employee.dart';
 import '../../../company/domain/entities/company_branch.dart';
+import '../../../finance/domain/entities/finance_ledger.dart';
+
 class PlayerState {
   static const _unset = Object();
   static const bankruptcyDurationHours = 24;
@@ -16,10 +18,8 @@ class PlayerState {
     required this.hour,
     required this.earningSessionsToday,
     this.maxEnergy = 100,
-    this.energyRecoveryRemainder = 0,
     this.energyRecoveryAt,
     this.negativeMoneyHours = 0,
-    this.wheelCooldownSeconds = 0,
     this.wheelMajorRewardsToday = 0,
     this.wheelDurationBuffPercent = 0,
     this.wheelDurationBuffTasks = 0,
@@ -27,7 +27,6 @@ class PlayerState {
     this.wheelEnergyBuffTasks = 0,
     this.wheelRewardBuffPercent = 0,
     this.wheelRewardBuffTasks = 0,
-    this.themePaletteId = 0,
     ActiveActivity? activeActivity,
     this.activeActivities = const <ActiveActivity>[],
     this.skills = const SkillProfile(),
@@ -52,6 +51,8 @@ class PlayerState {
     this.employees = const <CompanyEmployee>[],
     this.branches = const <CompanyBranch>[],
     this.ownedHomeIds = const <int>[],
+    this.rentedHomeIds = const <int>[],
+    this.financeLedger = const FinanceLedger(),
     this.ownedCarId,
     this.projectProgress = 0,
     this.totalEarned = 0,
@@ -63,7 +64,7 @@ class PlayerState {
     this.isOnboarded = false,
   }) : _legacyActiveActivity = activeActivity;
   static const initial = PlayerState(
-    schemaVersion: 23,
+    schemaVersion: 25,
     money: 240,
     energy: 100,
     knowledge: 0,
@@ -81,10 +82,8 @@ class PlayerState {
   final int hour;
   final int earningSessionsToday;
   final int maxEnergy;
-  final int energyRecoveryRemainder;
   final DateTime? energyRecoveryAt;
   final int negativeMoneyHours;
-  final int wheelCooldownSeconds;
   final int wheelMajorRewardsToday;
   final int wheelDurationBuffPercent;
   final int wheelDurationBuffTasks;
@@ -92,7 +91,6 @@ class PlayerState {
   final int wheelEnergyBuffTasks;
   final int wheelRewardBuffPercent;
   final int wheelRewardBuffTasks;
-  final int themePaletteId;
   final ActiveActivity? _legacyActiveActivity;
   final List<ActiveActivity> activeActivities;
   final SkillProfile skills;
@@ -117,6 +115,8 @@ class PlayerState {
   final List<CompanyEmployee> employees;
   final List<CompanyBranch> branches;
   final List<int> ownedHomeIds;
+  final List<int> rentedHomeIds;
+  final FinanceLedger financeLedger;
   final int? ownedCarId;
   final int projectProgress;
   final int totalEarned;
@@ -136,10 +136,8 @@ class PlayerState {
     int? hour,
     int? earningSessionsToday,
     int? maxEnergy,
-    int? energyRecoveryRemainder,
     DateTime? energyRecoveryAt,
     int? negativeMoneyHours,
-    int? wheelCooldownSeconds,
     int? wheelMajorRewardsToday,
     int? wheelDurationBuffPercent,
     int? wheelDurationBuffTasks,
@@ -147,7 +145,6 @@ class PlayerState {
     int? wheelEnergyBuffTasks,
     int? wheelRewardBuffPercent,
     int? wheelRewardBuffTasks,
-    int? themePaletteId,
     Object? activeActivity = _unset,
     Object? activeActivities = _unset,
     SkillProfile? skills,
@@ -172,6 +169,8 @@ class PlayerState {
     Object? employees = _unset,
     Object? branches = _unset,
     Object? ownedHomeIds = _unset,
+    Object? rentedHomeIds = _unset,
+    FinanceLedger? financeLedger,
     Object? ownedCarId = _unset,
     int? projectProgress,
     int? totalEarned,
@@ -192,36 +191,54 @@ class PlayerState {
       hour: hour ?? this.hour,
       earningSessionsToday: earningSessionsToday ?? this.earningSessionsToday,
       maxEnergy: maxEnergy ?? this.maxEnergy,
-      energyRecoveryRemainder: energyRecoveryRemainder ?? this.energyRecoveryRemainder,
       energyRecoveryAt: energyRecoveryAt ?? this.energyRecoveryAt,
       negativeMoneyHours: negativeMoneyHours ?? this.negativeMoneyHours,
-      wheelCooldownSeconds: wheelCooldownSeconds ?? this.wheelCooldownSeconds,
-      wheelMajorRewardsToday: wheelMajorRewardsToday ?? this.wheelMajorRewardsToday,
-      wheelDurationBuffPercent: wheelDurationBuffPercent ?? this.wheelDurationBuffPercent,
-      wheelDurationBuffTasks: wheelDurationBuffTasks ?? this.wheelDurationBuffTasks,
-      wheelEnergyBuffPercent: wheelEnergyBuffPercent ?? this.wheelEnergyBuffPercent,
+      wheelMajorRewardsToday:
+          wheelMajorRewardsToday ?? this.wheelMajorRewardsToday,
+      wheelDurationBuffPercent:
+          wheelDurationBuffPercent ?? this.wheelDurationBuffPercent,
+      wheelDurationBuffTasks:
+          wheelDurationBuffTasks ?? this.wheelDurationBuffTasks,
+      wheelEnergyBuffPercent:
+          wheelEnergyBuffPercent ?? this.wheelEnergyBuffPercent,
       wheelEnergyBuffTasks: wheelEnergyBuffTasks ?? this.wheelEnergyBuffTasks,
-      wheelRewardBuffPercent: wheelRewardBuffPercent ?? this.wheelRewardBuffPercent,
+      wheelRewardBuffPercent:
+          wheelRewardBuffPercent ?? this.wheelRewardBuffPercent,
       wheelRewardBuffTasks: wheelRewardBuffTasks ?? this.wheelRewardBuffTasks,
-      themePaletteId: themePaletteId ?? this.themePaletteId,
       activeActivity: identical(activeActivities, _unset)
-          ? (identical(activeActivity, _unset) ? _legacyActiveActivity : activeActivity as ActiveActivity?)
+          ? (identical(activeActivity, _unset)
+                ? _legacyActiveActivity
+                : activeActivity as ActiveActivity?)
           : null,
       activeActivities: identical(activeActivities, _unset)
-          ? (identical(activeActivity, _unset) ? this.activeActivities : const <ActiveActivity>[])
-          : List<ActiveActivity>.unmodifiable(activeActivities as List<ActiveActivity>),
+          ? (identical(activeActivity, _unset)
+                ? this.activeActivities
+                : const <ActiveActivity>[])
+          : List<ActiveActivity>.unmodifiable(
+              activeActivities as List<ActiveActivity>,
+            ),
       skills: skills ?? this.skills,
-      employment: identical(employment, _unset) ? this.employment : employment as Employment?,
-      applicationBlockedJobId: identical(applicationBlockedJobId, _unset) ? this.applicationBlockedJobId : applicationBlockedJobId as int?,
-      applicationBlockedUntilDay: applicationBlockedUntilDay ?? this.applicationBlockedUntilDay,
-      lastJobEvent: identical(lastJobEvent, _unset) ? this.lastJobEvent : lastJobEvent as String?,
+      employment: identical(employment, _unset)
+          ? this.employment
+          : employment as Employment?,
+      applicationBlockedJobId: identical(applicationBlockedJobId, _unset)
+          ? this.applicationBlockedJobId
+          : applicationBlockedJobId as int?,
+      applicationBlockedUntilDay:
+          applicationBlockedUntilDay ?? this.applicationBlockedUntilDay,
+      lastJobEvent: identical(lastJobEvent, _unset)
+          ? this.lastJobEvent
+          : lastJobEvent as String?,
       jobDataVersion: jobDataVersion ?? this.jobDataVersion,
       taskDataVersion: taskDataVersion ?? this.taskDataVersion,
       dismissedDay: dismissedDay ?? this.dismissedDay,
-      currentJobId: identical(currentJobId, _unset) ? this.currentJobId : currentJobId as int?,
+      currentJobId: identical(currentJobId, _unset)
+          ? this.currentJobId
+          : currentJobId as int?,
       performance: performance ?? this.performance,
       workSessionsToday: workSessionsToday ?? this.workSessionsToday,
-      trainingSessionsToday: trainingSessionsToday ?? this.trainingSessionsToday,
+      trainingSessionsToday:
+          trainingSessionsToday ?? this.trainingSessionsToday,
       dailyGoalClaimedDay: dailyGoalClaimedDay ?? this.dailyGoalClaimedDay,
       careerLevel: careerLevel ?? this.careerLevel,
       currentCityId: currentCityId ?? this.currentCityId,
@@ -231,48 +248,50 @@ class PlayerState {
       employeeCount: employeeCount ?? this.employeeCount,
       employees: identical(employees, _unset)
           ? this.employees
-          : List<CompanyEmployee>.unmodifiable(employees as List<CompanyEmployee>),
+          : List<CompanyEmployee>.unmodifiable(
+              employees as List<CompanyEmployee>,
+            ),
       branches: identical(branches, _unset)
           ? this.branches
           : List<CompanyBranch>.unmodifiable(branches as List<CompanyBranch>),
       ownedHomeIds: identical(ownedHomeIds, _unset)
           ? this.ownedHomeIds
           : List<int>.unmodifiable(ownedHomeIds as List<int>),
-      ownedCarId: identical(ownedCarId, _unset) ? this.ownedCarId : ownedCarId as int?,
+      rentedHomeIds: identical(rentedHomeIds, _unset)
+          ? this.rentedHomeIds
+          : List<int>.unmodifiable(rentedHomeIds as List<int>),
+      financeLedger: financeLedger ?? this.financeLedger,
+      ownedCarId: identical(ownedCarId, _unset)
+          ? this.ownedCarId
+          : ownedCarId as int?,
       projectProgress: projectProgress ?? this.projectProgress,
       totalEarned: totalEarned ?? this.totalEarned,
       totalWorkSessions: totalWorkSessions ?? this.totalWorkSessions,
-      totalTrainingSessions: totalTrainingSessions ?? this.totalTrainingSessions,
-      unlockedAchievementsMask: unlockedAchievementsMask ?? this.unlockedAchievementsMask,
+      totalTrainingSessions:
+          totalTrainingSessions ?? this.totalTrainingSessions,
+      unlockedAchievementsMask:
+          unlockedAchievementsMask ?? this.unlockedAchievementsMask,
       activeProjectId: activeProjectId ?? this.activeProjectId,
       completedProjects: completedProjects ?? this.completedProjects,
       isOnboarded: isOnboarded ?? this.isOnboarded,
     );
   }
+
   bool get isBankrupt => negativeMoneyHours >= bankruptcyDurationHours;
-  ActiveActivity? get activeActivity =>
-      activeActivities.isNotEmpty ? activeActivities.first : _legacyActiveActivity;
+  ActiveActivity? get activeActivity => activeActivities.isNotEmpty
+      ? activeActivities.first
+      : _legacyActiveActivity;
   List<ActiveActivity> get activities {
     if (activeActivities.isNotEmpty) {
       return List.unmodifiable(activeActivities);
     }
     final legacy = _legacyActiveActivity;
-    return legacy == null ? const <ActiveActivity>[] : List.unmodifiable([legacy]);
+    return legacy == null
+        ? const <ActiveActivity>[]
+        : List.unmodifiable([legacy]);
   }
+
   int get activityCapacity => careerLevel < 1 ? 1 : careerLevel;
   bool get hasActivityCapacity => activities.length < activityCapacity;
 
-  PlayerState advanceGameHour() {
-    final absoluteHour = (day - 1) * 24 + hour + 1;
-    final nextDay = absoluteHour ~/ 24 + 1;
-    final nextHour = absoluteHour % 24;
-    return copyWith(
-      day: nextDay,
-      hour: nextHour,
-      earningSessionsToday: nextDay == day ? earningSessionsToday : 0,
-      workSessionsToday: nextDay == day ? workSessionsToday : 0,
-      trainingSessionsToday: nextDay == day ? trainingSessionsToday : 0,
-      wheelMajorRewardsToday: nextDay == day ? wheelMajorRewardsToday : 0,
-    );
-  }
 }

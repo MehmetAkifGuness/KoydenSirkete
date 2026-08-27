@@ -21,9 +21,15 @@ List<CompanyEmployee> filterEmployeeCandidates(
   final sorted = [...result];
   sorted.sort((left, right) {
     final comparison = switch (filter) {
-      EmployeeCandidateFilter.lowCost => left.dailySalary.compareTo(right.dailySalary),
-      EmployeeCandidateFilter.highPerformance => right.performance.compareTo(left.performance),
-      EmployeeCandidateFilter.bestValue => _valueScore(right).compareTo(_valueScore(left)),
+      EmployeeCandidateFilter.lowCost => left.dailySalary.compareTo(
+        right.dailySalary,
+      ),
+      EmployeeCandidateFilter.highPerformance => right.performance.compareTo(
+        left.performance,
+      ),
+      EmployeeCandidateFilter.bestValue => _valueScore(
+        right,
+      ).compareTo(_valueScore(left)),
       EmployeeCandidateFilter.all => 0,
     };
     if (comparison != 0) return comparison;

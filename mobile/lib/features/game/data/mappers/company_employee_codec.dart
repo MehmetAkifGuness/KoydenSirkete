@@ -26,20 +26,20 @@ class CompanyEmployeeCodec {
   }
 
   Map<String, dynamic> _toJson(CompanyEmployee employee) => {
-        'id': employee.id,
-        'name': employee.name,
-        'role': employee.role,
-        'performance': employee.performance,
-        'daily_salary': employee.dailySalary,
-        'required_company_level': employee.requiredCompanyLevel,
-      };
+    'id': employee.id,
+    'name': employee.name,
+    'role': employee.role,
+    'performance': employee.performance,
+    'daily_salary': employee.dailySalary,
+    'required_company_level': employee.requiredCompanyLevel,
+  };
 
   CompanyEmployee _fromJson(Map<String, dynamic> json) => CompanyEmployee(
-        id: json['id'] as int,
-        name: json['name'] as String,
-        role: json['role'] as String,
-        performance: json['performance'] as int,
-        dailySalary: json['daily_salary'] as int,
-        requiredCompanyLevel: json['required_company_level'] as int? ?? 1,
-      );
+    id: json['id'] as int,
+    name: json['name'] as String,
+    role: json['role'] as String,
+    performance: json['performance'] as int,
+    dailySalary: json['daily_salary'] as int,
+    requiredCompanyLevel: json['required_company_level'] as int? ?? 1,
+  );
 }

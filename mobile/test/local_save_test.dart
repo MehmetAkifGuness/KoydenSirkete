@@ -7,11 +7,15 @@ import 'package:kariyerden_sirkete/features/game/domain/entities/player_state.da
 import 'package:kariyerden_sirkete/features/game/domain/entities/active_activity.dart';
 import 'package:kariyerden_sirkete/features/company/domain/entities/company_employee.dart';
 import 'package:kariyerden_sirkete/features/company/domain/entities/company_branch.dart';
+import 'package:kariyerden_sirkete/features/finance/domain/entities/finance_ledger.dart';
 
 void main() {
   test('player state repository persists the latest state', () async {
     final store = _MemoryPlayerStateStore();
-    final repository = LocalPlayerStateRepository(database: store, mapper: PlayerStateMapper());
+    final repository = LocalPlayerStateRepository(
+      database: store,
+      mapper: PlayerStateMapper(),
+    );
     final expected = PlayerState.initial.copyWith(
       money: 340,
       energy: 85,
@@ -27,7 +31,6 @@ void main() {
       employeeCount: 2,
       projectProgress: 40,
       negativeMoneyHours: 12,
-      wheelCooldownSeconds: 160,
       wheelMajorRewardsToday: 2,
       wheelDurationBuffPercent: 50,
       wheelDurationBuffTasks: 2,
@@ -35,7 +38,6 @@ void main() {
       wheelEnergyBuffTasks: 1,
       wheelRewardBuffPercent: 100,
       wheelRewardBuffTasks: 2,
-      themePaletteId: 7,
       isOnboarded: true,
     );
 
@@ -55,7 +57,6 @@ void main() {
     expect(actual?.employeeCount, expected.employeeCount);
     expect(actual?.projectProgress, expected.projectProgress);
     expect(actual?.negativeMoneyHours, expected.negativeMoneyHours);
-    expect(actual?.wheelCooldownSeconds, expected.wheelCooldownSeconds);
     expect(actual?.wheelMajorRewardsToday, expected.wheelMajorRewardsToday);
     expect(actual?.wheelDurationBuffPercent, expected.wheelDurationBuffPercent);
     expect(actual?.wheelDurationBuffTasks, expected.wheelDurationBuffTasks);
@@ -63,13 +64,15 @@ void main() {
     expect(actual?.wheelEnergyBuffTasks, expected.wheelEnergyBuffTasks);
     expect(actual?.wheelRewardBuffPercent, expected.wheelRewardBuffPercent);
     expect(actual?.wheelRewardBuffTasks, expected.wheelRewardBuffTasks);
-    expect(actual?.themePaletteId, expected.themePaletteId);
     expect(actual?.isOnboarded, expected.isOnboarded);
   });
 
   test('player state repository persists concurrent activities', () async {
     final store = _MemoryPlayerStateStore();
-    final repository = LocalPlayerStateRepository(database: store, mapper: PlayerStateMapper());
+    final repository = LocalPlayerStateRepository(
+      database: store,
+      mapper: PlayerStateMapper(),
+    );
     const earning = ActiveActivity(
       type: ActivityType.earning,
       sourceId: 'earning',
@@ -97,12 +100,18 @@ void main() {
 
     final actual = await repository.load();
     expect(actual?.activeActivities, hasLength(2));
-    expect(actual?.activities.map((activity) => activity.sourceId), ['earning', 'sport']);
+    expect(actual?.activities.map((activity) => activity.sourceId), [
+      'earning',
+      'sport',
+    ]);
   });
 
   test('player state repository persists selected company employees', () async {
     final store = _MemoryPlayerStateStore();
-    final repository = LocalPlayerStateRepository(database: store, mapper: PlayerStateMapper());
+    final repository = LocalPlayerStateRepository(
+      database: store,
+      mapper: PlayerStateMapper(),
+    );
     const employee = CompanyEmployee(
       id: 3,
       name: 'Zeynep Yılmaz',
@@ -126,12 +135,25 @@ void main() {
 
   test('player state repository persists branches and owned assets', () async {
     final store = _MemoryPlayerStateStore();
-    final repository = LocalPlayerStateRepository(database: store, mapper: PlayerStateMapper());
+    final repository = LocalPlayerStateRepository(
+      database: store,
+      mapper: PlayerStateMapper(),
+    );
     const branch = CompanyBranch(id: 2, cityId: 2, level: 1);
     final expected = PlayerState.initial.copyWith(
       companyLevel: 1,
       branches: const [branch],
       ownedHomeIds: const [201, 202],
+      rentedHomeIds: const [202],
+      financeLedger: const FinanceLedger(
+        entries: [
+          FinanceEntry(
+            day: 2,
+            category: FinanceCategory.rentalIncome,
+            amount: 67,
+          ),
+        ],
+      ),
       ownedCarId: 2,
     );
 
@@ -140,6 +162,9 @@ void main() {
     final actual = await repository.load();
     expect(actual?.branches.single.cityId, 2);
     expect(actual?.ownedHomeIds, [201, 202]);
+    expect(actual?.rentedHomeIds, [202]);
+    expect(actual?.financeLedger.entries.single.category, FinanceCategory.rentalIncome);
+    expect(actual?.financeLedger.entries.single.amount, 67);
     expect(actual?.ownedCarId, 2);
   });
 }

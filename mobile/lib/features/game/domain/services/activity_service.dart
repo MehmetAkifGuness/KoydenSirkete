@@ -76,12 +76,12 @@ class ActivityService {
 
   PlayerState activate(PlayerState state, ActiveActivity activity) {
     if (!state.hasActivityCapacity) {
-      throw const GameRuleException(
-        'R\u00FCtbe kapasitesi dolu.',
-      );
+      throw const GameRuleException('R\u00FCtbe kapasitesi dolu.');
     }
     if (state.activities.any(
-      (current) => current.type == activity.type && current.sourceId == activity.sourceId,
+      (current) =>
+          current.type == activity.type &&
+          current.sourceId == activity.sourceId,
     )) {
       throw const GameRuleException('Ayn\u0131 aktivite zaten devam ediyor.');
     }
@@ -184,18 +184,16 @@ class ActivityService {
           cityId: cityId,
           salary: salary,
           opportunityIndex: 0,
+          employer: activity.payload['employer'],
         );
         final nextState = _jobApplicationService.complete(
           state,
           listing,
           competitionDay: activity.startedDay,
         );
-        final hired = nextState.currentJobId == job.id;
         return ActivityCompletion(
           state: nextState,
-          message: hired
-              ? '${job.title} başvurun kabul edildi.'
-              : 'Başvuru rekabetini kaybettin. Yarın tekrar deneyebilirsin.',
+          message: nextState.lastJobEvent ?? 'Başvuru sonucu kaydedilemedi.',
         );
     }
   }

@@ -11,11 +11,13 @@ import '../core/widgets/game_bottom_nav.dart';
 import '../core/widgets/game_top_bar.dart';
 import '../core/widgets/storage_error_page.dart';
 import '../features/career/presentation/pages/career_page.dart';
+import '../features/assets/presentation/pages/assets_page.dart';
 import '../features/cities/presentation/pages/cities_page.dart';
 import '../features/company/presentation/pages/company_page.dart';
 import '../features/dashboard/presentation/pages/dashboard_page.dart';
 import '../features/earning/presentation/pages/earning_page.dart';
 import '../features/employment/presentation/pages/employment_page.dart';
+import '../features/finance/presentation/pages/finance_page.dart';
 import '../features/game/application/game_session_application_service.dart';
 import '../features/game/data/mappers/player_state_mapper.dart';
 import '../features/game/data/repositories/local_player_state_repository.dart';
@@ -31,6 +33,7 @@ import '../features/sport/presentation/pages/sport_page.dart';
 import '../features/training/presentation/pages/training_page.dart';
 import 'router/app_navigation_state.dart';
 import 'router/app_router.dart';
+import 'theme/app_motion.dart';
 import 'theme/app_theme.dart';
 
 class CareerToCompanyApp extends StatelessWidget {
@@ -102,7 +105,10 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      if (!_clockPaused && !_showWelcome && _session.state.isOnboarded && _session.isReady) {
+      if (!_clockPaused &&
+          !_showWelcome &&
+          _session.state.isOnboarded &&
+          _session.isReady) {
         unawaited(_resumeGame());
       }
     } else {
@@ -116,49 +122,96 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
       animation: Listenable.merge([_navigation, _session]),
       builder: (context, _) {
         if (!_session.isReady) {
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
+          return _shellTransition(
+            context,
+            'loading',
+            const Scaffold(body: Center(child: CircularProgressIndicator())),
           );
         }
         if (_session.errorMessage != null) {
-          return StorageErrorPage(
-            message: _session.errorMessage!,
-            onRetry: _session.retryInitialization,
+          return _shellTransition(
+            context,
+            'error',
+            StorageErrorPage(
+              message: _session.errorMessage!,
+              onRetry: _session.retryInitialization,
+            ),
           );
         }
         if (_session.state.isBankrupt) {
-          return BankruptcyPage(onRestart: _restartAfterBankruptcy);
+          return _shellTransition(
+            context,
+            'bankruptcy',
+            BankruptcyPage(onRestart: _restartAfterBankruptcy),
+          );
         }
         if (_showWelcome || !_session.state.isOnboarded) {
-          return OnboardingPage(session: _session, onStart: _enterGame);
+          return _shellTransition(
+            context,
+            'welcome',
+            OnboardingPage(session: _session, onStart: _enterGame),
+          );
         }
-        return Scaffold(
-          body: Column(
-            children: [
-              GameTopBar(
-                state: _session.state,
-                speed: _gameSpeed,
-                isRunning: !_clockPaused && _clockTicker.isRunning,
-                onSpeedChanged: _changeGameSpeed,
-                onToggleRunning: _toggleClock,
-              ),
-              Expanded(
-                child: MediaQuery.removePadding(
-                  context: context,
-                  removeTop: true,
-                  child: _currentPage(),
+        return _shellTransition(
+          context,
+          'game',
+          Scaffold(
+            body: Column(
+              children: [
+                GameTopBar(
+                  state: _session.state,
+                  speed: _gameSpeed,
+                  isRunning: !_clockPaused && _clockTicker.isRunning,
+                  onSpeedChanged: _changeGameSpeed,
+                  onToggleRunning: _toggleClock,
                 ),
-              ),
-            ],
-          ),
-          bottomNavigationBar: GameBottomNav(
-            selectedIndex: _navigation.currentIndex,
-            onSelected: _navigation.select,
+                Expanded(
+                  child: MediaQuery.removePadding(
+                    context: context,
+                    removeTop: true,
+                    child: AnimatedSwitcher(
+                      duration: _motionDuration(context, AppMotion.standard),
+                      switchInCurve: AppMotion.enterCurve,
+                      switchOutCurve: AppMotion.exitCurve,
+                      transitionBuilder: (child, animation) =>
+                          AppMotion.fadeSlide(
+                            child,
+                            animation,
+                            begin: const Offset(.035, 0),
+                          ),
+                      child: KeyedSubtree(
+                        key: ValueKey(_navigation.currentIndex),
+                        child: _currentPage(),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            bottomNavigationBar: GameBottomNav(
+              selectedIndex: _navigation.currentIndex,
+              onSelected: _navigation.select,
+            ),
           ),
         );
       },
     );
   }
+
+  Widget _shellTransition(BuildContext context, String key, Widget child) {
+    return AnimatedSwitcher(
+      duration: _motionDuration(context, AppMotion.slow),
+      switchInCurve: AppMotion.enterCurve,
+      switchOutCurve: AppMotion.exitCurve,
+      transitionBuilder: AppMotion.fadeSlide,
+      child: KeyedSubtree(key: ValueKey(key), child: child),
+    );
+  }
+
+  Duration _motionDuration(BuildContext context, Duration duration) =>
+      MediaQuery.maybeOf(context)?.disableAnimations ?? false
+      ? Duration.zero
+      : duration;
 
   Widget _currentPage() => switch (_navigation.currentIndex) {
     0 => DashboardPage(session: _session, onFeatureTap: _openFeature),
@@ -224,24 +277,25 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
 
   void _openFeature(AppFeature feature) {
     final route = switch (feature.title) {
-      _ when feature.title == AppFeatures.earning.title => MaterialPageRoute<void>(
-          builder: (_) => EarningPage(session: _session),
-        ),
-      _ when feature.title == AppFeatures.training.title => MaterialPageRoute<void>(
+      _ when feature.title == AppFeatures.earning.title =>
+        MaterialPageRoute<void>(builder: (_) => EarningPage(session: _session)),
+      _ when feature.title == AppFeatures.training.title =>
+        MaterialPageRoute<void>(
           builder: (_) => TrainingPage(session: _session),
         ),
-      _ when feature.title == AppFeatures.skills.title => MaterialPageRoute<void>(
-          builder: (_) => SkillsPage(session: _session),
-        ),
-      _ when feature.title == AppFeatures.sport.title => MaterialPageRoute<void>(
-          builder: (_) => SportPage(session: _session),
-        ),
+      _ when feature.title == AppFeatures.finance.title =>
+        MaterialPageRoute<void>(builder: (_) => FinancePage(session: _session)),
+      _ when feature.title == AppFeatures.assets.title =>
+        MaterialPageRoute<void>(builder: (_) => AssetsPage(session: _session)),
+      _ when feature.title == AppFeatures.skills.title =>
+        MaterialPageRoute<void>(builder: (_) => SkillsPage(session: _session)),
+      _ when feature.title == AppFeatures.sport.title =>
+        MaterialPageRoute<void>(builder: (_) => SportPage(session: _session)),
       _ when feature.title == AppFeatures.jobs.title => MaterialPageRoute<void>(
-          builder: (_) => JobsPage(session: _session),
-        ),
-      _ when feature.title == AppFeatures.cities.title => MaterialPageRoute<void>(
-          builder: (_) => CitiesPage(session: _session),
-        ),
+        builder: (_) => JobsPage(session: _session),
+      ),
+      _ when feature.title == AppFeatures.cities.title =>
+        MaterialPageRoute<void>(builder: (_) => CitiesPage(session: _session)),
       _ => AppRouter.placeholderRoute(feature),
     };
     Navigator.of(context).push(route);

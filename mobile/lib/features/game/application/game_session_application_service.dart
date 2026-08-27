@@ -8,6 +8,7 @@ import '../../career/domain/services/career_service.dart';
 import '../../cities/domain/entities/city.dart';
 import '../../cities/domain/services/city_service.dart';
 import '../../cities/domain/services/living_cost_service.dart';
+import '../../cities/domain/services/city_salary_service.dart';
 import '../../company/domain/services/company_service.dart';
 import '../domain/entities/player_state.dart';
 import '../domain/entities/debug_state_patch.dart';
@@ -34,6 +35,8 @@ import '../../employment/domain/services/employment_service.dart';
 import '../../work/domain/services/employer_task_generator.dart';
 import '../../wheel/domain/services/esnaf_wheel_service.dart';
 
+part 'game_session_feature_application.dart';
+
 class GameSessionApplicationService {
   GameSessionApplicationService({
     required PlayerStateRepository repository,
@@ -54,24 +57,29 @@ class GameSessionApplicationService {
     EmploymentService? employmentService,
     EmployerTaskGenerator? employerTaskGenerator,
     EsnafWheelService? esnafWheelService,
-  })  : _repository = repository,
-        _jobApplicationService = jobApplicationService ?? JobApplicationService(),
-        _workService = workService ?? WorkService(),
-        _careerService = careerService ?? CareerService(),
-        _cityService = cityService ?? CityService(),
-        _livingCostService = livingCostService ?? LivingCostService(),
-        _companyService = companyService ?? CompanyService(),
-        _companyBranchService = companyBranchService ?? CompanyBranchService(),
-        _assetService = assetService ?? AssetService(),
-        _dailyGoalService = dailyGoalService ?? DailyGoalService(),
-        _achievementService = achievementService ?? AchievementService(),
-        _gameClockService = gameClockService ?? GameClockService(),
-        _energyRecoveryService = energyRecoveryService ?? EnergyRecoveryService(),
-        _activityService = activityService ?? ActivityService(),
-        _jobListingService = jobListingService ?? JobListingService(),
-        _employmentService = employmentService ?? EmploymentService(),
-        _employerTaskGenerator = employerTaskGenerator ?? EmployerTaskGenerator(),
-        _esnafWheelService = esnafWheelService ?? EsnafWheelService();
+    CitySalaryService? citySalaryService,
+  }) : _repository = repository,
+       _jobApplicationService =
+           jobApplicationService ?? JobApplicationService(),
+       _workService = workService ?? WorkService(),
+       _careerService = careerService ?? CareerService(),
+       _cityService = cityService ?? CityService(),
+       _livingCostService = livingCostService ?? LivingCostService(),
+       _companyService = companyService ?? CompanyService(),
+       _companyBranchService = companyBranchService ?? CompanyBranchService(),
+       _assetService = assetService ?? AssetService(),
+       _dailyGoalService = dailyGoalService ?? DailyGoalService(),
+       _achievementService = achievementService ?? AchievementService(),
+       _gameClockService = gameClockService ?? GameClockService(),
+       _energyRecoveryService =
+           energyRecoveryService ?? EnergyRecoveryService(),
+       _activityService = activityService ?? ActivityService(),
+       _jobListingService = jobListingService ?? JobListingService(),
+       _employmentService = employmentService ?? EmploymentService(),
+       _employerTaskGenerator =
+           employerTaskGenerator ?? EmployerTaskGenerator(),
+       _esnafWheelService = esnafWheelService ?? EsnafWheelService(),
+       _citySalaryService = citySalaryService ?? CitySalaryService();
 
   final PlayerStateRepository _repository;
   final JobApplicationService _jobApplicationService;
@@ -91,36 +99,62 @@ class GameSessionApplicationService {
   final EmploymentService _employmentService;
   final EmployerTaskGenerator _employerTaskGenerator;
   final EsnafWheelService _esnafWheelService;
+  final CitySalaryService _citySalaryService;
 
   Future<PlayerState> load() async {
     final loaded = await _repository.load() ?? PlayerState.initial;
     if (loaded.employment == null && loaded.currentJobId != null) {
       final job = JobCatalog.findById(loaded.currentJobId);
       if (job != null) {
-        return _persist(loaded.copyWith(
-          employment: Employment(
-            jobId: job.id,
-            cityId: loaded.currentCityId,
-            salary: job.salary,
-            company: job.company,
-            startedDay: loaded.day,
+        return _persist(
+          loaded.copyWith(
+            employment: Employment(
+              jobId: job.id,
+              cityId: loaded.currentCityId,
+              salary: _citySalaryService.calculate(job, loaded.currentCityId),
+              company: job.company,
+              startedDay: loaded.day,
+            ),
+            careerLevel: job.level,
           ),
-          careerLevel: job.level,
-        ));
+        );
       }
     }
     if (loaded.employment != null) {
       final employmentJob = JobCatalog.findById(loaded.employment!.jobId);
-      if (employmentJob != null &&
-          (loaded.currentJobId != employmentJob.id || loaded.careerLevel != employmentJob.level)) {
-        return _persist(loaded.copyWith(currentJobId: employmentJob.id, careerLevel: employmentJob.level));
+      if (employmentJob != null) {
+        final salary = _citySalaryService.calculate(
+          employmentJob,
+          loaded.currentCityId,
+        );
+        if (loaded.currentJobId != employmentJob.id ||
+            loaded.careerLevel != employmentJob.level ||
+            loaded.employment!.cityId != loaded.currentCityId ||
+            loaded.employment!.salary != salary) {
+          return _persist(
+            loaded.copyWith(
+              currentJobId: employmentJob.id,
+              careerLevel: employmentJob.level,
+              employment: loaded.employment!.copyWith(
+                cityId: loaded.currentCityId,
+                salary: salary,
+              ),
+            ),
+          );
+        }
       }
     }
     return _persist(loaded);
   }
 
-  Future<PlayerState> startEarning(PlayerState state, {EarningPerformance performance = EarningPerformance.none}) async {
-    final activity = _activityService.startEarning(state, performance: performance);
+  Future<PlayerState> startEarning(
+    PlayerState state, {
+    EarningPerformance performance = EarningPerformance.none,
+  }) async {
+    final activity = _activityService.startEarning(
+      state,
+      performance: performance,
+    );
     return _persist(_activityService.activate(state, activity));
   }
 
@@ -139,26 +173,42 @@ class GameSessionApplicationService {
   }
 
   List<WorkTask> employerTasks(PlayerState state, Job job) {
-    return _employerTaskGenerator.generate(job: job, cityId: state.currentCityId, day: state.day);
+    return _employerTaskGenerator.generate(
+      job: job,
+      cityId: state.currentCityId,
+      day: state.day,
+    );
   }
 
-  Future<PlayerState> startJobApplication(PlayerState state, JobListing listing) async {
+  Future<PlayerState> startJobApplication(
+    PlayerState state,
+    JobListing listing,
+  ) async {
     final activity = _activityService.startJobApplication(state, listing);
     return _persist(_activityService.activate(state, activity));
   }
 
-  Future<PlayerState> startWork(PlayerState state, Job job, WorkTask task) async {
+  Future<PlayerState> startWork(
+    PlayerState state,
+    Job job,
+    WorkTask task,
+  ) async {
     final activity = _activityService.startWork(state, job, task);
     final activated = _activityService.activate(state, activity);
     final marked = _employmentService.markTaskStarted(activated);
     return _persist(_esnafWheelService.consumeWorkBuffs(marked));
   }
 
-  WheelAvailability wheelAvailability(PlayerState state) => _esnafWheelService.availability(state);
+  WheelAvailability wheelAvailability(PlayerState state) =>
+      _esnafWheelService.availability(state);
 
   Future<WheelSpinOutcome> spinWheel(PlayerState state) async {
     final outcome = _esnafWheelService.spin(state);
-    return WheelSpinOutcome(state: await _persist(outcome.state), reward: outcome.reward, sectorIndex: outcome.sectorIndex);
+    return WheelSpinOutcome(
+      state: await _persist(outcome.state),
+      reward: outcome.reward,
+      sectorIndex: outcome.sectorIndex,
+    );
   }
 
   Future<PlayerState> leaveJob(PlayerState state) async {
@@ -176,16 +226,23 @@ class GameSessionApplicationService {
     }
     final elapsedDays = clock.state.day - state.day;
     if (elapsedDays > 0) {
-      final operations = _companyService.processDailyOperations(nextState, days: elapsedDays);
+      final operations = _companyService.processDailyOperations(
+        nextState,
+        days: elapsedDays,
+      );
       nextState = operations.state;
       messages.addAll(operations.messages);
-      final branchOperations = _companyBranchService.processDailyOperations(nextState, days: elapsedDays);
+      final branchOperations = _companyBranchService.processDailyOperations(
+        nextState,
+        days: elapsedDays,
+      );
       nextState = branchOperations.state;
       messages.addAll(branchOperations.messages);
     }
     if (clock.dayChanged) {
       nextState = _employmentService.checkAttendance(nextState);
-      if (nextState.lastJobEvent != state.lastJobEvent && nextState.lastJobEvent != null) {
+      if (nextState.lastJobEvent != state.lastJobEvent &&
+          nextState.lastJobEvent != null) {
         messages.add(nextState.lastJobEvent!);
       }
     }
@@ -224,137 +281,12 @@ class GameSessionApplicationService {
     );
   }
 
-  JobApplicationCheck checkJob(PlayerState state, Job job) => _jobApplicationService.check(state, job);
-
-  Future<PlayerState> applyForJob(PlayerState state, Job job) async {
-    final nextState = _jobApplicationService.apply(state, job);
-    return _persist(nextState);
-  }
-
-  Future<WorkResult> work(PlayerState state, Job job, WorkTask task) async {
-    final result = _workService.execute(state, job, task);
-    final nextState = await _persist(result.state);
-    return WorkResult(state: nextState, income: result.income);
-  }
-
-  PromotionCheck checkPromotion(PlayerState state, Job currentJob, Job? nextJob) => _careerService.check(state, currentJob, nextJob);
-
-  Future<PlayerState> promote(PlayerState state, Job currentJob, Job nextJob) async {
-    final nextState = _careerService.promote(state, currentJob, nextJob);
-    return _persist(nextState);
-  }
-
-  CityMoveCheck checkCityMove(PlayerState state, City city) => _cityService.check(state, city);
-
-  Future<PlayerState> moveCity(PlayerState state, City city) async {
-    return _persist(_cityService.move(state, city));
-  }
-
-  Future<PlayerState> completeOnboarding(PlayerState state) async {
-    return _persist(state.copyWith(isOnboarded: true));
-  }
-
-  Future<PlayerState> resetGame() async {
-    return _persist(PlayerState.initial);
-  }
-
-  Future<PlayerState> selectThemePalette(PlayerState state, int paletteId) async {
-    return _persist(state.copyWith(themePaletteId: paletteId));
-  }
-
-  Future<PlayerState> updateDebugState(PlayerState state, DebugStatePatch patch) async {
-    int bounded(int value, int min, int max) => value.clamp(min, max).toInt();
-    final money = patch.money ?? state.money;
-    final maxEnergy = bounded(patch.maxEnergy ?? state.maxEnergy, 1, 1000);
-    final skills = patch.skills == null ? null : SkillProfile({for (final entry in patch.skills!.entries) entry.key: bounded(entry.value, 0, SkillProfile.maxValue)});
-    final next = state.copyWith(
-      money: money,
-      energy: bounded(patch.energy ?? state.energy, 0, maxEnergy),
-      maxEnergy: maxEnergy,
-      knowledge: bounded(patch.knowledge ?? state.knowledge, 0, 1000000),
-      experience: bounded(patch.experience ?? state.experience, 0, 1000000),
-      day: bounded(patch.day ?? state.day, 1, 1000000),
-      hour: bounded(patch.hour ?? state.hour, 0, 23),
-      careerLevel: bounded(patch.careerLevel ?? state.careerLevel, 1, 20),
-      companyFunds: bounded(patch.companyFunds ?? state.companyFunds, 0, 1000000000),
-      performance: bounded(patch.performance ?? state.performance, 0, 100),
-      skills: skills,
-      negativeMoneyHours: money >= 0 ? 0 : state.negativeMoneyHours,
-    );
-    await _repository.save(next);
-    return next;
-  }
-
-  Future<PlayerState> recoverEnergy(PlayerState state) => _persist(state);
-
-  DailyGoalStatus dailyGoalStatus(PlayerState state) => _dailyGoalService.status(state);
-
-  Future<PlayerState> claimDailyGoal(PlayerState state) async {
-    return _persist(_dailyGoalService.claim(state));
-  }
-
-  CompanyCheck checkCompanyEstablishment(PlayerState state) => _companyService.checkEstablishment(state);
-
-  Future<PlayerState> establishCompany(PlayerState state) async {
-    return _persist(_companyService.establish(state));
-  }
-
-  Future<PlayerState> recruitEmployee(PlayerState state, {CompanyEmployee? employee}) async {
-    return _persist(_companyService.recruit(state, employee: employee));
-  }
-
-  Future<PlayerState> dismissEmployee(PlayerState state, {required int employeeId}) async {
-    return _persist(_companyService.dismissEmployee(state, employeeId));
-  }
-
-  CompanyCheckResult checkBranchOpen(PlayerState state, City city) => _companyBranchService.checkOpen(state, city);
-
-  List<CompanyEmployee> branchCandidates(PlayerState state, CompanyBranch branch) => _companyBranchService.availableEmployees(state, branch);
-
-  Future<PlayerState> openBranch(PlayerState state, City city) async {
-    return _persist(_companyBranchService.open(state, city));
-  }
-
-  Future<PlayerState> recruitBranchEmployee(PlayerState state, {required int cityId, required CompanyEmployee employee}) async {
-    return _persist(_companyBranchService.recruit(state, cityId, employee));
-  }
-
-  Future<PlayerState> dismissBranchEmployee(PlayerState state, {required int cityId, required int employeeId}) async {
-    return _persist(_companyBranchService.dismiss(state, cityId, employeeId));
-  }
-
-  AssetCheck checkHome(PlayerState state, HomeAsset home, City city) => _assetService.checkHome(state, home, city);
-
-  Future<PlayerState> buyHome(PlayerState state, HomeAsset home, City city) async {
-    return _persist(_assetService.buyHome(state, home, city));
-  }
-
-  AssetCheck checkCar(PlayerState state, CarAsset car) => _assetService.checkCar(state, car);
-
-  Future<PlayerState> buyCar(PlayerState state, CarAsset car) async {
-    return _persist(_assetService.buyCar(state, car));
-  }
-
-  CompanyCheck checkCompanyUpgrade(PlayerState state) => _companyService.checkUpgrade(state);
-
-  Future<PlayerState> upgradeCompany(PlayerState state) async {
-    return _persist(_companyService.upgrade(state));
-  }
-
-  Future<PlayerState> selectCompanyProject(PlayerState state, CompanyProject project) async {
-    return _persist(_companyService.selectProject(state, project));
-  }
-
-  Future<CompanyActionResult> advanceCompanyProject(PlayerState state) async {
-    final result = _companyService.advanceProject(state);
-    final nextState = await _persist(result.state);
-    return CompanyActionResult(state: nextState, message: result.message);
-  }
-
   Future<PlayerState> _persist(PlayerState state) async {
     final recovered = _energyRecoveryService.recover(state);
     final settled = _livingCostService.settle(recovered);
-    final normalized = settled.money >= 0 && !settled.isBankrupt ? settled.copyWith(negativeMoneyHours: 0) : settled;
+    final normalized = settled.money >= 0 && !settled.isBankrupt
+        ? settled.copyWith(negativeMoneyHours: 0)
+        : settled;
     final evaluated = _achievementService.evaluate(normalized).state;
     await _repository.save(evaluated);
     return evaluated;

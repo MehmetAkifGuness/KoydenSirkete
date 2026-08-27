@@ -61,7 +61,10 @@ class FeatureCard extends StatelessWidget {
                 feature.subtitle,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(color: AppPalette.textMuted, fontSize: 11),
+                style: const TextStyle(
+                  color: AppPalette.textMuted,
+                  fontSize: 11,
+                ),
               ),
             ],
           ),

@@ -4,21 +4,32 @@ import '../../../game/domain/entities/player_state.dart';
 class EmploymentService {
   PlayerState markTaskStarted(PlayerState state) {
     final employment = state.employment;
-    if (employment == null) return state;
-    return state.copyWith(employment: employment.copyWith(lastTaskDay: state.day));
+    if (employment == null) {
+      return state;
+    }
+    return state.copyWith(
+      employment: employment.copyWith(lastTaskDay: state.day),
+    );
   }
 
   PlayerState checkAttendance(PlayerState state) {
     final employment = state.employment;
-    if (employment == null || state.day - employment.startedDay < 2) return state;
-    final lastTaskDay = employment.lastTaskDay < employment.startedDay ? employment.startedDay : employment.lastTaskDay;
-    if (state.day - lastTaskDay < 2) return state;
+    if (employment == null || state.day - employment.startedDay < 2) {
+      return state;
+    }
+    final lastTaskDay = employment.lastTaskDay < employment.startedDay
+        ? employment.startedDay
+        : employment.lastTaskDay;
+    if (state.day - lastTaskDay < 2) {
+      return state;
+    }
     return state.copyWith(
       currentJobId: null,
       employment: null,
       performance: 0,
       dismissedDay: state.day,
-      lastJobEvent: '${employment.company} iki oyun günü görev yapılmadığı için iş akdini sonlandırdı.',
+      lastJobEvent:
+          '${employment.company} iki oyun günü görev yapılmadığı için iş akdini sonlandırdı.',
     );
   }
 

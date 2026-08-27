@@ -1,5 +1,57 @@
 # Sürüm durumu
 
+# 2.5.0 — Finans ve uzun vadeli büyüme
+
+Tamamlandı:
+
+- Kategori bazlı gerçek para hareketleri ve son 7/30 günlük finans görünümü.
+- Gelir düzeyi, şehir, enflasyon, ev ve araç durumuna bağlı yaşam bütçesi.
+- Aylık %1 brüt kira, %8 bakım payı ve net kira getirisi.
+- Şirket değerlemesi, itibar, pazar payı ve altı büyüme hedefi.
+- Üç uzun süreli büyük sözleşme ve toplam 12 ödüllü başarı.
+- SQLite v25 geriye dönük kayıt geçişi.
+- 85 Flutter/domain/widget testi ve temiz statik analiz.
+
+# 2.4.0 — Okunabilirlik ve hareket
+
+Tamamlandı:
+
+- Tüm temel metin renklerinde en az `4.5:1` yüzey kontrastı.
+- Ayırt edilebilir ikincil vurgu rengi ve okunabilir disabled durumları.
+- Alt sekme, route, uygulama durumu, kart ve ilerleme animasyonları.
+- Sistem azaltılmış hareket tercihine uyum.
+- 74 Flutter/domain/widget testi ve temiz statik analiz.
+
+# 2.3.0 — Ev ve proje dengesi
+
+Tamamlandı:
+
+- Tek ev sahipliğinde tüm şehir giderlerinin sıfırlanması.
+- Sabit ₺200.000/₺400.000/₺600.000 ev fiyatları.
+- Tüm şirket projelerinin seviye kilidi olmadan seçilebilmesi.
+- Proje değişiminde ilerleme kaybı için kullanıcı onayı.
+- Flutter/domain/widget testleri ve temiz statik analiz.
+
+# 2.2.0 — Varlık ekonomisi
+
+Tamamlandı:
+
+- Kira hesabı ile şehir ekranındaki kira göstergesinin ortaklaştırılması.
+- Ev ve araba satışları ile %70 ikinci el değeri.
+- Şehir maaş katsayısının `0.90–1.50x` aralığına dengelenmesi.
+- Flutter/domain/widget testleri ve temiz statik analiz.
+
+# 2.1.0 — Ekonomi tutarlılığı ve sadeleştirme
+
+Tamamlandı:
+
+- Şehir maaş katsayısının tüm istihdam akışlarına uygulanması.
+- Ev sahipliğinde kira muafiyeti ve araç sahipliğinde taşınma indirimi.
+- Eski kayıtların şehir/maaş verisinin yüklemede onarılması.
+- Kullanılmayan kalıcı alanların ve sahte tema seçeneklerinin kaldırılması.
+- Büyük merkezi sınıfların sorumluluklarına ayrılması ve kod biçiminin standartlaştırılması.
+- Flutter/domain/widget testleri ve temiz statik analiz.
+
 # 2.0.0 — Offline gerçek zamanlı kariyer simülasyonu
 
 Tamamlandı:
@@ -11,7 +63,7 @@ Tamamlandı:
 - 20 kariyer rolü ve gizli deterministik bot rekabeti.
 - Ayrı `İşim`/`Şirketim` alanları, dinamik görevler ve devamsızlık kovulması.
 - SQLite v11–v17 migration'ları, iflas kontrolü, Esnaf Çarkı ve geriye dönük kayıt koruması.
-- 31 Flutter/domain/widget testi ve temiz statik analiz.
+- Flutter/domain/widget testleri ve temiz statik analiz.
 
 ## 1.4.0 — Şirket derinliği
 

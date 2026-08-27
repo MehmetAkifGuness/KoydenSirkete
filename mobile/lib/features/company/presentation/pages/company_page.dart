@@ -10,6 +10,7 @@ import '../../domain/services/company_project_catalog.dart';
 import '../../domain/services/company_service.dart';
 import '../models/employee_candidate_filter.dart';
 import '../widgets/employee_filter_bar.dart';
+import '../widgets/company_growth_panel.dart';
 import 'company_branches_page.dart';
 
 class CompanyPage extends StatelessWidget {
@@ -222,7 +223,10 @@ class _CompanyViewState extends State<_CompanyView> {
     final service = CompanyService();
     final employees = CompanyService.employeesFor(state);
     final allCandidates = service.availableEmployees(state);
-    final candidates = filterEmployeeCandidates(allCandidates, _candidateFilter);
+    final candidates = filterEmployeeCandidates(
+      allCandidates,
+      _candidateFilter,
+    );
     final capacity = CompanyService.employeeCapacity(state.companyLevel);
     final project = CompanyProjectCatalog.byId(state.activeProjectId);
     return ListView(
@@ -378,6 +382,8 @@ class _CompanyViewState extends State<_CompanyView> {
           const SizedBox(height: 9),
         ],
         const SizedBox(height: 17),
+        CompanyGrowthPanel(state: state),
+        const SizedBox(height: 25),
         AppSectionHeader(
           title: 'Ekip',
           caption: '${employees.length}/$capacity kapasite dolu',
@@ -429,15 +435,13 @@ class _ProjectCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final state = session.state;
     final selected = state.activeProjectId == project.id;
-    final unlocked = project.id <= state.companyLevel;
-    final selectable =
-        unlocked && (selected || state.projectProgress == 0) && !session.isBusy;
+    final selectable = !selected && !session.isBusy;
     final accent = selected ? AppPalette.primary : AppPalette.outline;
     return AppInfoCard(
       accent: accent,
       padding: const EdgeInsets.all(14),
       child: InkWell(
-        onTap: selectable && !selected ? () => _select(context) : null,
+        onTap: selectable ? () => _select(context) : null,
         borderRadius: BorderRadius.circular(12),
         child: Row(
           children: [
@@ -451,9 +455,7 @@ class _ProjectCard extends StatelessWidget {
               child: Icon(
                 selected
                     ? Icons.check_rounded
-                    : unlocked
-                    ? Icons.radio_button_unchecked_rounded
-                    : Icons.lock_outline_rounded,
+                    : Icons.radio_button_unchecked_rounded,
                 color: selected ? AppPalette.primary : AppPalette.textMuted,
                 size: 18,
               ),
@@ -472,9 +474,7 @@ class _ProjectCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 3),
                   Text(
-                    unlocked
-                        ? '${project.description} · ₺${project.reward} brüt ödül'
-                        : 'Seviye ${project.id} şirket gerekir.',
+                    '${project.description} · ₺${project.reward} brüt ödül',
                     style: const TextStyle(
                       color: AppPalette.textMuted,
                       fontSize: 11,
@@ -490,6 +490,28 @@ class _ProjectCard extends StatelessWidget {
   }
 
   Future<void> _select(BuildContext context) async {
+    if (session.state.projectProgress > 0) {
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Projeyi değiştir'),
+          content: const Text(
+            'Mevcut proje ilerlemesi sıfırlanacak. Devam edilsin mi?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Vazgeç'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Projeyi değiştir'),
+            ),
+          ],
+        ),
+      );
+      if (confirmed != true || !context.mounted) return;
+    }
     final message = await session.selectCompanyProject(project);
     if (context.mounted && message != null) AppFeedback.show(context, message);
   }

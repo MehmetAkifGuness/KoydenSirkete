@@ -18,4 +18,4 @@ features/<feature>/
 └── data/repositories
 ```
 
-2.0.0 itibarıyla `earning`, `training`, `skills`, `sport`, `jobs`, `career`, `cities`, `employment`, `company` ve `wheel` offline oynanabilir durumdadır. Oyun saati yalnızca foreground'da ilerler; enerji gerçek zamanla, uygulama kapalıyken de tamamlanır ve tüm kalıcı veri SQLite v18 üzerinde tutulur.
+2.5.0 itibarıyla `earning`, `training`, `skills`, `sport`, `jobs`, `career`, `cities`, `finance`, `employment`, `company`, `assets` ve `wheel` offline oynanabilir durumdadır. Oyun saati yalnızca foreground'da ilerler; enerji gerçek zamanla, uygulama kapalıyken de tamamlanır ve tüm kalıcı veri SQLite v25 üzerinde tutulur. Ev/araba alım-satımı ve kiralama `assets`, yaşam bütçesi `cities`, finans geçmişi `finance`, değerleme ve uzun vadeli büyüme ise `company` domain sınırlarında yönetilir. Ortak kontrast ve hareket davranışları feature'ların dışında app/core tema katmanında tutulur.

@@ -3,10 +3,10 @@ import 'package:sqflite/sqflite.dart';
 
 import 'player_state_store.dart';
 
-class AppDatabase implements PlayerStateStore {
-  static const _databaseName = 'career_to_company.db';
-  static const _tableName = 'player_state';
+const _databaseName = 'career_to_company.db';
+const _tableName = 'player_state';
 
+class AppDatabase extends SqlitePlayerStateStore {
   Database? _database;
 
   Future<Database> _open() async {
@@ -17,7 +17,7 @@ class AppDatabase implements PlayerStateStore {
     final databasePath = join(await getDatabasesPath(), _databaseName);
     return _database = await openDatabase(
       databasePath,
-      version: 23,
+      version: 25,
       onCreate: (database, _) async {
         await database.execute('''
           CREATE TABLE $_tableName (
@@ -26,10 +26,8 @@ class AppDatabase implements PlayerStateStore {
             money INTEGER NOT NULL,
             energy INTEGER NOT NULL,
             max_energy INTEGER NOT NULL DEFAULT 100,
-            energy_recovery_remainder INTEGER NOT NULL DEFAULT 0,
             energy_recovery_at INTEGER,
             negative_money_hours INTEGER NOT NULL DEFAULT 0,
-            wheel_cooldown_seconds INTEGER NOT NULL DEFAULT 0,
             wheel_major_rewards_today INTEGER NOT NULL DEFAULT 0,
             wheel_duration_buff_percent INTEGER NOT NULL DEFAULT 0,
             wheel_duration_buff_tasks INTEGER NOT NULL DEFAULT 0,
@@ -37,7 +35,6 @@ class AppDatabase implements PlayerStateStore {
             wheel_energy_buff_tasks INTEGER NOT NULL DEFAULT 0,
             wheel_reward_buff_percent INTEGER NOT NULL DEFAULT 0,
             wheel_reward_buff_tasks INTEGER NOT NULL DEFAULT 0,
-            theme_palette_id INTEGER NOT NULL DEFAULT 0,
             active_activity_json TEXT,
             active_activities_json TEXT,
             skills_json TEXT,
@@ -45,6 +42,8 @@ class AppDatabase implements PlayerStateStore {
             employees_json TEXT,
             branches_json TEXT,
             owned_home_ids_json TEXT,
+            rented_home_ids_json TEXT,
+            finance_ledger_json TEXT,
             owned_car_id INTEGER,
             application_blocked_job_id INTEGER,
             application_blocked_until_day INTEGER NOT NULL DEFAULT 0,
@@ -81,101 +80,207 @@ class AppDatabase implements PlayerStateStore {
       },
       onUpgrade: (database, oldVersion, _) async {
         if (oldVersion < 2) {
-          await database.execute('ALTER TABLE $_tableName ADD COLUMN current_job_id INTEGER');
+          await database.execute(
+            'ALTER TABLE $_tableName ADD COLUMN current_job_id INTEGER',
+          );
         }
         if (oldVersion < 3) {
-          await database.execute('ALTER TABLE $_tableName ADD COLUMN performance INTEGER NOT NULL DEFAULT 0');
-          await database.execute('ALTER TABLE $_tableName ADD COLUMN work_sessions_today INTEGER NOT NULL DEFAULT 0');
+          await database.execute(
+            'ALTER TABLE $_tableName ADD COLUMN performance INTEGER NOT NULL DEFAULT 0',
+          );
+          await database.execute(
+            'ALTER TABLE $_tableName ADD COLUMN work_sessions_today INTEGER NOT NULL DEFAULT 0',
+          );
         }
         if (oldVersion < 4) {
-          await database.execute('ALTER TABLE $_tableName ADD COLUMN career_level INTEGER NOT NULL DEFAULT 1');
+          await database.execute(
+            'ALTER TABLE $_tableName ADD COLUMN career_level INTEGER NOT NULL DEFAULT 1',
+          );
         }
         if (oldVersion < 5) {
-          await database.execute('ALTER TABLE $_tableName ADD COLUMN current_city_id INTEGER NOT NULL DEFAULT 1');
-          await database.execute('ALTER TABLE $_tableName ADD COLUMN last_living_cost_day INTEGER NOT NULL DEFAULT 1');
+          await database.execute(
+            'ALTER TABLE $_tableName ADD COLUMN current_city_id INTEGER NOT NULL DEFAULT 1',
+          );
+          await database.execute(
+            'ALTER TABLE $_tableName ADD COLUMN last_living_cost_day INTEGER NOT NULL DEFAULT 1',
+          );
         }
         if (oldVersion < 6) {
-          await database.execute('ALTER TABLE $_tableName ADD COLUMN company_level INTEGER NOT NULL DEFAULT 0');
-          await database.execute('ALTER TABLE $_tableName ADD COLUMN company_funds INTEGER NOT NULL DEFAULT 0');
-          await database.execute('ALTER TABLE $_tableName ADD COLUMN employee_count INTEGER NOT NULL DEFAULT 0');
-          await database.execute('ALTER TABLE $_tableName ADD COLUMN project_progress INTEGER NOT NULL DEFAULT 0');
+          await database.execute(
+            'ALTER TABLE $_tableName ADD COLUMN company_level INTEGER NOT NULL DEFAULT 0',
+          );
+          await database.execute(
+            'ALTER TABLE $_tableName ADD COLUMN company_funds INTEGER NOT NULL DEFAULT 0',
+          );
+          await database.execute(
+            'ALTER TABLE $_tableName ADD COLUMN employee_count INTEGER NOT NULL DEFAULT 0',
+          );
+          await database.execute(
+            'ALTER TABLE $_tableName ADD COLUMN project_progress INTEGER NOT NULL DEFAULT 0',
+          );
         }
         if (oldVersion < 7) {
-          await database.execute('ALTER TABLE $_tableName ADD COLUMN is_onboarded INTEGER NOT NULL DEFAULT 1');
+          await database.execute(
+            'ALTER TABLE $_tableName ADD COLUMN is_onboarded INTEGER NOT NULL DEFAULT 1',
+          );
         }
         if (oldVersion < 8) {
-          await database.execute('ALTER TABLE $_tableName ADD COLUMN training_sessions_today INTEGER NOT NULL DEFAULT 0');
-          await database.execute('ALTER TABLE $_tableName ADD COLUMN daily_goal_claimed_day INTEGER NOT NULL DEFAULT 0');
+          await database.execute(
+            'ALTER TABLE $_tableName ADD COLUMN training_sessions_today INTEGER NOT NULL DEFAULT 0',
+          );
+          await database.execute(
+            'ALTER TABLE $_tableName ADD COLUMN daily_goal_claimed_day INTEGER NOT NULL DEFAULT 0',
+          );
         }
         if (oldVersion < 9) {
-          await database.execute('ALTER TABLE $_tableName ADD COLUMN total_earned INTEGER NOT NULL DEFAULT 0');
-          await database.execute('ALTER TABLE $_tableName ADD COLUMN total_work_sessions INTEGER NOT NULL DEFAULT 0');
-          await database.execute('ALTER TABLE $_tableName ADD COLUMN total_training_sessions INTEGER NOT NULL DEFAULT 0');
-          await database.execute('ALTER TABLE $_tableName ADD COLUMN unlocked_achievements_mask INTEGER NOT NULL DEFAULT 0');
+          await database.execute(
+            'ALTER TABLE $_tableName ADD COLUMN total_earned INTEGER NOT NULL DEFAULT 0',
+          );
+          await database.execute(
+            'ALTER TABLE $_tableName ADD COLUMN total_work_sessions INTEGER NOT NULL DEFAULT 0',
+          );
+          await database.execute(
+            'ALTER TABLE $_tableName ADD COLUMN total_training_sessions INTEGER NOT NULL DEFAULT 0',
+          );
+          await database.execute(
+            'ALTER TABLE $_tableName ADD COLUMN unlocked_achievements_mask INTEGER NOT NULL DEFAULT 0',
+          );
         }
         if (oldVersion < 10) {
-          await database.execute('ALTER TABLE $_tableName ADD COLUMN active_project_id INTEGER NOT NULL DEFAULT 1');
-          await database.execute('ALTER TABLE $_tableName ADD COLUMN completed_projects INTEGER NOT NULL DEFAULT 0');
+          await database.execute(
+            'ALTER TABLE $_tableName ADD COLUMN active_project_id INTEGER NOT NULL DEFAULT 1',
+          );
+          await database.execute(
+            'ALTER TABLE $_tableName ADD COLUMN completed_projects INTEGER NOT NULL DEFAULT 0',
+          );
         }
         if (oldVersion < 11) {
-          await database.execute('ALTER TABLE $_tableName ADD COLUMN max_energy INTEGER NOT NULL DEFAULT 100');
-          await database.execute('ALTER TABLE $_tableName ADD COLUMN energy_recovery_remainder INTEGER NOT NULL DEFAULT 0');
-          await database.execute('ALTER TABLE $_tableName ADD COLUMN active_activity_json TEXT');
+          await database.execute(
+            'ALTER TABLE $_tableName ADD COLUMN max_energy INTEGER NOT NULL DEFAULT 100',
+          );
+          await database.execute(
+            'ALTER TABLE $_tableName ADD COLUMN active_activity_json TEXT',
+          );
         }
         if (oldVersion < 12) {
-          await database.execute('ALTER TABLE $_tableName ADD COLUMN skills_json TEXT');
+          await database.execute(
+            'ALTER TABLE $_tableName ADD COLUMN skills_json TEXT',
+          );
         }
         if (oldVersion < 13) {
-          await database.execute('ALTER TABLE $_tableName ADD COLUMN employment_json TEXT');
-          await database.execute('ALTER TABLE $_tableName ADD COLUMN application_blocked_job_id INTEGER');
-          await database.execute('ALTER TABLE $_tableName ADD COLUMN application_blocked_until_day INTEGER NOT NULL DEFAULT 0');
-          await database.execute('ALTER TABLE $_tableName ADD COLUMN last_job_event TEXT');
+          await database.execute(
+            'ALTER TABLE $_tableName ADD COLUMN employment_json TEXT',
+          );
+          await database.execute(
+            'ALTER TABLE $_tableName ADD COLUMN application_blocked_job_id INTEGER',
+          );
+          await database.execute(
+            'ALTER TABLE $_tableName ADD COLUMN application_blocked_until_day INTEGER NOT NULL DEFAULT 0',
+          );
+          await database.execute(
+            'ALTER TABLE $_tableName ADD COLUMN last_job_event TEXT',
+          );
         }
         if (oldVersion < 14) {
-          await database.execute('ALTER TABLE $_tableName ADD COLUMN job_data_version INTEGER NOT NULL DEFAULT 3');
-          await database.execute('ALTER TABLE $_tableName ADD COLUMN task_data_version INTEGER NOT NULL DEFAULT 2');
+          await database.execute(
+            'ALTER TABLE $_tableName ADD COLUMN job_data_version INTEGER NOT NULL DEFAULT 3',
+          );
+          await database.execute(
+            'ALTER TABLE $_tableName ADD COLUMN task_data_version INTEGER NOT NULL DEFAULT 2',
+          );
         }
         if (oldVersion < 15) {
-          await database.execute('ALTER TABLE $_tableName ADD COLUMN dismissed_day INTEGER NOT NULL DEFAULT 0');
+          await database.execute(
+            'ALTER TABLE $_tableName ADD COLUMN dismissed_day INTEGER NOT NULL DEFAULT 0',
+          );
         }
         if (oldVersion < 16) {
-          await database.execute('ALTER TABLE $_tableName ADD COLUMN negative_money_hours INTEGER NOT NULL DEFAULT 0');
+          await database.execute(
+            'ALTER TABLE $_tableName ADD COLUMN negative_money_hours INTEGER NOT NULL DEFAULT 0',
+          );
         }
         if (oldVersion < 17) {
-          await database.execute('ALTER TABLE $_tableName ADD COLUMN wheel_cooldown_seconds INTEGER NOT NULL DEFAULT 0');
-          await database.execute('ALTER TABLE $_tableName ADD COLUMN wheel_major_rewards_today INTEGER NOT NULL DEFAULT 0');
-          await database.execute('ALTER TABLE $_tableName ADD COLUMN wheel_duration_buff_percent INTEGER NOT NULL DEFAULT 0');
-          await database.execute('ALTER TABLE $_tableName ADD COLUMN wheel_duration_buff_tasks INTEGER NOT NULL DEFAULT 0');
-          await database.execute('ALTER TABLE $_tableName ADD COLUMN wheel_energy_buff_percent INTEGER NOT NULL DEFAULT 0');
-          await database.execute('ALTER TABLE $_tableName ADD COLUMN wheel_energy_buff_tasks INTEGER NOT NULL DEFAULT 0');
+          await database.execute(
+            'ALTER TABLE $_tableName ADD COLUMN wheel_major_rewards_today INTEGER NOT NULL DEFAULT 0',
+          );
+          await database.execute(
+            'ALTER TABLE $_tableName ADD COLUMN wheel_duration_buff_percent INTEGER NOT NULL DEFAULT 0',
+          );
+          await database.execute(
+            'ALTER TABLE $_tableName ADD COLUMN wheel_duration_buff_tasks INTEGER NOT NULL DEFAULT 0',
+          );
+          await database.execute(
+            'ALTER TABLE $_tableName ADD COLUMN wheel_energy_buff_percent INTEGER NOT NULL DEFAULT 0',
+          );
+          await database.execute(
+            'ALTER TABLE $_tableName ADD COLUMN wheel_energy_buff_tasks INTEGER NOT NULL DEFAULT 0',
+          );
         }
         if (oldVersion < 18) {
-          await database.execute('ALTER TABLE $_tableName ADD COLUMN energy_recovery_at INTEGER');
+          await database.execute(
+            'ALTER TABLE $_tableName ADD COLUMN energy_recovery_at INTEGER',
+          );
         }
         if (oldVersion < 19) {
-          await database.execute('ALTER TABLE $_tableName ADD COLUMN active_activities_json TEXT');
+          await database.execute(
+            'ALTER TABLE $_tableName ADD COLUMN active_activities_json TEXT',
+          );
         }
         if (oldVersion < 20) {
-          await database.execute('ALTER TABLE $_tableName ADD COLUMN employees_json TEXT');
+          await database.execute(
+            'ALTER TABLE $_tableName ADD COLUMN employees_json TEXT',
+          );
         }
         if (oldVersion < 21) {
-          await database.execute('ALTER TABLE $_tableName ADD COLUMN wheel_reward_buff_percent INTEGER NOT NULL DEFAULT 0');
-          await database.execute('ALTER TABLE $_tableName ADD COLUMN wheel_reward_buff_tasks INTEGER NOT NULL DEFAULT 0');
-        }
-        if (oldVersion < 22) {
-          await database.execute('ALTER TABLE $_tableName ADD COLUMN theme_palette_id INTEGER NOT NULL DEFAULT 0');
+          await database.execute(
+            'ALTER TABLE $_tableName ADD COLUMN wheel_reward_buff_percent INTEGER NOT NULL DEFAULT 0',
+          );
+          await database.execute(
+            'ALTER TABLE $_tableName ADD COLUMN wheel_reward_buff_tasks INTEGER NOT NULL DEFAULT 0',
+          );
         }
         if (oldVersion < 23) {
-          await database.execute('ALTER TABLE $_tableName ADD COLUMN branches_json TEXT');
-          await database.execute('ALTER TABLE $_tableName ADD COLUMN owned_home_ids_json TEXT');
-          await database.execute('ALTER TABLE $_tableName ADD COLUMN owned_car_id INTEGER');
+          await database.execute(
+            'ALTER TABLE $_tableName ADD COLUMN branches_json TEXT',
+          );
+          await database.execute(
+            'ALTER TABLE $_tableName ADD COLUMN owned_home_ids_json TEXT',
+          );
+          await database.execute(
+            'ALTER TABLE $_tableName ADD COLUMN owned_car_id INTEGER',
+          );
+        }
+        if (oldVersion < 24) {
+          await database.execute(
+            'ALTER TABLE $_tableName ADD COLUMN rented_home_ids_json TEXT',
+          );
+        }
+        if (oldVersion < 25) {
+          await database.execute(
+            'ALTER TABLE $_tableName ADD COLUMN finance_ledger_json TEXT',
+          );
         }
       },
     );
   }
+
+  @override
+  Future<Database> get database => _open();
+
+  @override
+  Future<void> close() async {
+    final database = _database;
+    _database = null;
+    await database?.close();
+  }
+}
+
+abstract class SqlitePlayerStateStore implements PlayerStateStore {
+  Future<Database> get database;
+
   @override
   Future<PlayerStateRecord?> readPlayerState() async {
-    final rows = await (await _open()).query(_tableName, limit: 1);
+    final rows = await (await database).query(_tableName, limit: 1);
     if (rows.isEmpty) {
       return null;
     }
@@ -186,10 +291,8 @@ class AppDatabase implements PlayerStateStore {
       money: row['money']! as int,
       energy: row['energy']! as int,
       maxEnergy: row['max_energy'] as int? ?? 100,
-      energyRecoveryRemainder: row['energy_recovery_remainder'] as int? ?? 0,
       energyRecoveryAt: _dateTimeFromMillis(row['energy_recovery_at'] as int?),
       negativeMoneyHours: row['negative_money_hours'] as int? ?? 0,
-      wheelCooldownSeconds: row['wheel_cooldown_seconds'] as int? ?? 0,
       wheelMajorRewardsToday: row['wheel_major_rewards_today'] as int? ?? 0,
       wheelDurationBuffPercent: row['wheel_duration_buff_percent'] as int? ?? 0,
       wheelDurationBuffTasks: row['wheel_duration_buff_tasks'] as int? ?? 0,
@@ -197,7 +300,6 @@ class AppDatabase implements PlayerStateStore {
       wheelEnergyBuffTasks: row['wheel_energy_buff_tasks'] as int? ?? 0,
       wheelRewardBuffPercent: row['wheel_reward_buff_percent'] as int? ?? 0,
       wheelRewardBuffTasks: row['wheel_reward_buff_tasks'] as int? ?? 0,
-      themePaletteId: row['theme_palette_id'] as int? ?? 0,
       activeActivityJson: row['active_activity_json'] as String?,
       activeActivitiesJson: row['active_activities_json'] as String?,
       skillsJson: row['skills_json'] as String?,
@@ -205,9 +307,12 @@ class AppDatabase implements PlayerStateStore {
       employeesJson: row['employees_json'] as String?,
       branchesJson: row['branches_json'] as String?,
       ownedHomeIdsJson: row['owned_home_ids_json'] as String?,
+      rentedHomeIdsJson: row['rented_home_ids_json'] as String?,
+      financeLedgerJson: row['finance_ledger_json'] as String?,
       ownedCarId: row['owned_car_id'] as int?,
       applicationBlockedJobId: row['application_blocked_job_id'] as int?,
-      applicationBlockedUntilDay: row['application_blocked_until_day'] as int? ?? 0,
+      applicationBlockedUntilDay:
+          row['application_blocked_until_day'] as int? ?? 0,
       lastJobEvent: row['last_job_event'] as String?,
       jobDataVersion: row['job_data_version'] as int? ?? 3,
       taskDataVersion: row['task_data_version'] as int? ?? 2,
@@ -241,74 +346,65 @@ class AppDatabase implements PlayerStateStore {
 
   @override
   Future<void> savePlayerState(PlayerStateRecord record) async {
-    await (await _open()).insert(
-      _tableName,
-      {
-        'id': record.id,
-        'schema_version': record.schemaVersion,
-        'money': record.money,
-        'energy': record.energy,
-        'max_energy': record.maxEnergy,
-        'energy_recovery_remainder': record.energyRecoveryRemainder,
-        'energy_recovery_at': record.energyRecoveryAt?.millisecondsSinceEpoch,
-        'negative_money_hours': record.negativeMoneyHours,
-        'wheel_cooldown_seconds': record.wheelCooldownSeconds,
-        'wheel_major_rewards_today': record.wheelMajorRewardsToday,
-        'wheel_duration_buff_percent': record.wheelDurationBuffPercent,
-        'wheel_duration_buff_tasks': record.wheelDurationBuffTasks,
-        'wheel_energy_buff_percent': record.wheelEnergyBuffPercent,
-        'wheel_energy_buff_tasks': record.wheelEnergyBuffTasks,
-        'wheel_reward_buff_percent': record.wheelRewardBuffPercent,
-        'wheel_reward_buff_tasks': record.wheelRewardBuffTasks,
-        'theme_palette_id': record.themePaletteId,
-        'active_activity_json': record.activeActivityJson,
-        'active_activities_json': record.activeActivitiesJson,
-        'skills_json': record.skillsJson,
-        'employment_json': record.employmentJson,
-        'employees_json': record.employeesJson,
-        'branches_json': record.branchesJson,
-        'owned_home_ids_json': record.ownedHomeIdsJson,
-        'owned_car_id': record.ownedCarId,
-        'application_blocked_job_id': record.applicationBlockedJobId,
-        'application_blocked_until_day': record.applicationBlockedUntilDay,
-        'last_job_event': record.lastJobEvent,
-        'job_data_version': record.jobDataVersion,
-        'task_data_version': record.taskDataVersion,
-        'dismissed_day': record.dismissedDay,
-        'knowledge': record.knowledge,
-        'experience': record.experience,
-        'day': record.day,
-        'hour': record.hour,
-        'earning_sessions_today': record.earningSessionsToday,
-        'current_job_id': record.currentJobId,
-        'performance': record.performance,
-        'work_sessions_today': record.workSessionsToday,
-        'training_sessions_today': record.trainingSessionsToday,
-        'daily_goal_claimed_day': record.dailyGoalClaimedDay,
-        'career_level': record.careerLevel,
-        'current_city_id': record.currentCityId,
-        'last_living_cost_day': record.lastLivingCostDay,
-        'company_level': record.companyLevel,
-        'company_funds': record.companyFunds,
-        'employee_count': record.employeeCount,
-        'project_progress': record.projectProgress,
-        'total_earned': record.totalEarned,
-        'total_work_sessions': record.totalWorkSessions,
-        'total_training_sessions': record.totalTrainingSessions,
-        'unlocked_achievements_mask': record.unlockedAchievementsMask,
-        'active_project_id': record.activeProjectId,
-        'completed_projects': record.completedProjects,
-        'is_onboarded': record.isOnboarded ? 1 : 0,
-      },
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    await (await database).insert(_tableName, {
+      'id': record.id,
+      'schema_version': record.schemaVersion,
+      'money': record.money,
+      'energy': record.energy,
+      'max_energy': record.maxEnergy,
+      'energy_recovery_at': record.energyRecoveryAt?.millisecondsSinceEpoch,
+      'negative_money_hours': record.negativeMoneyHours,
+      'wheel_major_rewards_today': record.wheelMajorRewardsToday,
+      'wheel_duration_buff_percent': record.wheelDurationBuffPercent,
+      'wheel_duration_buff_tasks': record.wheelDurationBuffTasks,
+      'wheel_energy_buff_percent': record.wheelEnergyBuffPercent,
+      'wheel_energy_buff_tasks': record.wheelEnergyBuffTasks,
+      'wheel_reward_buff_percent': record.wheelRewardBuffPercent,
+      'wheel_reward_buff_tasks': record.wheelRewardBuffTasks,
+      'active_activity_json': record.activeActivityJson,
+      'active_activities_json': record.activeActivitiesJson,
+      'skills_json': record.skillsJson,
+      'employment_json': record.employmentJson,
+      'employees_json': record.employeesJson,
+      'branches_json': record.branchesJson,
+      'owned_home_ids_json': record.ownedHomeIdsJson,
+      'rented_home_ids_json': record.rentedHomeIdsJson,
+      'finance_ledger_json': record.financeLedgerJson,
+      'owned_car_id': record.ownedCarId,
+      'application_blocked_job_id': record.applicationBlockedJobId,
+      'application_blocked_until_day': record.applicationBlockedUntilDay,
+      'last_job_event': record.lastJobEvent,
+      'job_data_version': record.jobDataVersion,
+      'task_data_version': record.taskDataVersion,
+      'dismissed_day': record.dismissedDay,
+      'knowledge': record.knowledge,
+      'experience': record.experience,
+      'day': record.day,
+      'hour': record.hour,
+      'earning_sessions_today': record.earningSessionsToday,
+      'current_job_id': record.currentJobId,
+      'performance': record.performance,
+      'work_sessions_today': record.workSessionsToday,
+      'training_sessions_today': record.trainingSessionsToday,
+      'daily_goal_claimed_day': record.dailyGoalClaimedDay,
+      'career_level': record.careerLevel,
+      'current_city_id': record.currentCityId,
+      'last_living_cost_day': record.lastLivingCostDay,
+      'company_level': record.companyLevel,
+      'company_funds': record.companyFunds,
+      'employee_count': record.employeeCount,
+      'project_progress': record.projectProgress,
+      'total_earned': record.totalEarned,
+      'total_work_sessions': record.totalWorkSessions,
+      'total_training_sessions': record.totalTrainingSessions,
+      'unlocked_achievements_mask': record.unlockedAchievementsMask,
+      'active_project_id': record.activeProjectId,
+      'completed_projects': record.completedProjects,
+      'is_onboarded': record.isOnboarded ? 1 : 0,
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
-  @override
-  Future<void> close() async {
-    final database = _database;
-    _database = null;
-    await database?.close();
-  }
-  DateTime? _dateTimeFromMillis(int? value) => value == null || value <= 0 ? null : DateTime.fromMillisecondsSinceEpoch(value);
+  DateTime? _dateTimeFromMillis(int? value) => value == null || value <= 0
+      ? null
+      : DateTime.fromMillisecondsSinceEpoch(value);
 }

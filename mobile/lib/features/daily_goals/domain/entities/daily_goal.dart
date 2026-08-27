@@ -1,8 +1,14 @@
 import '../../../game/domain/entities/player_state.dart';
 import '../../../../core/errors/game_rule_exception.dart';
+import '../../../finance/domain/entities/finance_ledger.dart';
 
 class DailyGoalStatus {
-  const DailyGoalStatus({required this.progress, required this.target, required this.reward, required this.isClaimed});
+  const DailyGoalStatus({
+    required this.progress,
+    required this.target,
+    required this.reward,
+    required this.isClaimed,
+  });
 
   final int progress;
   final int target;
@@ -18,7 +24,11 @@ class DailyGoalService {
   static const reward = 120;
 
   DailyGoalStatus status(PlayerState state) {
-    final progress = (state.earningSessionsToday + state.workSessionsToday + state.trainingSessionsToday).clamp(0, target);
+    final progress =
+        (state.earningSessionsToday +
+                state.workSessionsToday +
+                state.trainingSessionsToday)
+            .clamp(0, target);
     return DailyGoalStatus(
       progress: progress,
       target: target,
@@ -38,6 +48,11 @@ class DailyGoalService {
     return state.copyWith(
       money: state.money + reward,
       dailyGoalClaimedDay: state.day,
+      financeLedger: state.financeLedger.record(
+        day: state.day,
+        category: FinanceCategory.rewards,
+        amount: reward,
+      ),
     );
   }
 }

@@ -3,9 +3,14 @@ import '../entities/earning_performance.dart';
 import 'earning_mini_game_service.dart';
 import '../../../game/domain/entities/player_state.dart';
 import '../../../game/domain/entities/active_activity.dart';
+import '../../../finance/domain/entities/finance_ledger.dart';
 
 class EarningResult {
-  const EarningResult({required this.state, required this.reward, required this.bonusPercent});
+  const EarningResult({
+    required this.state,
+    required this.reward,
+    required this.bonusPercent,
+  });
 
   final PlayerState state;
   final int reward;
@@ -13,7 +18,8 @@ class EarningResult {
 }
 
 class EarningService {
-  EarningService({EarningMiniGameService? miniGameService}) : _miniGameService = miniGameService ?? EarningMiniGameService();
+  EarningService({EarningMiniGameService? miniGameService})
+    : _miniGameService = miniGameService ?? EarningMiniGameService();
 
   static const energyCost = 20;
   static const durationHours = 2;
@@ -21,9 +27,14 @@ class EarningService {
 
   final EarningMiniGameService _miniGameService;
 
-  ActiveActivity start(PlayerState state, {EarningPerformance performance = EarningPerformance.none}) {
+  ActiveActivity start(
+    PlayerState state, {
+    EarningPerformance performance = EarningPerformance.none,
+  }) {
     if (state.energy < energyCost) {
-      throw const GameRuleException('Para kazanmak için en az 20 enerji gerekir.');
+      throw const GameRuleException(
+        'Para kazanmak için en az 20 enerji gerekir.',
+      );
     }
 
     return ActiveActivity(
@@ -38,14 +49,23 @@ class EarningService {
     );
   }
 
-  EarningResult complete(PlayerState state, {EarningPerformance performance = EarningPerformance.none}) {
-
-    final dailyReward = (baseReward * _dailyMultiplier(state.earningSessionsToday)).round();
-    final reward = (dailyReward * _miniGameService.rewardMultiplier(performance)).round();
+  EarningResult complete(
+    PlayerState state, {
+    EarningPerformance performance = EarningPerformance.none,
+  }) {
+    final dailyReward =
+        (baseReward * _dailyMultiplier(state.earningSessionsToday)).round();
+    final reward =
+        (dailyReward * _miniGameService.rewardMultiplier(performance)).round();
     final nextState = state.copyWith(
       money: state.money + reward,
       totalEarned: state.totalEarned + reward,
       earningSessionsToday: state.earningSessionsToday + 1,
+      financeLedger: state.financeLedger.record(
+        day: state.day,
+        category: FinanceCategory.casualIncome,
+        amount: reward,
+      ),
     );
     return EarningResult(
       state: nextState,

@@ -13,8 +13,6 @@ class Job {
     this.careerTrack = 'genel',
     this.level = 1,
     this.nextJobId,
-    this.cityId,
-    this.opportunityWeight = 1,
     this.skillRequirements = const {},
   });
 
@@ -28,14 +26,15 @@ class Job {
   final String careerTrack;
   final int level;
   final int? nextJobId;
-  final int? cityId;
-  final int opportunityWeight;
   final Map<SkillId, int> skillRequirements;
 
   Map<SkillId, int> get scaledSkillRequirements => {
-        for (final entry in skillRequirements.entries)
-          entry.key: ((entry.value * (SkillProfile.maxValue ~/ 100)) * _requirementFactor(level)).round(),
-      };
+    for (final entry in skillRequirements.entries)
+      entry.key:
+          ((entry.value * (SkillProfile.maxValue ~/ 100)) *
+                  _requirementFactor(level))
+              .round(),
+  };
 
   static double _requirementFactor(int level) {
     return switch (level) {

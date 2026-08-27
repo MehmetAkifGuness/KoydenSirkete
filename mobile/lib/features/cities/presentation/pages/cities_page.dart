@@ -3,11 +3,12 @@ import 'package:flutter/material.dart';
 import '../../../../app/theme/app_palette.dart';
 import '../../../../core/widgets/app_feedback.dart';
 import '../../../../core/widgets/app_page.dart';
-import '../../../assets/domain/services/asset_service.dart';
+import '../../../assets/domain/services/car_catalog.dart';
 import '../../../game/presentation/state/game_session_controller.dart';
 import '../../domain/entities/city.dart';
 import '../../domain/services/city_catalog.dart';
 import '../../domain/services/city_service.dart';
+import '../../domain/services/living_cost_service.dart';
 import '../models/city_filter.dart';
 
 class CitiesPage extends StatefulWidget {
@@ -32,11 +33,9 @@ class _CitiesPageState extends State<CitiesPage> {
         animation: session,
         builder: (context, _) {
           final currentCity = CityCatalog.findById(session.state.currentCityId);
-          final dailyCost =
-              currentCity != null &&
-                  AssetService().hasHomeInCity(session.state, currentCity.id)
-              ? 0
-              : currentCity?.dailyCost ?? 0;
+          final livingCosts = currentCity == null
+              ? LivingCostBreakdown.empty
+              : LivingCostService().breakdown(session.state, currentCity.id);
           return ListView(
             padding: const EdgeInsets.fromLTRB(18, 8, 18, 28),
             children: [
@@ -79,10 +78,18 @@ class _CitiesPageState extends State<CitiesPage> {
                           ),
                           const SizedBox(height: 3),
                           Text(
-                            'Günlük yaşam gideri · ₺$dailyCost',
+                            'Günlük gider ₺${livingCosts.totalExpenses} · Kira geliri +₺${livingCosts.rentalIncome}',
                             style: const TextStyle(
                               color: AppPalette.textSecondary,
                               fontSize: 12,
+                            ),
+                          ),
+                          const SizedBox(height: 3),
+                          Text(
+                            'Konut ₺${livingCosts.housing} · Yemek ₺${livingCosts.food} · Fatura ₺${livingCosts.utilities} · Ulaşım ₺${livingCosts.transportation}${livingCosts.rentalMaintenance == 0 ? '' : ' · Bakım ₺${livingCosts.rentalMaintenance}'}',
+                            style: const TextStyle(
+                              color: AppPalette.textMuted,
+                              fontSize: 10,
                             ),
                           ),
                         ],
@@ -125,6 +132,8 @@ class _CityCard extends StatelessWidget {
     final isCurrent = city.id == session.state.currentCityId;
     final check = session.checkCityMove(city);
     final moveCost = CityService().moveCost(session.state, city);
+    final livingCosts = LivingCostService().breakdown(session.state, city.id);
+    final car = CarCatalog.findById(session.state.ownedCarId);
     return AppInfoCard(
       accent: isCurrent ? AppPalette.primary : AppPalette.secondary,
       child: Column(
@@ -143,7 +152,7 @@ class _CityCard extends StatelessWidget {
                 ),
               ),
               AppPill(
-                label: '₺${city.dailyCost}/gün',
+                label: '₺${livingCosts.totalExpenses}/gün',
                 color: AppPalette.tertiary,
                 icon: Icons.home_work_outlined,
               ),
@@ -175,11 +184,19 @@ class _CityCard extends StatelessWidget {
                 label: '${city.opportunityCount} fırsat',
                 color: AppPalette.primary,
               ),
+              AppPill(
+                label: livingCosts.housing == 0
+                    ? 'Konut senin'
+                    : 'Kira ₺${livingCosts.housing}',
+                color: livingCosts.housing == 0
+                    ? AppPalette.success
+                    : AppPalette.tertiary,
+              ),
             ],
           ),
           const SizedBox(height: 10),
           Text(
-            'Taşınma ₺$moveCost · Maaş x${city.salaryMultiplier.toStringAsFixed(2)} · Pazar ${city.marketLevel}',
+            'Taşınma ₺$moveCost${car == null ? '' : ' · Araç indirimi %${car.moveDiscountPercent}'} · Maaş x${city.salaryMultiplier.toStringAsFixed(2)} · Pazar ${city.marketLevel}',
             style: const TextStyle(color: AppPalette.textMuted, fontSize: 11),
           ),
           const SizedBox(height: 9),

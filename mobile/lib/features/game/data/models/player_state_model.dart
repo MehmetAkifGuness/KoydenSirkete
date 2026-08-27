@@ -10,7 +10,9 @@ import '../../../company/domain/entities/company_employee.dart';
 import '../mappers/company_employee_codec.dart';
 import '../mappers/company_branch_codec.dart';
 import '../mappers/owned_asset_ids_codec.dart';
+import '../mappers/finance_ledger_codec.dart';
 import '../../../company/domain/entities/company_branch.dart';
+import '../../../finance/domain/entities/finance_ledger.dart';
 
 class PlayerStateModel {
   const PlayerStateModel({
@@ -23,10 +25,8 @@ class PlayerStateModel {
     required this.hour,
     required this.earningSessionsToday,
     this.maxEnergy = 100,
-    this.energyRecoveryRemainder = 0,
     this.energyRecoveryAt,
     this.negativeMoneyHours = 0,
-    this.wheelCooldownSeconds = 0,
     this.wheelMajorRewardsToday = 0,
     this.wheelDurationBuffPercent = 0,
     this.wheelDurationBuffTasks = 0,
@@ -34,7 +34,6 @@ class PlayerStateModel {
     this.wheelEnergyBuffTasks = 0,
     this.wheelRewardBuffPercent = 0,
     this.wheelRewardBuffTasks = 0,
-    this.themePaletteId = 0,
     this.activeActivity,
     this.activeActivities = const <ActiveActivity>[],
     this.skills = const SkillProfile(),
@@ -42,6 +41,8 @@ class PlayerStateModel {
     this.employees = const <CompanyEmployee>[],
     this.branches = const <CompanyBranch>[],
     this.ownedHomeIds = const <int>[],
+    this.rentedHomeIds = const <int>[],
+    this.financeLedger = const FinanceLedger(),
     this.ownedCarId,
     this.applicationBlockedJobId,
     this.applicationBlockedUntilDay = 0,
@@ -81,10 +82,8 @@ class PlayerStateModel {
       hour: record.hour,
       earningSessionsToday: record.earningSessionsToday,
       maxEnergy: record.maxEnergy,
-      energyRecoveryRemainder: record.energyRecoveryRemainder,
       energyRecoveryAt: record.energyRecoveryAt,
       negativeMoneyHours: record.negativeMoneyHours,
-      wheelCooldownSeconds: record.wheelCooldownSeconds,
       wheelMajorRewardsToday: record.wheelMajorRewardsToday,
       wheelDurationBuffPercent: record.wheelDurationBuffPercent,
       wheelDurationBuffTasks: record.wheelDurationBuffTasks,
@@ -92,13 +91,15 @@ class PlayerStateModel {
       wheelEnergyBuffTasks: record.wheelEnergyBuffTasks,
       wheelRewardBuffPercent: record.wheelRewardBuffPercent,
       wheelRewardBuffTasks: record.wheelRewardBuffTasks,
-      themePaletteId: record.themePaletteId,
       activeActivity: ActiveActivityCodec().decode(record.activeActivityJson),
       activeActivities: ActiveActivityCodec().decodeList(
         record.activeActivitiesJson,
         legacyValue: record.activeActivityJson,
       ),
-      skills: SkillProfileCodec().decode(record.skillsJson, scale: record.schemaVersion < 18 ? 10 : 1),
+      skills: SkillProfileCodec().decode(
+        record.skillsJson,
+        scale: record.schemaVersion < 18 ? 10 : 1,
+      ),
       employment: EmploymentCodec().decode(record.employmentJson),
       employees: CompanyEmployeeCodec().decodeList(
         record.employeesJson,
@@ -106,6 +107,8 @@ class PlayerStateModel {
       ),
       branches: CompanyBranchCodec().decodeList(record.branchesJson),
       ownedHomeIds: OwnedAssetIdsCodec().decode(record.ownedHomeIdsJson),
+      rentedHomeIds: OwnedAssetIdsCodec().decode(record.rentedHomeIdsJson),
+      financeLedger: FinanceLedgerCodec().decode(record.financeLedgerJson),
       ownedCarId: record.ownedCarId,
       applicationBlockedJobId: record.applicationBlockedJobId,
       applicationBlockedUntilDay: record.applicationBlockedUntilDay,
@@ -144,10 +147,8 @@ class PlayerStateModel {
   final int hour;
   final int earningSessionsToday;
   final int maxEnergy;
-  final int energyRecoveryRemainder;
   final DateTime? energyRecoveryAt;
   final int negativeMoneyHours;
-  final int wheelCooldownSeconds;
   final int wheelMajorRewardsToday;
   final int wheelDurationBuffPercent;
   final int wheelDurationBuffTasks;
@@ -155,7 +156,6 @@ class PlayerStateModel {
   final int wheelEnergyBuffTasks;
   final int wheelRewardBuffPercent;
   final int wheelRewardBuffTasks;
-  final int themePaletteId;
   final ActiveActivity? activeActivity;
   final List<ActiveActivity> activeActivities;
   final SkillProfile skills;
@@ -163,6 +163,8 @@ class PlayerStateModel {
   final List<CompanyEmployee> employees;
   final List<CompanyBranch> branches;
   final List<int> ownedHomeIds;
+  final List<int> rentedHomeIds;
+  final FinanceLedger financeLedger;
   final int? ownedCarId;
   final int? applicationBlockedJobId;
   final int applicationBlockedUntilDay;
@@ -201,10 +203,8 @@ class PlayerStateModel {
       hour: entity.hour,
       earningSessionsToday: entity.earningSessionsToday,
       maxEnergy: entity.maxEnergy,
-      energyRecoveryRemainder: entity.energyRecoveryRemainder,
       energyRecoveryAt: entity.energyRecoveryAt,
       negativeMoneyHours: entity.negativeMoneyHours,
-      wheelCooldownSeconds: entity.wheelCooldownSeconds,
       wheelMajorRewardsToday: entity.wheelMajorRewardsToday,
       wheelDurationBuffPercent: entity.wheelDurationBuffPercent,
       wheelDurationBuffTasks: entity.wheelDurationBuffTasks,
@@ -212,7 +212,6 @@ class PlayerStateModel {
       wheelEnergyBuffTasks: entity.wheelEnergyBuffTasks,
       wheelRewardBuffPercent: entity.wheelRewardBuffPercent,
       wheelRewardBuffTasks: entity.wheelRewardBuffTasks,
-      themePaletteId: entity.themePaletteId,
       activeActivity: entity.activeActivity,
       activeActivities: entity.activities,
       skills: entity.skills,
@@ -220,6 +219,8 @@ class PlayerStateModel {
       employees: entity.employees,
       branches: entity.branches,
       ownedHomeIds: entity.ownedHomeIds,
+      rentedHomeIds: entity.rentedHomeIds,
+      financeLedger: entity.financeLedger,
       ownedCarId: entity.ownedCarId,
       applicationBlockedJobId: entity.applicationBlockedJobId,
       applicationBlockedUntilDay: entity.applicationBlockedUntilDay,
@@ -248,5 +249,4 @@ class PlayerStateModel {
       isOnboarded: entity.isOnboarded,
     );
   }
-
 }

@@ -4,6 +4,7 @@ import '../entities/company_employee.dart';
 import '../entities/company_project.dart';
 import 'company_employee_catalog.dart';
 import 'company_project_catalog.dart';
+import '../../../finance/domain/entities/finance_ledger.dart';
 
 class CompanyCheck {
   const CompanyCheck({required this.isEligible, required this.reason});
@@ -28,8 +29,6 @@ class CompanyOperationResult {
 
 class CompanyService {
   static const establishmentCost = 1000;
-  static const recruitmentCost = 0;
-  static const projectCost = 100;
   static const maxCompanyLevel = 3;
   static const dailyBaseRevenue = 50;
   static const dailyEmployeeRevenue = 75;
@@ -53,12 +52,16 @@ class CompanyService {
   }
 
   int dailyPayroll(PlayerState state) {
-    return employeesFor(state).fold(0, (total, employee) => total + employee.dailySalary);
+    return employeesFor(
+      state,
+    ).fold(0, (total, employee) => total + employee.dailySalary);
   }
 
-  int dailyEmployeeContribution(CompanyEmployee employee) => dailyEmployeeRevenue + employee.performance ~/ 20;
+  int dailyEmployeeContribution(CompanyEmployee employee) =>
+      dailyEmployeeRevenue + employee.performance ~/ 20;
 
-  int dailyEmployeeNetContribution(CompanyEmployee employee) => dailyEmployeeContribution(employee) - employee.dailySalary;
+  int dailyEmployeeNetContribution(CompanyEmployee employee) =>
+      dailyEmployeeContribution(employee) - employee.dailySalary;
 
   int dailyRevenue(PlayerState state) {
     if (state.companyLevel == 0) return 0;
@@ -75,7 +78,10 @@ class CompanyService {
     return processDailyOperations(state, days: days).state;
   }
 
-  CompanyOperationResult processDailyOperations(PlayerState state, {int days = 1}) {
+  CompanyOperationResult processDailyOperations(
+    PlayerState state, {
+    int days = 1,
+  }) {
     if (days < 1 || state.companyLevel == 0) {
       return CompanyOperationResult(state: state, messages: const <String>[]);
     }
@@ -85,13 +91,16 @@ class CompanyService {
       final revenue = dailyRevenue(current);
       final payroll = dailyPayroll(current);
       final completedProjectsBeforeOperation = current.completedProjects;
-      current = current.copyWith(companyFunds: current.companyFunds + revenue - payroll);
+      current = current.copyWith(
+        companyFunds: current.companyFunds + revenue - payroll,
+      );
       if (employeesFor(current).isEmpty) {
         continue;
       }
       final projectResult = advanceProject(current);
       current = projectResult.state;
-      if (projectResult.state.completedProjects > completedProjectsBeforeOperation) {
+      if (projectResult.state.completedProjects >
+          completedProjectsBeforeOperation) {
         messages.add(projectResult.message);
       }
     }
@@ -100,15 +109,27 @@ class CompanyService {
 
   CompanyCheck checkEstablishment(PlayerState state) {
     if (state.companyLevel > 0) {
-      return const CompanyCheck(isEligible: false, reason: 'Zaten bir şirketin var.');
+      return const CompanyCheck(
+        isEligible: false,
+        reason: 'Zaten bir şirketin var.',
+      );
     }
     if (state.careerLevel < 3) {
-      return const CompanyCheck(isEligible: false, reason: 'Şirket kurmak için kariyer seviyesi 3 olmalı.');
+      return const CompanyCheck(
+        isEligible: false,
+        reason: 'Şirket kurmak için kariyer seviyesi 3 olmalı.',
+      );
     }
     if (state.money < establishmentCost) {
-      return const CompanyCheck(isEligible: false, reason: 'Şirket kurmak için yeterli sermayen yok.');
+      return const CompanyCheck(
+        isEligible: false,
+        reason: 'Şirket kurmak için yeterli sermayen yok.',
+      );
     }
-    return const CompanyCheck(isEligible: true, reason: 'Şirket kurmaya hazırsın.');
+    return const CompanyCheck(
+      isEligible: true,
+      reason: 'Şirket kurmaya hazırsın.',
+    );
   }
 
   PlayerState establish(PlayerState state) {
@@ -126,6 +147,11 @@ class CompanyService {
       projectProgress: 0,
       activeProjectId: CompanyProjectCatalog.projects.first.id,
       completedProjects: 0,
+      financeLedger: state.financeLedger.record(
+        day: state.day,
+        category: FinanceCategory.companyInvestment,
+        amount: -establishmentCost,
+      ),
     );
   }
 
@@ -135,7 +161,9 @@ class CompanyService {
     }
     final employees = employeesFor(state);
     if (employees.length >= employeeCapacity(state.companyLevel)) {
-      throw const GameRuleException('Bu şirket seviyesi için çalışan kapasitesi dolu.');
+      throw const GameRuleException(
+        'Bu şirket seviyesi için çalışan kapasitesi dolu.',
+      );
     }
     final selected = employee;
     if (selected == null) {
@@ -159,7 +187,9 @@ class CompanyService {
     if (!employees.any((employee) => employee.id == employeeId)) {
       throw const GameRuleException('Bu çalışan şirketinde bulunamadı.');
     }
-    final remaining = employees.where((employee) => employee.id != employeeId).toList(growable: false);
+    final remaining = employees
+        .where((employee) => employee.id != employeeId)
+        .toList(growable: false);
     return state.copyWith(
       employeeCount: remaining.length,
       employees: remaining,
@@ -171,13 +201,11 @@ class CompanyService {
       return 0;
     }
     final project = CompanyProjectCatalog.byId(state.activeProjectId);
-    return employeesFor(state).fold(
-      0,
-      (total, employee) {
-        final progress = (project.progressPerEmployee * employee.performance / 100).round();
-        return total + (progress < 1 ? 1 : progress);
-      },
-    );
+    return employeesFor(state).fold(0, (total, employee) {
+      final progress =
+          (project.progressPerEmployee * employee.performance / 100).round();
+      return total + (progress < 1 ? 1 : progress);
+    });
   }
 
   CompanyActionResult advanceProject(PlayerState state) {
@@ -195,8 +223,12 @@ class CompanyService {
     final nextState = state.copyWith(
       companyFunds: state.companyFunds + (completed ? netReward : 0),
       projectProgress: nextProgress,
-      experience: completed ? state.experience + project.experienceReward : state.experience,
-      completedProjects: completed ? state.completedProjects + 1 : state.completedProjects,
+      experience: completed
+          ? state.experience + project.experienceReward
+          : state.experience,
+      completedProjects: completed
+          ? state.completedProjects + 1
+          : state.completedProjects,
     );
     return CompanyActionResult(
       state: nextState,
@@ -208,16 +240,28 @@ class CompanyService {
 
   CompanyCheck checkUpgrade(PlayerState state) {
     if (state.companyLevel == 0) {
-      return const CompanyCheck(isEligible: false, reason: 'Önce şirketini kurmalısın.');
+      return const CompanyCheck(
+        isEligible: false,
+        reason: 'Önce şirketini kurmalısın.',
+      );
     }
     if (state.companyLevel >= maxCompanyLevel) {
-      return const CompanyCheck(isEligible: false, reason: 'Şirketin en yüksek seviyede.');
+      return const CompanyCheck(
+        isEligible: false,
+        reason: 'Şirketin en yüksek seviyede.',
+      );
     }
     final cost = upgradeCost(state.companyLevel);
     if (state.companyFunds < cost) {
-      return CompanyCheck(isEligible: false, reason: 'Seviye yükseltmek için şirket kasasında ₺$cost olmalı.');
+      return CompanyCheck(
+        isEligible: false,
+        reason: 'Seviye yükseltmek için şirket kasasında ₺$cost olmalı.',
+      );
     }
-    return CompanyCheck(isEligible: true, reason: 'Yeni seviye ve çalışan kapasitesi açılacak.');
+    return CompanyCheck(
+      isEligible: true,
+      reason: 'Yeni seviye ve çalışan kapasitesi açılacak.',
+    );
   }
 
   PlayerState upgrade(PlayerState state) {
@@ -231,15 +275,15 @@ class CompanyService {
     );
   }
 
-  CompanyCheck checkProjectSelection(PlayerState state, CompanyProject project) {
+  CompanyCheck checkProjectSelection(
+    PlayerState state,
+    CompanyProject project,
+  ) {
     if (state.companyLevel == 0) {
-      return const CompanyCheck(isEligible: false, reason: 'Önce şirketini kurmalısın.');
-    }
-    if (project.id > state.companyLevel) {
-      return CompanyCheck(isEligible: false, reason: 'Bu proje için şirket seviyesi ${project.id} olmalı.');
-    }
-    if (state.projectProgress > 0) {
-      return const CompanyCheck(isEligible: false, reason: 'Devam eden proje bitmeden proje değiştirilemez.');
+      return const CompanyCheck(
+        isEligible: false,
+        reason: 'Önce şirketini kurmalısın.',
+      );
     }
     return const CompanyCheck(isEligible: true, reason: 'Proje seçilebilir.');
   }
@@ -249,6 +293,11 @@ class CompanyService {
     if (!check.isEligible) {
       throw GameRuleException(check.reason);
     }
-    return state.copyWith(activeProjectId: project.id);
+    return state.copyWith(
+      activeProjectId: project.id,
+      projectProgress: state.activeProjectId == project.id
+          ? state.projectProgress
+          : 0,
+    );
   }
 }

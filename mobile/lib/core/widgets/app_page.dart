@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../app/theme/app_palette.dart';
+import '../../app/theme/app_motion.dart';
 
 class AppPage extends StatelessWidget {
   const AppPage({
@@ -18,59 +19,75 @@ class AppPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final reduceMotion =
+        MediaQuery.maybeOf(context)?.disableAnimations ?? false;
     return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 15, 16, 12),
-              child: Column(
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Müdür',
-                              style: TextStyle(
-                                color: AppPalette.textMuted,
-                                fontSize: 10,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: 1.5,
-                              ),
-                            ),
-                            const SizedBox(height: 3),
-                            Text(
-                              title,
-                              style: Theme.of(context).textTheme.headlineSmall,
-                            ),
-                            if (subtitle != null) ...[
-                              const SizedBox(height: 3),
-                              Text(
-                                subtitle!,
-                                style: const TextStyle(
+      body: TweenAnimationBuilder<double>(
+        tween: Tween(begin: 0, end: 1),
+        duration: reduceMotion ? Duration.zero : AppMotion.standard,
+        curve: AppMotion.enterCurve,
+        child: SafeArea(
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 15, 16, 12),
+                child: Column(
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Müdür',
+                                style: TextStyle(
                                   color: AppPalette.textMuted,
-                                  fontSize: 12,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: 1.5,
                                 ),
                               ),
+                              const SizedBox(height: 3),
+                              Text(
+                                title,
+                                style: Theme.of(
+                                  context,
+                                ).textTheme.headlineSmall,
+                              ),
+                              if (subtitle != null) ...[
+                                const SizedBox(height: 3),
+                                Text(
+                                  subtitle!,
+                                  style: const TextStyle(
+                                    color: AppPalette.textMuted,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
                             ],
-                          ],
+                          ),
                         ),
-                      ),
-                      if (actions != null) ...actions!,
-                      const SizedBox(width: 8),
-                    ],
-                  ),
-                  const SizedBox(height: 13),
-                  const Divider(height: 1),
-                ],
+                        if (actions != null) ...actions!,
+                        const SizedBox(width: 8),
+                      ],
+                    ),
+                    const SizedBox(height: 13),
+                    const Divider(height: 1),
+                  ],
+                ),
               ),
-            ),
-            Expanded(child: child),
-          ],
+              Expanded(child: child),
+            ],
+          ),
+        ),
+        builder: (context, value, child) => Opacity(
+          opacity: value,
+          child: Transform.translate(
+            offset: Offset(0, (1 - value) * 10),
+            child: child,
+          ),
         ),
       ),
     );
@@ -132,7 +149,9 @@ class AppInfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return AnimatedContainer(
+      duration: AppMotion.fast,
+      curve: AppMotion.enterCurve,
       decoration: BoxDecoration(
         color: AppPalette.surface,
         border: Border.all(color: accent.withValues(alpha: .22)),
@@ -158,7 +177,9 @@ class AppPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return AnimatedContainer(
+      duration: AppMotion.fast,
+      curve: AppMotion.enterCurve,
       padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
       decoration: BoxDecoration(
         color: color.withValues(alpha: .10),
@@ -288,13 +309,21 @@ class AppProgressLine extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(5),
-      child: LinearProgressIndicator(
-        value: value.clamp(0, 1),
-        minHeight: 7,
-        color: color,
-        backgroundColor: AppPalette.track,
+    final target = value.clamp(0.0, 1.0);
+    final reduceMotion =
+        MediaQuery.maybeOf(context)?.disableAnimations ?? false;
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: target),
+      duration: reduceMotion ? Duration.zero : AppMotion.slow,
+      curve: AppMotion.enterCurve,
+      builder: (context, animatedValue, _) => ClipRRect(
+        borderRadius: BorderRadius.circular(5),
+        child: LinearProgressIndicator(
+          value: animatedValue,
+          minHeight: 7,
+          color: color,
+          backgroundColor: AppPalette.track,
+        ),
       ),
     );
   }

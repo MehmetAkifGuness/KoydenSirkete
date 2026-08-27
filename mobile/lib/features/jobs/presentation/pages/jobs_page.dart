@@ -83,7 +83,8 @@ class _JobsPageState extends State<JobsPage> {
               const SizedBox(height: 25),
               const AppSectionHeader(
                 title: 'Sana uygun ilanlar',
-                caption: 'Her başvuru 10 enerji ve 1 oyun saati harcar.',
+                caption:
+                    'Her ilan rekabetli · Başvuru 10 enerji ve 1 oyun saati.',
               ),
               const SizedBox(height: 12),
               _JobFilterBar(
@@ -93,7 +94,10 @@ class _JobsPageState extends State<JobsPage> {
               const SizedBox(height: 9),
               Text(
                 '${listings.length}/${allListings.length} ilan gösteriliyor',
-                style: const TextStyle(color: AppPalette.textMuted, fontSize: 11),
+                style: const TextStyle(
+                  color: AppPalette.textMuted,
+                  fontSize: 11,
+                ),
               ),
               const SizedBox(height: 8),
               for (final listing in listings) ...[
@@ -144,7 +148,7 @@ class _JobCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '${job.company} · ${job.careerTrack} ${job.level}. rütbe',
+                      '${listing.company} · ${job.careerTrack} ${job.level}. rütbe',
                       style: const TextStyle(
                         color: AppPalette.secondary,
                         fontSize: 12,

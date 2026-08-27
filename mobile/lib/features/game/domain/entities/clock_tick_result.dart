@@ -14,10 +14,9 @@ class ClockTickResult {
   final List<ActiveActivity> completedActivities;
   final bool dayChanged;
 
-  List<ActiveActivity> get activities =>
-      completedActivities.isNotEmpty
-          ? completedActivities
-          : completedActivity == null
-              ? const <ActiveActivity>[]
-              : <ActiveActivity>[completedActivity!];
+  List<ActiveActivity> get activities => completedActivities.isNotEmpty
+      ? completedActivities
+      : completedActivity == null
+      ? const <ActiveActivity>[]
+      : <ActiveActivity>[completedActivity!];
 }

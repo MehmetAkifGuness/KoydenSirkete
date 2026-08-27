@@ -24,9 +24,12 @@ import '../../../assets/domain/services/asset_service.dart';
 import '../../../jobs/domain/entities/job_listing.dart';
 import '../../../wheel/domain/services/esnaf_wheel_service.dart';
 
+part 'game_session_feature_controller.dart';
+
 class GameSessionController extends ChangeNotifier {
-  GameSessionController({required GameSessionApplicationService applicationService})
-      : _applicationService = applicationService;
+  GameSessionController({
+    required GameSessionApplicationService applicationService,
+  }) : _applicationService = applicationService;
   final GameSessionApplicationService _applicationService;
   PlayerState _state = PlayerState.initial;
   bool _isReady = false;
@@ -44,18 +47,24 @@ class GameSessionController extends ChangeNotifier {
       _state = await _applicationService.load();
     } catch (_) {
       _state = PlayerState.initial;
-      _errorMessage = 'Cihazdaki ilerleme verisi okunamadı. Verilerin korunması için tekrar deneyin.';
+      _errorMessage =
+          'Cihazdaki ilerleme verisi okunamadı. Verilerin korunması için tekrar deneyin.';
     } finally {
       _isReady = true;
       notifyListeners();
     }
   }
+
   Future<void> retryInitialization() => initialize();
-  Future<String?> earnMoney({EarningPerformance performance = EarningPerformance.none}) async {
+  Future<String?> earnMoney({
+    EarningPerformance performance = EarningPerformance.none,
+  }) async {
     return _execute(
-      action: (state) => _applicationService.startEarning(state, performance: performance),
+      action: (state) =>
+          _applicationService.startEarning(state, performance: performance),
       stateOf: (result) => result,
-      message: (_) => 'Para kazanma aktivitesi başladı. 2 oyun saati sonra tamamlanacak.',
+      message: (_) =>
+          'Para kazanma aktivitesi başladı. 2 oyun saati sonra tamamlanacak.',
     );
   }
 
@@ -63,7 +72,8 @@ class GameSessionController extends ChangeNotifier {
     return _execute(
       action: (state) => _applicationService.startTraining(state, course),
       stateOf: (result) => result,
-      message: (_) => '${course.name} başladı. Aktivite tamamlanınca bilgi kazanacaksın.',
+      message: (_) =>
+          '${course.name} başladı. Aktivite tamamlanınca bilgi kazanacaksın.',
     );
   }
 
@@ -71,7 +81,8 @@ class GameSessionController extends ChangeNotifier {
     return _execute(
       action: _applicationService.startSport,
       stateOf: (result) => result,
-      message: (_) => 'Spor başladı. 1 oyun saati sonra maksimum enerjin artacak.',
+      message: (_) =>
+          'Spor başladı. 1 oyun saati sonra maksimum enerjin artacak.',
     );
   }
 
@@ -107,7 +118,8 @@ class GameSessionController extends ChangeNotifier {
     }
   }
 
-  JobApplicationCheck checkJob(Job job) => _applicationService.checkJob(_state, job);
+  JobApplicationCheck checkJob(Job job) =>
+      _applicationService.checkJob(_state, job);
 
   Future<String?> applyForJob(Job job) async {
     return _execute(
@@ -119,13 +131,16 @@ class GameSessionController extends ChangeNotifier {
 
   List<JobListing> get jobListings => _applicationService.jobListings(_state);
 
-  List<WorkTask> employerTasks(Job job) => _applicationService.employerTasks(_state, job);
+  List<WorkTask> employerTasks(Job job) =>
+      _applicationService.employerTasks(_state, job);
 
   Future<String?> applyForListing(JobListing listing) async {
     return _execute(
-      action: (state) => _applicationService.startJobApplication(state, listing),
+      action: (state) =>
+          _applicationService.startJobApplication(state, listing),
       stateOf: (result) => result,
-      message: (_) => 'Başvuru karşılaşması başladı. 1 oyun saati sonra sonuçlanacak.',
+      message: (_) =>
+          'Başvuru karşılaşması başladı. 1 oyun saati sonra sonuçlanacak.',
     );
   }
 
@@ -133,7 +148,8 @@ class GameSessionController extends ChangeNotifier {
     return _execute(
       action: (state) => _applicationService.work(state, job, task),
       stateOf: (result) => result.state,
-      message: (result) => '+₺${result.income} kazandın. Performansın: %${result.state.performance}',
+      message: (result) =>
+          '+₺${result.income} kazandın. Performansın: %${result.state.performance}',
     );
   }
 
@@ -141,11 +157,13 @@ class GameSessionController extends ChangeNotifier {
     return _execute(
       action: (state) => _applicationService.startWork(state, job, task),
       stateOf: (result) => result,
-      message: (_) => 'Görev başladı. Süre dolunca maaş ve performans işlenecek.',
+      message: (_) =>
+          'Görev başladı. Süre dolunca maaş ve performans işlenecek.',
     );
   }
 
-  WheelAvailability get wheelAvailability => _applicationService.wheelAvailability(_state);
+  WheelAvailability get wheelAvailability =>
+      _applicationService.wheelAvailability(_state);
 
   Future<WheelSpinOutcome?> spinWheel() async {
     if (!_canExecute()) {
@@ -175,17 +193,20 @@ class GameSessionController extends ChangeNotifier {
     );
   }
 
-  PromotionCheck checkPromotion(Job currentJob, Job? nextJob) => _applicationService.checkPromotion(_state, currentJob, nextJob);
+  PromotionCheck checkPromotion(Job currentJob, Job? nextJob) =>
+      _applicationService.checkPromotion(_state, currentJob, nextJob);
 
   Future<String?> promote(Job currentJob, Job nextJob) async {
     return _execute(
-      action: (state) => _applicationService.promote(state, currentJob, nextJob),
+      action: (state) =>
+          _applicationService.promote(state, currentJob, nextJob),
       stateOf: (result) => result,
       message: (_) => '${nextJob.title} seviyesine terfi ettin.',
     );
   }
 
-  CityMoveCheck checkCityMove(City city) => _applicationService.checkCityMove(_state, city);
+  CityMoveCheck checkCityMove(City city) =>
+      _applicationService.checkCityMove(_state, city);
 
   Future<String?> moveCity(City city) async {
     return _execute(
@@ -227,129 +248,11 @@ class GameSessionController extends ChangeNotifier {
     }
   }
 
-  Future<String?> selectThemePalette(int paletteId) async {
-    return _execute(
-      action: (state) => _applicationService.selectThemePalette(state, paletteId),
-      stateOf: (result) => result,
-      message: (_) => 'Renk paleti güncellendi.',
-    );
-  }
-
   Future<String?> updateDebugState(DebugStatePatch patch) async {
     return _execute(
       action: (state) => _applicationService.updateDebugState(state, patch),
       stateOf: (result) => result,
       message: (_) => 'Geliştirici verileri kaydedildi.',
-    );
-  }
-
-  DailyGoalStatus get dailyGoalStatus => _applicationService.dailyGoalStatus(_state);
-
-  Future<String?> claimDailyGoal() async {
-    return _execute(
-      action: _applicationService.claimDailyGoal,
-      stateOf: (result) => result,
-      message: (_) => 'Günlük hedef ödülünü aldın: +₺${dailyGoalStatus.reward}.',
-    );
-  }
-
-  CompanyCheck checkCompanyEstablishment() => _applicationService.checkCompanyEstablishment(_state);
-
-  Future<String?> establishCompany() async {
-    return _execute(
-      action: _applicationService.establishCompany,
-      stateOf: (result) => result,
-      message: (_) => 'Şirketin kuruldu. Artık kendi işini büyütebilirsin.',
-    );
-  }
-
-  Future<String?> recruitEmployee(CompanyEmployee employee) async {
-    return _execute(
-      action: (state) => _applicationService.recruitEmployee(state, employee: employee),
-      stateOf: (result) => result,
-      message: (_) => 'Çalışan ekibe katıldı. İşe alım ücretsiz; günlük maaş gideri artık uygulanacak.',
-    );
-  }
-
-  Future<String?> dismissEmployee(int employeeId) async {
-    return _execute(
-      action: (state) => _applicationService.dismissEmployee(state, employeeId: employeeId),
-      stateOf: (result) => result,
-      message: (_) => 'Çalışanın işten çıkarıldı. Maaş gideri ve proje katkısı güncellendi.',
-    );
-  }
-
-  CompanyCheckResult checkBranchOpen(City city) => _applicationService.checkBranchOpen(_state, city);
-
-  List<CompanyEmployee> branchCandidates(CompanyBranch branch) => _applicationService.branchCandidates(_state, branch);
-
-  Future<String?> openBranch(City city) {
-    return _execute(
-      action: (state) => _applicationService.openBranch(state, city),
-      stateOf: (result) => result,
-      message: (_) => '${city.name} şehrinde bayin açıldı.',
-    );
-  }
-
-  Future<String?> recruitBranchEmployee(int cityId, CompanyEmployee employee) {
-    return _execute(
-      action: (state) => _applicationService.recruitBranchEmployee(state, cityId: cityId, employee: employee),
-      stateOf: (result) => result,
-      message: (_) => 'Çalışan bayine katıldı.',
-    );
-  }
-
-  Future<String?> dismissBranchEmployee(int cityId, int employeeId) {
-    return _execute(
-      action: (state) => _applicationService.dismissBranchEmployee(state, cityId: cityId, employeeId: employeeId),
-      stateOf: (result) => result,
-      message: (_) => 'Bayi çalışanı işten çıkarıldı.',
-    );
-  }
-
-  AssetCheck checkHome(HomeAsset home, City city) => _applicationService.checkHome(_state, home, city);
-
-  Future<String?> buyHome(HomeAsset home, City city) {
-    return _execute(
-      action: (state) => _applicationService.buyHome(state, home, city),
-      stateOf: (result) => result,
-      message: (_) => '${home.name} satın alındı. Bu şehirde kira ödemezsin.',
-    );
-  }
-
-  AssetCheck checkCar(CarAsset car) => _applicationService.checkCar(_state, car);
-
-  Future<String?> buyCar(CarAsset car) {
-    return _execute(
-      action: (state) => _applicationService.buyCar(state, car),
-      stateOf: (result) => result,
-      message: (_) => '${car.name} satın alındı. Şehir değiştirirken avantaj kazanırsın.',
-    );
-  }
-
-  CompanyCheck checkCompanyUpgrade() => _applicationService.checkCompanyUpgrade(_state);
-
-  Future<String?> upgradeCompany() async {
-    return _execute(
-      action: _applicationService.upgradeCompany,
-      stateOf: (result) => result,
-      message: (result) => 'Şirketin seviye ${result.companyLevel} oldu.',
-    );
-  }
-
-  Future<String?> selectCompanyProject(CompanyProject project) async {
-    return _execute(
-      action: (state) => _applicationService.selectCompanyProject(state, project),
-      stateOf: (result) => result,
-      message: (_) => '${project.name} projesi seçildi.',
-    );
-  }
-
-  Future<String?> advanceCompanyProject() async {
-    return _execute(
-      action: _applicationService.advanceCompanyProject,
-      stateOf: (result) => result.state,
-      message: (result) => result.message,
     );
   }
 
