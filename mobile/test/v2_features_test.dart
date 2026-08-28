@@ -718,7 +718,7 @@ void main() {
     expect(service.valuation(state), greaterThan(state.companyFunds));
     expect(service.reputation(state), greaterThan(0));
     expect(service.marketShare(state), greaterThan(0));
-    expect(CompanyProjectCatalog.projects, hasLength(7));
+    expect(CompanyProjectCatalog.projects, hasLength(15));
     expect(CompanyProjectCatalog.projects.last.progressPerEmployee, 2);
   });
 

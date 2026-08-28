@@ -247,6 +247,12 @@ Android-first, tamamen offline kariyer ve şirket simülasyonu.
 - Şirket ekranından açılan geçmiş sayfası sezonları yeniden eskiye gösterir; en iyi derece ve toplam para ödülünü özetler.
 - Kayıtlar mevcut rekabet JSON verisinde tutulur ve eski oyun kayıtları boş geçmişle güvenle açılır.
 
+## v2.23.0 genişletilmiş proje portföyü
+
+- Şirket kataloğu, mevcut proje kimlikleri korunarak 15 sözleşmeye çıkarıldı.
+- Projeler kısa, orta, büyük ve stratejik sözleşme kategorilerinde dengeli biçimde dağıtıldı.
+- Portföy ekranı projeleri kategori başlıkları altında sunar ve sözleşme türünü her kartta gösterir.
+
 ## Çalıştırma
 
 ```powershell

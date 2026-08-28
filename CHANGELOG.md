@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.23.0
+
+- Şirket proje kataloğu 7 projeden 15 projeye çıkarıldı.
+- Projeler kısa, orta, büyük ve stratejik sözleşme olmak üzere dört kategoriye ayrıldı.
+- Yeni projeler maliyet, ödül, risk, uzmanlık ve önerilen şirket seviyesi bakımından kademeli olarak dengelendi.
+- Proje portföyü kategori başlıkları altında gruplandı ve sözleşme türü her proje kartında görünür hâle getirildi.
+- Katalog bütünlüğü, kategori dağılımı ve mevcut proje seçim akışı hedefli otomatik testlerle doğrulandı.
+
 ## 2.22.0
 
 - Tamamlanan rekabet sezonlarının sıralaması, puanı, galibiyet/mağlubiyet sayısı ve ödülleri kalıcı geçmişe eklendi.

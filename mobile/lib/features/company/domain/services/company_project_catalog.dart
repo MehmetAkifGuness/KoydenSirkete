@@ -2,7 +2,7 @@ import '../entities/company_project.dart';
 import '../entities/company_specialty.dart';
 
 abstract final class CompanyProjectCatalog {
-  static const version = 4;
+  static const version = 5;
 
   static const projects = <CompanyProject>[
     CompanyProject(
@@ -16,6 +16,7 @@ abstract final class CompanyProjectCatalog {
       riskPercent: 8,
       recommendedCompanyLevel: 1,
       specialty: CompanySpecialty.operations,
+      category: CompanyProjectCategory.shortTerm,
     ),
     CompanyProject(
       id: 2,
@@ -28,6 +29,7 @@ abstract final class CompanyProjectCatalog {
       riskPercent: 12,
       recommendedCompanyLevel: 1,
       specialty: CompanySpecialty.technology,
+      category: CompanyProjectCategory.shortTerm,
     ),
     CompanyProject(
       id: 3,
@@ -40,6 +42,7 @@ abstract final class CompanyProjectCatalog {
       riskPercent: 18,
       recommendedCompanyLevel: 2,
       specialty: CompanySpecialty.finance,
+      category: CompanyProjectCategory.mediumTerm,
     ),
     CompanyProject(
       id: 4,
@@ -52,6 +55,7 @@ abstract final class CompanyProjectCatalog {
       riskPercent: 25,
       recommendedCompanyLevel: 2,
       specialty: CompanySpecialty.logistics,
+      category: CompanyProjectCategory.large,
     ),
     CompanyProject(
       id: 5,
@@ -64,6 +68,7 @@ abstract final class CompanyProjectCatalog {
       riskPercent: 32,
       recommendedCompanyLevel: 3,
       specialty: CompanySpecialty.technology,
+      category: CompanyProjectCategory.large,
     ),
     CompanyProject(
       id: 6,
@@ -76,6 +81,7 @@ abstract final class CompanyProjectCatalog {
       riskPercent: 40,
       recommendedCompanyLevel: 3,
       specialty: CompanySpecialty.leadership,
+      category: CompanyProjectCategory.strategic,
     ),
     CompanyProject(
       id: 7,
@@ -88,7 +94,116 @@ abstract final class CompanyProjectCatalog {
       riskPercent: 20,
       recommendedCompanyLevel: 3,
       specialty: CompanySpecialty.leadership,
+      category: CompanyProjectCategory.strategic,
       requiresSeasonInvitation: true,
+    ),
+    CompanyProject(
+      id: 8,
+      name: 'Yerel mağaza ağı',
+      description: 'Mahalle işletmelerini ortak satış ağına bağlayan hızlı iş.',
+      cost: 140,
+      reward: 650,
+      progressPerEmployee: 9,
+      experienceReward: 7,
+      riskPercent: 10,
+      recommendedCompanyLevel: 1,
+      specialty: CompanySpecialty.sales,
+      category: CompanyProjectCategory.shortTerm,
+    ),
+    CompanyProject(
+      id: 9,
+      name: 'Hızlı teslimat pilotu',
+      description:
+          'Tek şehirde yeni teslimat modelini doğrulayan pilot çalışma.',
+      cost: 220,
+      reward: 1000,
+      progressPerEmployee: 8,
+      experienceReward: 12,
+      riskPercent: 14,
+      recommendedCompanyLevel: 1,
+      specialty: CompanySpecialty.logistics,
+      category: CompanyProjectCategory.shortTerm,
+    ),
+    CompanyProject(
+      id: 10,
+      name: 'Bölgesel marka kampanyası',
+      description: 'Yakın şehirlerde bilinirliği artıran satış kampanyası.',
+      cost: 420,
+      reward: 2200,
+      progressPerEmployee: 6,
+      experienceReward: 22,
+      riskPercent: 20,
+      recommendedCompanyLevel: 2,
+      specialty: CompanySpecialty.sales,
+      category: CompanyProjectCategory.mediumTerm,
+    ),
+    CompanyProject(
+      id: 11,
+      name: 'Finans otomasyonu',
+      description: 'Kurumsal müşterinin mali süreçlerini tek sistemde toplar.',
+      cost: 550,
+      reward: 3000,
+      progressPerEmployee: 5,
+      experienceReward: 26,
+      riskPercent: 22,
+      recommendedCompanyLevel: 2,
+      specialty: CompanySpecialty.finance,
+      category: CompanyProjectCategory.mediumTerm,
+    ),
+    CompanyProject(
+      id: 12,
+      name: 'Akıllı depo kurulumu',
+      description: 'Depo operasyonunu izlenebilir ve verimli hâle getirir.',
+      cost: 750,
+      reward: 4200,
+      progressPerEmployee: 5,
+      experienceReward: 30,
+      riskPercent: 24,
+      recommendedCompanyLevel: 2,
+      specialty: CompanySpecialty.technology,
+      category: CompanyProjectCategory.mediumTerm,
+    ),
+    CompanyProject(
+      id: 13,
+      name: 'İhracat operasyonu',
+      description:
+          'Yurt dışı teslimat ve tedarik süreçlerini birlikte yönetir.',
+      cost: 1800,
+      reward: 10500,
+      progressPerEmployee: 3,
+      experienceReward: 42,
+      riskPercent: 30,
+      recommendedCompanyLevel: 3,
+      specialty: CompanySpecialty.logistics,
+      category: CompanyProjectCategory.large,
+    ),
+    CompanyProject(
+      id: 14,
+      name: 'Ulusal perakende dönüşümü',
+      description:
+          'Çok şehirli mağaza ağını baştan sona yenileyen büyük proje.',
+      cost: 3200,
+      reward: 19000,
+      progressPerEmployee: 3,
+      experienceReward: 58,
+      riskPercent: 34,
+      recommendedCompanyLevel: 3,
+      specialty: CompanySpecialty.operations,
+      category: CompanyProjectCategory.large,
+    ),
+    CompanyProject(
+      id: 15,
+      name: 'Sürdürülebilir büyüme ortaklığı',
+      description:
+          'Uzun vadeli finansman ve büyüme planını birleştiren ortaklık.',
+      cost: 5000,
+      reward: 30000,
+      progressPerEmployee: 2,
+      experienceReward: 75,
+      riskPercent: 36,
+      recommendedCompanyLevel: 3,
+      specialty: CompanySpecialty.finance,
+      category: CompanyProjectCategory.strategic,
     ),
   ];
 

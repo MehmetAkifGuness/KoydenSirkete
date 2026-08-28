@@ -1,5 +1,16 @@
 import 'company_specialty.dart';
 
+enum CompanyProjectCategory {
+  shortTerm('Kısa sözleşme'),
+  mediumTerm('Orta sözleşme'),
+  large('Büyük sözleşme'),
+  strategic('Stratejik sözleşme');
+
+  const CompanyProjectCategory(this.label);
+
+  final String label;
+}
+
 class CompanyProject {
   const CompanyProject({
     required this.id,
@@ -12,6 +23,7 @@ class CompanyProject {
     required this.riskPercent,
     required this.recommendedCompanyLevel,
     required this.specialty,
+    required this.category,
     this.requiresSeasonInvitation = false,
   });
 
@@ -25,5 +37,6 @@ class CompanyProject {
   final int riskPercent;
   final int recommendedCompanyLevel;
   final CompanySpecialty specialty;
+  final CompanyProjectCategory category;
   final bool requiresSeasonInvitation;
 }

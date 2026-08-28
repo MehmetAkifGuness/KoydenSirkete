@@ -406,9 +406,20 @@ class _CompanyViewState extends State<_CompanyView> {
           caption: 'Şirketinin bir sonraki büyüme hamlesini seç.',
         ),
         const SizedBox(height: 12),
-        for (final item in CompanyProjectCatalog.projects) ...[
-          _ProjectCard(project: item, session: session),
-          const SizedBox(height: 9),
+        for (final category in CompanyProjectCategory.values) ...[
+          AppSectionHeader(
+            title: category.label,
+            caption:
+                '${CompanyProjectCatalog.projects.where((item) => item.category == category).length} proje',
+          ),
+          const SizedBox(height: 8),
+          for (final item in CompanyProjectCatalog.projects.where(
+            (item) => item.category == category,
+          )) ...[
+            _ProjectCard(project: item, session: session),
+            const SizedBox(height: 9),
+          ],
+          const SizedBox(height: 8),
         ],
         const SizedBox(height: 17),
         CompanyGrowthPanel(state: state),
@@ -537,6 +548,7 @@ class _ProjectCard extends StatelessWidget {
                     spacing: 6,
                     runSpacing: 6,
                     children: [
+                      AppPill(label: project.category.label),
                       AppPill(label: '${project.specialty.label} uzmanlığı'),
                       AppPill(
                         label: '%${forecast.successChance} başarı',

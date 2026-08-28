@@ -375,8 +375,11 @@ void main() {
       300,
       scrollable: find.byType(Scrollable).first,
     );
+    expect(find.text('Orta sözleşme'), findsWidgets);
     expect(find.textContaining('başarı'), findsWidgets);
     expect(find.textContaining('uzmanlığı'), findsWidgets);
+    await tester.ensureVisible(find.text('Kurumsal çözüm'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Kurumsal çözüm'));
     await tester.pumpAndSettle();
 
