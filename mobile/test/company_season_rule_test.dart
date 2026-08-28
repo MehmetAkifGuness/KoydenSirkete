@@ -54,8 +54,8 @@ void main() {
     final competitionDelta = forecast.won ? stake : -(stake ~/ 2);
 
     expect(forecast.seasonRule.title, 'Talep patlaması');
-    expect(forecast.totalRevenuePercent, 10);
-    expect(forecast.totalPayrollPercent, 2);
+    expect(forecast.totalRevenuePercent, forecast.event.revenuePercent + 10);
+    expect(forecast.totalPayrollPercent, forecast.event.payrollPercent + 2);
     expect(forecast.fundsDelta, economicDelta + competitionDelta);
   });
 

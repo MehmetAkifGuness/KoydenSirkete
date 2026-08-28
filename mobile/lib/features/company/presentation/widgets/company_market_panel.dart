@@ -58,6 +58,11 @@ class CompanyMarketPanel extends StatelessWidget {
                 runSpacing: 7,
                 children: [
                   AppPill(
+                    label: forecast.event.category.label,
+                    icon: Icons.event_repeat_rounded,
+                    color: AppPalette.secondary,
+                  ),
+                  AppPill(
                     label: _percentLabel(
                       'Toplam gelir',
                       forecast.totalRevenuePercent,

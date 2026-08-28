@@ -17,7 +17,7 @@ MÜDÜR — 10/10 HEDEF PLANI
 - [TAMAMLANDI — v2.18.0] Her sezona farklı piyasa kuralı ekle: yüksek enflasyon, talep patlaması, personel krizi, teknoloji dönüşümü gibi.
 - [TAMAMLANDI — v2.19.0] Oyuncunun rakibe karşı proje, fiyat, kalite veya büyüme stratejisi seçebilmesini sağla.
 - [TAMAMLANDI — v2.20.0] Sezon sonunda yalnızca para değil; kupa, itibar, sponsorluk veya özel proje daveti ver.
-- Aynı sonuçların tekrarını azaltmak için dengeli ve deterministik sezon olay havuzu oluştur.
+- [TAMAMLANDI — v2.21.0] Aynı sonuçların tekrarını azaltmak için dengeli ve deterministik sezon olay havuzu oluştur.
 - Sezon geçmişi ekranında önceki sıralamaları, puanları ve ödülleri göster.
 
 3. ÖNCELİK — ŞİRKET YÖNETİMİ VE İÇERİK ÇEŞİTLİLİĞİ

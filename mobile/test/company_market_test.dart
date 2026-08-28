@@ -4,6 +4,7 @@ import 'package:kariyerden_sirkete/features/company/domain/services/company_bran
 import 'package:kariyerden_sirkete/features/company/domain/services/company_employee_catalog.dart';
 import 'package:kariyerden_sirkete/features/company/domain/services/company_employee_wellbeing_service.dart';
 import 'package:kariyerden_sirkete/features/company/domain/services/company_market_service.dart';
+import 'package:kariyerden_sirkete/features/company/domain/services/company_season_event_service.dart';
 import 'package:kariyerden_sirkete/features/company/domain/services/company_competition_service.dart';
 import 'package:kariyerden_sirkete/features/company/domain/services/company_service.dart';
 import 'package:kariyerden_sirkete/features/game/domain/entities/player_state.dart';
@@ -12,23 +13,15 @@ void main() {
   test('market events rotate every seven days deterministically', () {
     final service = CompanyMarketService();
     final state = _companyState();
+    const seasonEvents = CompanySeasonEventService();
+    final schedule = seasonEvents.scheduleForSeason(1);
 
-    expect(
-      service.forecast(state, day: 1).event,
-      CompanyMarketService.events[0],
-    );
-    expect(
-      service.forecast(state, day: 7).event,
-      CompanyMarketService.events[0],
-    );
-    expect(
-      service.forecast(state, day: 8).event,
-      CompanyMarketService.events[1],
-    );
-    expect(
-      service.forecast(state, day: 15).event,
-      CompanyMarketService.events[2],
-    );
+    expect(service.forecast(state, day: 1).event, schedule[0]);
+    expect(service.forecast(state, day: 2).event, schedule[0]);
+    expect(service.forecast(state, day: 8).event, schedule[0]);
+    expect(service.forecast(state, day: 9).event, schedule[1]);
+    expect(service.forecast(state, day: 16).event, schedule[2]);
+    expect(service.forecast(state, day: 31).event, schedule[4]);
     expect(
       service.forecast(state, day: 15).playerScore,
       service.forecast(state, day: 15).playerScore,
@@ -118,7 +111,7 @@ void main() {
       }
     }
 
-    expect(observedEvents, hasLength(CompanyMarketService.events.length));
+    expect(observedEvents.length, greaterThanOrEqualTo(12));
     expect(state.companyFunds, lessThan(1000000));
     expect(state.companyCompetition.seasonNumber, 6);
     expect(state.companyCompetition.championships, inInclusiveRange(0, 5));

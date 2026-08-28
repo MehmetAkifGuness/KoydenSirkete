@@ -1,5 +1,16 @@
 # Changelog
 
+## 2.21.0
+
+- Piyasa olay havuzu 6 sabit olaydan fırsat, tehdit, iş gücü ve dengeli kategorilerindeki 16 olaya çıkarıldı.
+- Her 30 günlük sezonda dört kategoriyi zorunlu olarak içeren beş benzersiz olay deterministik biçimde seçilir.
+- Değişken beşinci olay ve sezona göre değişen sıra, aynı olay dizilerinin sık tekrar etmesini önler.
+- Bir sezonun son olayıyla sonraki sezonun ilk olayının aynı olması engellendi.
+- Yedi günlük olay dönemleri sezon başlangıcına hizalandı; son dönem sezon bitişinde taşmadan tamamlanır.
+- Şirket ekranına aktif dönemi ve sezonun beş olayını gün aralıklarıyla gösteren olay takvimi eklendi.
+- Havuz dengesi, 64 sezonluk çeşitlilik, tekrarsız sınırlar, ekonomik limitler, takvim kapsamı ve arayüz otomatik testlerle doğrulandı.
+- Takvim oyun günü ve sezon numarasından hesaplandığı için SQLite v28 ve eski kayıt uyumluluğu korundu.
+
 ## 2.20.0
 
 - Sezon derecelerine para ödülünden bağımsız kupa, sponsorluk, özel proje daveti ve itibar ödülleri eklendi.

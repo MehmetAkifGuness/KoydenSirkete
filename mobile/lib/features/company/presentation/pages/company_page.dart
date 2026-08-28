@@ -13,6 +13,7 @@ import '../models/employee_candidate_filter.dart';
 import '../widgets/employee_filter_bar.dart';
 import '../widgets/company_growth_panel.dart';
 import '../widgets/company_market_panel.dart';
+import '../widgets/company_season_event_panel.dart';
 import '../widgets/company_rival_profiles_panel.dart';
 import '../widgets/company_strategy_panel.dart';
 import '../widgets/company_season_reward_panel.dart';
@@ -413,6 +414,8 @@ class _CompanyViewState extends State<_CompanyView> {
         CompanyGrowthPanel(state: state),
         const SizedBox(height: 25),
         CompanyMarketPanel(state: state),
+        const SizedBox(height: 25),
+        CompanySeasonEventPanel(state: state),
         const SizedBox(height: 25),
         CompanyRivalProfilesPanel(state: state),
         const SizedBox(height: 25),

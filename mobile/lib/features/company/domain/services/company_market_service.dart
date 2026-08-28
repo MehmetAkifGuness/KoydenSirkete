@@ -3,37 +3,22 @@ import 'dart:math' as math;
 import '../../../game/domain/entities/player_state.dart';
 import '../entities/company_competition_strategy.dart';
 import '../entities/company_competitor.dart';
+import '../entities/company_market_event.dart';
 import '../entities/company_season_rule.dart';
-import '../entities/company_specialty.dart';
 import 'company_branch_service.dart';
 import 'company_competitor_catalog.dart';
 import 'company_competition_strategy_service.dart';
 import 'company_finance_recorder.dart';
+import 'company_market_event_catalog.dart';
 import 'company_region_service.dart';
+import 'company_season_event_service.dart';
 import 'company_season_rule_service.dart';
 import 'company_service.dart';
 import 'company_trophy_service.dart';
 import '../../../finance/domain/entities/finance_ledger.dart';
 
 export '../entities/company_competitor.dart';
-
-class CompanyMarketEvent {
-  const CompanyMarketEvent({
-    required this.id,
-    required this.title,
-    required this.description,
-    required this.specialty,
-    required this.revenuePercent,
-    required this.payrollPercent,
-  });
-
-  final String id;
-  final String title;
-  final String description;
-  final CompanySpecialty specialty;
-  final int revenuePercent;
-  final int payrollPercent;
-}
+export '../entities/company_market_event.dart';
 
 class CompanyMarketForecast {
   const CompanyMarketForecast({
@@ -114,73 +99,24 @@ class CompanyMarketService {
     CompanyBranchService? branchService,
     CompanyRegionService? regionService,
     CompanySeasonRuleService? seasonRuleService,
+    CompanySeasonEventService? seasonEventService,
     CompanyCompetitionStrategyService? strategyService,
   }) : _companyService = companyService ?? CompanyService(),
        _branchService = branchService ?? CompanyBranchService(),
        _regionService = regionService ?? CompanyRegionService(),
        _seasonRuleService =
            seasonRuleService ?? const CompanySeasonRuleService(),
+       _seasonEventService =
+           seasonEventService ?? const CompanySeasonEventService(),
        _strategyService =
            strategyService ?? const CompanyCompetitionStrategyService();
 
-  static const eventDurationDays = 7;
-  static const events = <CompanyMarketEvent>[
-    CompanyMarketEvent(
-      id: 'balanced_market',
-      title: 'Dengeli piyasa',
-      description: 'Talep ve işletme maliyetleri normal seviyede.',
-      specialty: CompanySpecialty.operations,
-      revenuePercent: 0,
-      payrollPercent: 0,
-    ),
-    CompanyMarketEvent(
-      id: 'demand_boom',
-      title: 'Talep artışı',
-      description: 'Müşteri talebi tüm şirket gelirlerini artırıyor.',
-      specialty: CompanySpecialty.sales,
-      revenuePercent: 15,
-      payrollPercent: 0,
-    ),
-    CompanyMarketEvent(
-      id: 'recession',
-      title: 'Ekonomik durgunluk',
-      description: 'Düşük talep günlük geliri baskılıyor.',
-      specialty: CompanySpecialty.finance,
-      revenuePercent: -12,
-      payrollPercent: 0,
-    ),
-    CompanyMarketEvent(
-      id: 'talent_shortage',
-      title: 'Yetenek kıtlığı',
-      description: 'Nitelikli çalışan maliyetleri geçici olarak yükseldi.',
-      specialty: CompanySpecialty.leadership,
-      revenuePercent: 0,
-      payrollPercent: 10,
-    ),
-    CompanyMarketEvent(
-      id: 'digital_transformation',
-      title: 'Dijital dönüşüm dalgası',
-      description: 'Yeni yatırımlar pazardaki harcamaları canlandırıyor.',
-      specialty: CompanySpecialty.technology,
-      revenuePercent: 8,
-      payrollPercent: 3,
-    ),
-    CompanyMarketEvent(
-      id: 'cost_pressure',
-      title: 'Maliyet baskısı',
-      description: 'İşletme maliyetleri yükselirken talep hafif daralıyor.',
-      specialty: CompanySpecialty.logistics,
-      revenuePercent: -5,
-      payrollPercent: 8,
-    ),
-  ];
+  static const eventDurationDays = CompanySeasonEventService.eventDurationDays;
+  static const events = CompanyMarketEventCatalog.events;
   static const competitors = CompanyCompetitorCatalog.competitors;
 
-  static CompanyMarketEvent eventForDay(int day) {
-    final index =
-        ((day - 1).clamp(0, 1 << 31) ~/ eventDurationDays) % events.length;
-    return events[index];
-  }
+  static CompanyMarketEvent eventForDay(int day) =>
+      const CompanySeasonEventService().eventForDay(day);
 
   static int competitorProfileModifier(
     CompanyCompetitor competitor,
@@ -227,11 +163,12 @@ class CompanyMarketService {
   final CompanyBranchService _branchService;
   final CompanyRegionService _regionService;
   final CompanySeasonRuleService _seasonRuleService;
+  final CompanySeasonEventService _seasonEventService;
   final CompanyCompetitionStrategyService _strategyService;
 
   CompanyMarketForecast forecast(PlayerState state, {int? day}) {
     final currentDay = day ?? state.day;
-    final event = eventForDay(currentDay);
+    final event = _seasonEventService.eventForDay(currentDay);
     final seasonRule = _seasonRuleService.ruleForDay(currentDay);
     final competitorIndex =
         ((currentDay - 1) ~/ 3 + state.companyLevel + state.branches.length) %
@@ -309,7 +246,7 @@ class CompanyMarketService {
           ? 0
           : (fundsDelta * (100 + marketBonus) / 100).round(),
       activeEmployeeCount: employees.length,
-      daysRemaining: eventDurationDays - (currentDay - 1) % eventDurationDays,
+      daysRemaining: _seasonEventService.daysRemainingForDay(currentDay),
       competitorProfileModifier: profileModifier,
       competitorProfileReason: competitorProfileReason(competitor, event),
       seasonRule: seasonRule,

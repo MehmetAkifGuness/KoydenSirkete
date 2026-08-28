@@ -233,6 +233,14 @@ Android-first, tamamen offline kariyer ve şirket simülasyonu.
 - Aktif haklar, derece tablosu ve son sezon ödülleri şirket ekranında birlikte gösterilir.
 - Ödül geçmişi mevcut rekabet JSON kaydında tutulduğu için SQLite v28 ve eski kayıt uyumluluğu korunur.
 
+## v2.21.0 dengeli sezon olay havuzu
+
+- On altı piyasa olayı fırsat, tehdit, iş gücü ve dengeli olmak üzere dört kategoriye ayrılır.
+- Her sezon beş benzersiz olay içerir; dört kategori garanti edilir ve beşinci olay deterministik olarak değişir.
+- Olay sırası sezonlara göre karışır ve sezon sınırında aynı olay art arda gelemez.
+- Aktif olay ile sezonun tüm olay takvimi gün aralıkları ve ekonomik etkileriyle şirket ekranında gösterilir.
+- Takvim kayıt alanı kullanmadan oyun günü ve sezon numarasından yeniden üretilebilir.
+
 ## Çalıştırma
 
 ```powershell
