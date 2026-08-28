@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.22.0
+
+- Tamamlanan rekabet sezonlarının sıralaması, puanı, galibiyet/mağlubiyet sayısı ve ödülleri kalıcı geçmişe eklendi.
+- Sezon kapanışı geçmiş kaydını yalnızca bir kez oluşturur; en güncel 1000 sezon saklanır.
+- Şirket ekranından açılan sezon geçmişi sayfası sonuçları yeniden eskiye sıralar ve özet istatistikleri gösterir.
+- Geçmiş mevcut rekabet JSON verisinde tutulduğu için SQLite v28 ve eski kayıt uyumluluğu korundu.
+- Sezon kapanışı, kayıt codec'i ve geçmiş ekranı hedefli otomatik testlerle doğrulandı.
+
 ## 2.21.0
 
 - Piyasa olay havuzu 6 sabit olaydan fırsat, tehdit, iş gücü ve dengeli kategorilerindeki 16 olaya çıkarıldı.

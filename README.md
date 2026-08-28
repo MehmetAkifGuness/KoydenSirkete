@@ -241,6 +241,12 @@ Android-first, tamamen offline kariyer ve şirket simülasyonu.
 - Aktif olay ile sezonun tüm olay takvimi gün aralıkları ve ekonomik etkileriyle şirket ekranında gösterilir.
 - Takvim kayıt alanı kullanmadan oyun günü ve sezon numarasından yeniden üretilebilir.
 
+## v2.22.0 sezon geçmişi
+
+- Tamamlanan sezonların sıralaması, puanı, galibiyet/mağlubiyet sayısı ve tüm ödülleri kalıcı olarak saklanır.
+- Şirket ekranından açılan geçmiş sayfası sezonları yeniden eskiye gösterir; en iyi derece ve toplam para ödülünü özetler.
+- Kayıtlar mevcut rekabet JSON verisinde tutulur ve eski oyun kayıtları boş geçmişle güvenle açılır.
+
 ## Çalıştırma
 
 ```powershell

@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:kariyerden_sirkete/features/company/domain/entities/company_competition_state.dart';
 import 'package:kariyerden_sirkete/features/company/domain/entities/company_season_trophy.dart';
 import 'package:kariyerden_sirkete/features/company/domain/entities/company_season_reward.dart';
+import 'package:kariyerden_sirkete/features/company/domain/entities/company_season_result.dart';
 import 'package:kariyerden_sirkete/features/company/domain/services/company_competition_service.dart';
 import 'package:kariyerden_sirkete/features/company/domain/services/company_market_service.dart';
 import 'package:kariyerden_sirkete/features/finance/domain/entities/finance_ledger.dart';
@@ -37,6 +38,14 @@ void main() {
     expect(settled.state.companyCompetition.trophies, hasLength(1));
     expect(settled.state.companyCompetition.trophies.single.seasonNumber, 1);
     expect(settled.state.companyCompetition.trophies.single.points, 100);
+    expect(settled.state.companyCompetition.seasonHistory, hasLength(1));
+    expect(settled.state.companyCompetition.seasonHistory.single.rank, 1);
+    expect(settled.state.companyCompetition.seasonHistory.single.points, 100);
+    expect(settled.state.companyCompetition.seasonHistory.single.wins, 30);
+    expect(
+      settled.state.companyCompetition.seasonHistory.single.cashReward,
+      6000,
+    );
     expect(
       settled.state.companyCompetition.seasonRewards.single.type,
       CompanySeasonRewardType.trophy,
@@ -45,6 +54,7 @@ void main() {
     expect(settled.messages.single, contains('Proje güvencesi'));
     expect(repeated.state.companyFunds, 7000);
     expect(repeated.state.companyCompetition.trophies, hasLength(1));
+    expect(repeated.state.companyCompetition.seasonHistory, hasLength(1));
     expect(
       settled.state.financeLedger.entries.single.category,
       FinanceCategory.companySeason,
@@ -52,6 +62,50 @@ void main() {
     expect(
       settled.state.financeLedger.entries.single.account,
       FinanceAccount.company,
+    );
+  });
+
+  test('season history retains the latest one thousand results', () {
+    final history = List.generate(
+      CompanyCompetitionState.maxStoredSeasonResults,
+      (index) => CompanySeasonResult(
+        seasonNumber: index + 1,
+        rank: 5,
+        points: 0,
+        wins: 0,
+        losses: 30,
+        cashReward: 0,
+        reward: CompanySeasonReward(
+          seasonNumber: index + 1,
+          rank: 5,
+          type: CompanySeasonRewardType.none,
+          value: 0,
+        ),
+      ),
+    );
+    final state = _companyState(day: CompanyCompetitionState.startDay(1002))
+        .copyWith(
+          companyCompetition: CompanyCompetitionState(
+            seasonNumber: 1001,
+            points: 100,
+            wins: 30,
+            seasonHistory: history,
+          ),
+        );
+
+    final settled = CompanyCompetitionService().process(state, const []);
+
+    expect(
+      settled.state.companyCompetition.seasonHistory,
+      hasLength(CompanyCompetitionState.maxStoredSeasonResults),
+    );
+    expect(
+      settled.state.companyCompetition.seasonHistory.first.seasonNumber,
+      2,
+    );
+    expect(
+      settled.state.companyCompetition.seasonHistory.last.seasonNumber,
+      1001,
     );
   });
 
@@ -91,6 +145,7 @@ void main() {
   test('competition codec persists trophies and imports legacy counts', () {
     final codec = CompanyCompetitionCodec();
     const expected = CompanyCompetitionState(
+      seasonNumber: 3,
       championships: 1,
       strategyId: 'quality_advantage',
       trophies: [
@@ -103,6 +158,22 @@ void main() {
           type: CompanySeasonRewardType.projectInvitation,
           value: 1,
           consumed: true,
+        ),
+      ],
+      seasonHistory: [
+        CompanySeasonResult(
+          seasonNumber: 2,
+          rank: 3,
+          points: 84,
+          wins: 26,
+          losses: 4,
+          cashReward: 1500,
+          reward: CompanySeasonReward(
+            seasonNumber: 2,
+            rank: 3,
+            type: CompanySeasonRewardType.projectInvitation,
+            value: 1,
+          ),
         ),
       ],
     );
@@ -118,9 +189,18 @@ void main() {
       CompanySeasonRewardType.projectInvitation,
     );
     expect(actual.seasonRewards.single.consumed, isTrue);
+    expect(actual.seasonHistory.single.points, 84);
+    expect(actual.seasonHistory.single.wins, 26);
+    expect(actual.seasonHistory.single.losses, 4);
+    expect(actual.seasonHistory.single.cashReward, 1500);
+    expect(
+      actual.seasonHistory.single.reward.type,
+      CompanySeasonRewardType.projectInvitation,
+    );
     expect(legacy.championships, 2);
     expect(legacy.strategyId, isEmpty);
     expect(legacy.seasonRewards, isEmpty);
+    expect(legacy.seasonHistory, isEmpty);
     expect(legacy.trophies, hasLength(2));
     expect(legacy.trophies.every((trophy) => trophy.isImported), isTrue);
 
@@ -131,6 +211,11 @@ void main() {
       day: 2,
     );
     expect(invalidReward.seasonRewards, isEmpty);
+    final invalidHistory = codec.decode(
+      '{"seasonNumber":2,"seasonHistory":[{"seasonNumber":2,"rank":1,"points":90,"wins":30,"losses":0,"cashReward":6000,"rewardType":"trophy","rewardValue":1}]}',
+      day: 32,
+    );
+    expect(invalidHistory.seasonHistory, isEmpty);
   });
 }
 

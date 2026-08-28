@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import '../../../company/domain/entities/company_competition_state.dart';
 import '../../../company/domain/entities/company_season_reward.dart';
+import '../../../company/domain/entities/company_season_result.dart';
 import '../../../company/domain/entities/company_season_trophy.dart';
 import '../../../company/domain/services/company_competition_strategy_service.dart';
 
@@ -26,6 +27,19 @@ class CompanyCompetitionCodec {
           'type': reward.type.name,
           'value': reward.value,
           'consumed': reward.consumed,
+        },
+    ],
+    'seasonHistory': [
+      for (final result in value.seasonHistory)
+        {
+          'seasonNumber': result.seasonNumber,
+          'rank': result.rank,
+          'points': result.points,
+          'wins': result.wins,
+          'losses': result.losses,
+          'cashReward': result.cashReward,
+          'rewardType': result.reward.type.name,
+          'rewardValue': result.reward.value,
         },
     ],
     'trophies': [
@@ -70,11 +84,16 @@ class CompanyCompetitionCodec {
           ? strategyValue
           : '';
       final seasonRewards = _decodeSeasonRewards(data['seasonRewards']);
+      final seasonNumber = read(
+        'seasonNumber',
+        fallback.seasonNumber,
+      ).clamp(1, 1 << 20).toInt();
+      final seasonHistory = _decodeSeasonHistory(
+        data['seasonHistory'],
+        beforeSeason: seasonNumber,
+      );
       return CompanyCompetitionState(
-        seasonNumber: read(
-          'seasonNumber',
-          fallback.seasonNumber,
-        ).clamp(1, 1 << 20),
+        seasonNumber: seasonNumber,
         points: read('points'),
         wins: read('wins'),
         losses: read('losses'),
@@ -85,6 +104,7 @@ class CompanyCompetitionCodec {
         strategyId: strategyId,
         trophies: normalizedTrophies,
         seasonRewards: seasonRewards,
+        seasonHistory: seasonHistory,
       );
     } on FormatException {
       return fallback;
@@ -138,19 +158,12 @@ class CompanyCompetitionCodec {
           !seasons.add(season)) {
         continue;
       }
-      final safeValue = switch (type) {
-        CompanySeasonRewardType.trophy ||
-        CompanySeasonRewardType.projectInvitation => rewardValue.clamp(0, 1),
-        CompanySeasonRewardType.sponsorship => rewardValue.clamp(0, 25),
-        CompanySeasonRewardType.reputation => rewardValue.clamp(0, 100),
-        CompanySeasonRewardType.none => 0,
-      };
       rewards.add(
         CompanySeasonReward(
           seasonNumber: season.clamp(1, 1 << 20).toInt(),
           rank: rank,
           type: type,
-          value: safeValue.toInt(),
+          value: _safeRewardValue(type, rewardValue),
           consumed: item['consumed'] == true,
         ),
       );
@@ -158,4 +171,80 @@ class CompanyCompetitionCodec {
     }
     return List<CompanySeasonReward>.unmodifiable(rewards);
   }
+
+  List<CompanySeasonResult> _decodeSeasonHistory(
+    Object? value, {
+    required int beforeSeason,
+  }) {
+    if (value is! List<dynamic>) return const <CompanySeasonResult>[];
+    final results = <CompanySeasonResult>[];
+    final seasons = <int>{};
+    final types = CompanySeasonRewardType.values.asNameMap();
+    for (final item in value) {
+      if (item is! Map<dynamic, dynamic>) continue;
+      final season = item['seasonNumber'];
+      final rank = item['rank'];
+      final points = item['points'];
+      final wins = item['wins'];
+      final losses = item['losses'];
+      final cashReward = item['cashReward'];
+      final rewardType = types[item['rewardType']];
+      final rewardValue = item['rewardValue'];
+      if (season is! int ||
+          season < 1 ||
+          season >= beforeSeason ||
+          rank is! int ||
+          rank < 1 ||
+          rank > 5 ||
+          points is! int ||
+          wins is! int ||
+          losses is! int ||
+          cashReward is! int ||
+          rewardType == null ||
+          rewardValue is! int ||
+          !seasons.add(season)) {
+        continue;
+      }
+      final safeWins = wins.clamp(
+        0,
+        CompanyCompetitionState.seasonDurationDays,
+      );
+      final safeLosses = losses.clamp(
+        0,
+        CompanyCompetitionState.seasonDurationDays - safeWins,
+      );
+      results.add(
+        CompanySeasonResult(
+          seasonNumber: season,
+          rank: rank,
+          points: points.clamp(0, 1 << 20).toInt(),
+          wins: safeWins.toInt(),
+          losses: safeLosses.toInt(),
+          cashReward: cashReward.clamp(0, 1 << 31).toInt(),
+          reward: CompanySeasonReward(
+            seasonNumber: season,
+            rank: rank,
+            type: rewardType,
+            value: _safeRewardValue(rewardType, rewardValue),
+          ),
+        ),
+      );
+      if (results.length == CompanyCompetitionState.maxStoredSeasonResults) {
+        break;
+      }
+    }
+    results.sort(
+      (left, right) => left.seasonNumber.compareTo(right.seasonNumber),
+    );
+    return List<CompanySeasonResult>.unmodifiable(results);
+  }
+
+  int _safeRewardValue(CompanySeasonRewardType type, int value) =>
+      switch (type) {
+        CompanySeasonRewardType.trophy ||
+        CompanySeasonRewardType.projectInvitation => value.clamp(0, 1).toInt(),
+        CompanySeasonRewardType.sponsorship => value.clamp(0, 25).toInt(),
+        CompanySeasonRewardType.reputation => value.clamp(0, 100).toInt(),
+        CompanySeasonRewardType.none => 0,
+      };
 }

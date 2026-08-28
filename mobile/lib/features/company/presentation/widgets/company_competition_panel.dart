@@ -7,6 +7,7 @@ import '../../domain/entities/company_competition_state.dart';
 import '../../domain/entities/company_season_rule.dart';
 import '../../domain/services/company_competition_service.dart';
 import '../../domain/services/company_season_rule_service.dart';
+import '../pages/company_season_history_page.dart';
 
 class CompanyCompetitionPanel extends StatelessWidget {
   const CompanyCompetitionPanel({required this.state, super.key});
@@ -108,6 +109,20 @@ class CompanyCompetitionPanel extends StatelessWidget {
                   ),
                 ),
               ],
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  key: const ValueKey('open-season-history'),
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => CompanySeasonHistoryPage(state: state),
+                    ),
+                  ),
+                  icon: const Icon(Icons.history_rounded, size: 18),
+                  label: const Text('Sezon geçmişini aç'),
+                ),
+              ),
             ],
           ),
         ),

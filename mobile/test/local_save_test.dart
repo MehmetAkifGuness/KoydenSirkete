@@ -13,6 +13,7 @@ import 'package:kariyerden_sirkete/features/company/domain/entities/company_comp
 import 'package:kariyerden_sirkete/features/company/domain/entities/company_expansion_state.dart';
 import 'package:kariyerden_sirkete/features/company/domain/entities/company_season_trophy.dart';
 import 'package:kariyerden_sirkete/features/company/domain/entities/company_season_reward.dart';
+import 'package:kariyerden_sirkete/features/company/domain/entities/company_season_result.dart';
 import 'package:kariyerden_sirkete/features/finance/domain/entities/finance_ledger.dart';
 
 void main() {
@@ -73,6 +74,36 @@ void main() {
             value: 8,
           ),
         ],
+        seasonHistory: [
+          CompanySeasonResult(
+            seasonNumber: 2,
+            rank: 3,
+            points: 72,
+            wins: 24,
+            losses: 6,
+            cashReward: 1500,
+            reward: CompanySeasonReward(
+              seasonNumber: 2,
+              rank: 3,
+              type: CompanySeasonRewardType.projectInvitation,
+              value: 1,
+            ),
+          ),
+          CompanySeasonResult(
+            seasonNumber: 3,
+            rank: 2,
+            points: 78,
+            wins: 26,
+            losses: 4,
+            cashReward: 3000,
+            reward: CompanySeasonReward(
+              seasonNumber: 3,
+              rank: 2,
+              type: CompanySeasonRewardType.sponsorship,
+              value: 8,
+            ),
+          ),
+        ],
       ),
       companyStageIndex: 2,
       companyExpansion: const CompanyExpansionState(
@@ -119,6 +150,10 @@ void main() {
       actual?.companyCompetition.seasonRewards.last.type,
       CompanySeasonRewardType.sponsorship,
     );
+    expect(actual?.companyCompetition.seasonHistory, hasLength(2));
+    expect(actual?.companyCompetition.seasonHistory.first.points, 72);
+    expect(actual?.companyCompetition.seasonHistory.last.rank, 2);
+    expect(actual?.companyCompetition.seasonHistory.last.cashReward, 3000);
     expect(actual?.companyStageIndex, 2);
     expect(actual?.companyExpansion.completedDealIds, [
       'rota_logistics',

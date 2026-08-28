@@ -1,6 +1,7 @@
 import '../../../finance/domain/entities/finance_ledger.dart';
 import '../../../game/domain/entities/player_state.dart';
 import '../entities/company_competition_state.dart';
+import '../entities/company_season_result.dart';
 import '../entities/company_season_trophy.dart';
 import 'company_finance_recorder.dart';
 import 'company_market_service.dart';
@@ -170,6 +171,22 @@ class CompanyCompetitionService {
         ),
       );
     }
+    final seasonResult = CompanySeasonResult(
+      seasonNumber: competition.seasonNumber,
+      rank: rank,
+      points: competition.points,
+      wins: competition.wins,
+      losses: competition.losses,
+      cashReward: reward,
+      reward: seasonReward,
+    );
+    final history = [...competition.seasonHistory, seasonResult];
+    final boundedHistory =
+        history.length <= CompanyCompetitionState.maxStoredSeasonResults
+        ? history
+        : history.sublist(
+            history.length - CompanyCompetitionState.maxStoredSeasonResults,
+          );
     final nextCompetition = CompanyCompetitionState(
       seasonNumber: competition.seasonNumber + 1,
       championships: trophyCount,
@@ -183,6 +200,7 @@ class CompanyCompetitionService {
         ...competition.seasonRewards,
         seasonReward,
       ]),
+      seasonHistory: List<CompanySeasonResult>.unmodifiable(boundedHistory),
     );
     final nextState = state.copyWith(
       companyFunds: state.companyFunds + reward,

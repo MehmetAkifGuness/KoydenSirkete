@@ -1,5 +1,6 @@
-import 'company_season_trophy.dart';
 import 'company_season_reward.dart';
+import 'company_season_result.dart';
+import 'company_season_trophy.dart';
 
 class CompanyCompetitionState {
   const CompanyCompetitionState({
@@ -14,9 +15,11 @@ class CompanyCompetitionState {
     this.strategyId = '',
     this.trophies = const <CompanySeasonTrophy>[],
     this.seasonRewards = const <CompanySeasonReward>[],
+    this.seasonHistory = const <CompanySeasonResult>[],
   });
 
   static const seasonDurationDays = 30;
+  static const maxStoredSeasonResults = 1000;
 
   final int seasonNumber;
   final int points;
@@ -29,6 +32,7 @@ class CompanyCompetitionState {
   final String strategyId;
   final List<CompanySeasonTrophy> trophies;
   final List<CompanySeasonReward> seasonRewards;
+  final List<CompanySeasonResult> seasonHistory;
 
   int get matches => wins + losses;
   int get daysRemaining => seasonDurationDays - matches;
@@ -57,6 +61,7 @@ class CompanyCompetitionState {
     String? strategyId,
     List<CompanySeasonTrophy>? trophies,
     List<CompanySeasonReward>? seasonRewards,
+    List<CompanySeasonResult>? seasonHistory,
   }) => CompanyCompetitionState(
     seasonNumber: seasonNumber ?? this.seasonNumber,
     points: points ?? this.points,
@@ -69,5 +74,6 @@ class CompanyCompetitionState {
     strategyId: strategyId ?? this.strategyId,
     trophies: trophies ?? this.trophies,
     seasonRewards: seasonRewards ?? this.seasonRewards,
+    seasonHistory: seasonHistory ?? this.seasonHistory,
   );
 }
