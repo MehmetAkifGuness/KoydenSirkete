@@ -36,6 +36,8 @@ import '../../company/domain/entities/company_project.dart';
 import '../../company/domain/entities/company_employee.dart';
 import '../../company/domain/entities/company_branch.dart';
 import '../../company/domain/services/company_branch_service.dart';
+import '../../company/domain/services/company_branch_management_service.dart';
+import '../../company/domain/entities/company_specialty.dart';
 import '../../assets/domain/entities/home_asset.dart';
 import '../../assets/domain/entities/car_asset.dart';
 import '../../assets/domain/services/asset_service.dart';

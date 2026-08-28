@@ -160,6 +160,38 @@ extension GameSessionFeatureApplication on GameSessionApplicationService {
     required int employeeId,
   }) => _persist(_companyBranchService.dismiss(state, cityId, employeeId));
 
+  Future<PlayerState> setBranchManager(
+    PlayerState state, {
+    required int cityId,
+    required int? employeeId,
+  }) => _persist(
+    const CompanyBranchManagementService().setManager(
+      state,
+      cityId,
+      employeeId,
+    ),
+  );
+
+  Future<PlayerState> setBranchLocalGoal(
+    PlayerState state, {
+    required int cityId,
+    required CompanyBranchLocalGoal goal,
+  }) => _persist(
+    const CompanyBranchManagementService().setLocalGoal(state, cityId, goal),
+  );
+
+  Future<PlayerState> setBranchSpecialty(
+    PlayerState state, {
+    required int cityId,
+    required CompanySpecialty specialty,
+  }) => _persist(
+    const CompanyBranchManagementService().setSpecialty(
+      state,
+      cityId,
+      specialty,
+    ),
+  );
+
   EmployeeDevelopmentCheck checkBranchEmployeeDevelopment(
     PlayerState state,
     int cityId,

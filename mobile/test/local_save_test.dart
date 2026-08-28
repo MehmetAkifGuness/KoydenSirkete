@@ -9,6 +9,7 @@ import 'package:kariyerden_sirkete/features/game/domain/entities/player_state.da
 import 'package:kariyerden_sirkete/features/game/domain/entities/active_activity.dart';
 import 'package:kariyerden_sirkete/features/company/domain/entities/company_employee.dart';
 import 'package:kariyerden_sirkete/features/company/domain/entities/company_branch.dart';
+import 'package:kariyerden_sirkete/features/company/domain/entities/company_specialty.dart';
 import 'package:kariyerden_sirkete/features/company/domain/entities/company_competition_state.dart';
 import 'package:kariyerden_sirkete/features/company/domain/entities/company_expansion_state.dart';
 import 'package:kariyerden_sirkete/features/company/domain/entities/company_season_trophy.dart';
@@ -310,7 +311,26 @@ void main() {
       database: store,
       mapper: PlayerStateMapper(),
     );
-    const branch = CompanyBranch(id: 2, cityId: 2, level: 2);
+    const branchManager = CompanyEmployee(
+      id: 21,
+      name: 'Bayi Müdürü',
+      role: 'Şube yöneticisi',
+      performance: 88,
+      dailySalary: 65,
+      experience: 420,
+      seniority: CompanyEmployeeSeniority.senior,
+      burnout: 24,
+      requestedDailySalary: 72,
+    );
+    const branch = CompanyBranch(
+      id: 2,
+      cityId: 2,
+      level: 2,
+      employees: [branchManager],
+      managerEmployeeId: 21,
+      localGoal: CompanyBranchLocalGoal.marketGrowth,
+      specialty: CompanySpecialty.leadership,
+    );
     final expected = PlayerState.initial.copyWith(
       companyLevel: 1,
       branches: const [branch],
@@ -333,6 +353,16 @@ void main() {
     final actual = await repository.load();
     expect(actual?.branches.single.cityId, 2);
     expect(actual?.branches.single.level, 2);
+    expect(actual?.branches.single.managerEmployeeId, branchManager.id);
+    expect(actual?.branches.single.localGoal, CompanyBranchLocalGoal.marketGrowth);
+    expect(actual?.branches.single.specialty, CompanySpecialty.leadership);
+    expect(actual?.branches.single.employees.single.experience, 420);
+    expect(
+      actual?.branches.single.employees.single.seniority,
+      CompanyEmployeeSeniority.senior,
+    );
+    expect(actual?.branches.single.employees.single.burnout, 24);
+    expect(actual?.branches.single.employees.single.requestedDailySalary, 72);
     expect(actual?.ownedHomeIds, [201, 202]);
     expect(actual?.rentedHomeIds, [202]);
     expect(

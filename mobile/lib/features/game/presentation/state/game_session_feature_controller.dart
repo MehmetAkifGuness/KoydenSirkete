@@ -129,6 +129,45 @@ extension GameSessionFeatureController on GameSessionController {
     message: (_) => 'Bayi çalışanı işten çıkarıldı.',
   );
 
+  Future<String?> setBranchManager(int cityId, CompanyEmployee? employee) =>
+      _execute(
+        action: (state) => _applicationService.setBranchManager(
+          state,
+          cityId: cityId,
+          employeeId: employee?.id,
+        ),
+        stateOf: (result) => result,
+        message: (_) => employee == null
+            ? 'Bayi yöneticisi kaldırıldı.'
+            : '${employee.name} bayi yöneticisi oldu.',
+      );
+
+  Future<String?> setBranchLocalGoal(
+    int cityId,
+    CompanyBranchLocalGoal goal,
+  ) => _execute(
+    action: (state) => _applicationService.setBranchLocalGoal(
+      state,
+      cityId: cityId,
+      goal: goal,
+    ),
+    stateOf: (result) => result,
+    message: (_) => 'Yerel hedef “${goal.label}” olarak güncellendi.',
+  );
+
+  Future<String?> setBranchSpecialty(
+    int cityId,
+    CompanySpecialty specialty,
+  ) => _execute(
+    action: (state) => _applicationService.setBranchSpecialty(
+      state,
+      cityId: cityId,
+      specialty: specialty,
+    ),
+    stateOf: (result) => result,
+    message: (_) => 'Bayi uzmanlığı “${specialty.label}” olarak güncellendi.',
+  );
+
   EmployeeDevelopmentCheck checkBranchEmployeeDevelopment(
     int cityId,
     int employeeId,

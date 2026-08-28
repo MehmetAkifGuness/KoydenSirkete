@@ -16,6 +16,7 @@ import '../../domain/services/company_region_service.dart';
 import '../models/employee_candidate_filter.dart';
 import '../widgets/employee_filter_bar.dart';
 import '../widgets/company_region_panel.dart';
+import '../widgets/company_branch_management_panel.dart';
 
 class CompanyBranchesPage extends StatelessWidget {
   const CompanyBranchesPage({required this.session, super.key});
@@ -284,7 +285,7 @@ class _BranchCardState extends State<_BranchCard> {
     final upgradeCost = service.upgradeCostFor(session.state, branch);
     final specialty = city == null
         ? CompanySpecialty.operations
-        : CompanyBranchService.preferredSpecialty(city);
+        : branch.specialty ?? CompanyBranchService.preferredSpecialty(city);
     return AppInfoCard(
       accent: AppPalette.primary,
       child: Column(
@@ -344,6 +345,8 @@ class _BranchCardState extends State<_BranchCard> {
               style: const TextStyle(color: AppPalette.textMuted, fontSize: 10),
             ),
           ],
+          const SizedBox(height: 14),
+          CompanyBranchManagementPanel(branch: branch, session: session),
           const Divider(height: 22),
           for (final employee in branch.employees) ...[
             _BranchEmployeeTile(

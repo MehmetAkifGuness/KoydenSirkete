@@ -277,6 +277,14 @@ Android-first, tamamen offline kariyer ve şirket simülasyonu.
 - Boş ekip projeyi duraklatır; işten çıkarılan çalışanların eski atamaları otomatik temizlenir.
 - SQLite v30 migrasyonu ekip seçimlerini saklarken yapılandırılmamış eski kayıtlar mevcut davranışla açılır.
 
+## v2.27.0 yerel şube yönetimi
+
+- Her bayiye mevcut çalışanlardan yönetici atanabilir; performans, kıdem ve liderlik uzmanlığı gelir bonusunu belirler.
+- Yerel hedefler gelir büyümesi, maliyet kontrolü ve ekip gelişimi arasında ölçülebilir tercihler sunar.
+- Şube uzmanlığı eşleşen çalışanların ek gelirini belirler; şehir yapısına uygun öneri arayüzde ayrıca gösterilir.
+- Yönetici, hedef ve uzmanlık seçimleri mevcut şube kaydında tutulur; eski şubeler dengeli hedefle açılır.
+- Bayi çalışanlarının tüm kariyer ve tükenmişlik alanları kayıt döngüsünde eksiksiz korunur.
+
 ## Çalıştırma
 
 ```powershell

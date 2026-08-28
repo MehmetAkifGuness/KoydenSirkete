@@ -23,6 +23,7 @@ import '../../../daily_goals/domain/entities/daily_goal.dart';
 import '../../../company/domain/entities/company_project.dart';
 import '../../../company/domain/entities/company_employee.dart';
 import '../../../company/domain/entities/company_branch.dart';
+import '../../../company/domain/entities/company_specialty.dart';
 import '../../../company/domain/services/company_branch_service.dart';
 import '../../../assets/domain/entities/home_asset.dart';
 import '../../../assets/domain/entities/car_asset.dart';

@@ -15,6 +15,7 @@ import 'package:kariyerden_sirkete/features/career/presentation/pages/career_pag
 import 'package:kariyerden_sirkete/features/company/presentation/pages/company_branches_page.dart';
 import 'package:kariyerden_sirkete/features/company/presentation/pages/company_page.dart';
 import 'package:kariyerden_sirkete/features/company/domain/entities/company_branch.dart';
+import 'package:kariyerden_sirkete/features/company/domain/entities/company_specialty.dart';
 import 'package:kariyerden_sirkete/features/company/domain/entities/company_competition_state.dart';
 import 'package:kariyerden_sirkete/features/company/domain/entities/company_season_trophy.dart';
 import 'package:kariyerden_sirkete/features/company/domain/services/company_branch_service.dart';
@@ -341,7 +342,7 @@ void main() {
     );
     await tester.ensureVisible(action);
     await tester.pumpAndSettle();
-    expect(find.textContaining('odağı'), findsOneWidget);
+    expect(find.textContaining('odağı'), findsWidgets);
     expect(find.textContaining('Başlangıç'), findsWidgets);
     expect(find.textContaining('Deneyim 0'), findsWidgets);
     expect(find.textContaining('Tükenmişlik %0'), findsWidgets);
@@ -350,6 +351,77 @@ void main() {
 
     expect(session.state.branches.single.level, 2);
     expect(session.state.companyFunds, 100);
+    session.dispose();
+  });
+
+  testWidgets('branch management choices persist from the branch panel', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(800, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final city = CityCatalog.cities.first;
+    final employee = CompanyEmployeeCatalog.candidates.first;
+    final branch = CompanyBranch(
+      id: city.id,
+      cityId: city.id,
+      employees: [employee],
+    );
+    final session = await _readySession(
+      PlayerState.initial.copyWith(
+        companyLevel: 3,
+        companyFunds: 10000,
+        branches: [branch],
+      ),
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.dark(),
+        home: AppGradientBackground(
+          child: CompanyBranchesPage(session: session),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final managerChip = find.byKey(
+      ValueKey('branch-manager-${city.id}-${employee.id}'),
+    );
+    final scrollable = find.byType(Scrollable).first;
+    await tester.drag(scrollable, const Offset(0, -450));
+    await tester.pumpAndSettle();
+    await tester.tap(managerChip);
+    await tester.pumpAndSettle();
+    expect(session.state.branches.single.managerEmployeeId, employee.id);
+
+    await tester.pump(const Duration(seconds: 4));
+    final goalChip = find.byKey(
+      ValueKey(
+        'branch-goal-${city.id}-${CompanyBranchLocalGoal.teamDevelopment.name}',
+      ),
+    );
+    await tester.drag(scrollable, const Offset(0, -250));
+    await tester.pumpAndSettle();
+    await tester.tap(goalChip);
+    await tester.pumpAndSettle();
+    expect(
+      session.state.branches.single.localGoal,
+      CompanyBranchLocalGoal.teamDevelopment,
+    );
+
+    await tester.pump(const Duration(seconds: 4));
+    final specialtyChip = find.byKey(
+      ValueKey(
+        'branch-specialty-${city.id}-${CompanySpecialty.finance.name}',
+      ),
+    );
+    await tester.drag(scrollable, const Offset(0, -300));
+    await tester.pumpAndSettle();
+    await tester.tap(specialtyChip);
+    await tester.pumpAndSettle();
+    expect(
+      session.state.branches.single.specialty,
+      CompanySpecialty.finance,
+    );
     session.dispose();
   });
 

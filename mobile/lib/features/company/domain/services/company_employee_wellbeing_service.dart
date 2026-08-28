@@ -1,5 +1,6 @@
 import '../../../game/domain/entities/player_state.dart';
 import '../entities/company_employee.dart';
+import '../entities/company_branch.dart';
 import 'company_market_service.dart';
 import 'company_service.dart';
 import 'company_region_service.dart';
@@ -78,15 +79,13 @@ class CompanyEmployeeWellbeingService {
       );
       final branches = [
         for (final branch in current.branches)
-          branch.copyWith(
-            employees: _updateEmployees(
-              branch.employees,
-              outcome,
-              resigned,
-              raiseRequests,
-              burnoutWarnings,
-              moraleProtection,
-            ),
+          _updateBranch(
+            branch,
+            outcome,
+            resigned,
+            raiseRequests,
+            burnoutWarnings,
+            moraleProtection,
           ),
       ];
       current = current.copyWith(
@@ -105,6 +104,33 @@ class CompanyEmployeeWellbeingService {
       }
     }
     return EmployeeWellbeingResult(state: current, messages: messages);
+  }
+
+  CompanyBranch _updateBranch(
+    CompanyBranch branch,
+    DailyMarketOutcome outcome,
+    List<String> resigned,
+    List<String> raiseRequests,
+    List<String> burnoutWarnings,
+    int moraleProtection,
+  ) {
+    final employees = _updateEmployees(
+      branch.employees,
+      outcome,
+      resigned,
+      raiseRequests,
+      burnoutWarnings,
+      moraleProtection,
+    );
+    final managerStillEmployed = employees.any(
+      (employee) => employee.id == branch.managerEmployeeId,
+    );
+    return branch.copyWith(
+      employees: employees,
+      managerEmployeeId: managerStillEmployed
+          ? branch.managerEmployeeId
+          : null,
+    );
   }
 
   List<CompanyEmployee> _updateEmployees(

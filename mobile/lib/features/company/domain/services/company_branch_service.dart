@@ -6,6 +6,7 @@ import '../entities/company_branch.dart';
 import '../entities/company_employee.dart';
 import '../entities/company_specialty.dart';
 import 'company_employee_catalog.dart';
+import 'company_branch_management_service.dart';
 import 'company_finance_recorder.dart';
 import 'company_region_service.dart';
 import 'company_service.dart';
@@ -27,15 +28,19 @@ class CompanyBranchService {
   CompanyBranchService({
     CompanyRegionService? regionService,
     CompanySeasonRewardService? seasonRewardService,
+    CompanyBranchManagementService? managementService,
   }) : _regionService = regionService ?? CompanyRegionService(),
        _seasonRewardService =
-           seasonRewardService ?? const CompanySeasonRewardService();
+           seasonRewardService ?? const CompanySeasonRewardService(),
+       _managementService =
+           managementService ?? const CompanyBranchManagementService();
 
   static const maxBranchLevel = 3;
   static const levelRevenueBonusPercent = 25;
   static const specialistDailyRevenueBonus = 35;
   final CompanyRegionService _regionService;
   final CompanySeasonRewardService _seasonRewardService;
+  final CompanyBranchManagementService _managementService;
 
   static int openingCost(City city) =>
       (city.dailyCost * 12 + city.marketLevel * 2000).clamp(30000, 200000);
@@ -62,12 +67,7 @@ class CompanyBranchService {
           .round();
 
   static CompanySpecialty preferredSpecialty(City city) =>
-      switch (city.economicLevel) {
-        CityEconomicLevel.regional => CompanySpecialty.operations,
-        CityEconomicLevel.developing => CompanySpecialty.logistics,
-        CityEconomicLevel.metropolis => CompanySpecialty.sales,
-        CityEconomicLevel.economicCenter => CompanySpecialty.technology,
-      };
+      CompanyBranchManagementService.preferredSpecialty(city);
 
   List<CompanyEmployee> availableEmployees(
     PlayerState state,
@@ -166,7 +166,15 @@ class CompanyBranchService {
     if (employees.length == branch.employees.length) {
       throw const GameRuleException('Bu çalışan bayide bulunamadı.');
     }
-    return _replaceBranch(state, branch.copyWith(employees: employees));
+    return _replaceBranch(
+      state,
+      branch.copyWith(
+        employees: employees,
+        managerEmployeeId: branch.managerEmployeeId == employeeId
+            ? null
+            : branch.managerEmployeeId,
+      ),
+    );
   }
 
   CompanyCheckResult checkUpgrade(PlayerState state, int cityId) {
@@ -223,7 +231,7 @@ class CompanyBranchService {
   int dailyRevenue(CompanyBranch branch) {
     final city = CityCatalog.findById(branch.cityId);
     if (city == null || branch.employees.isEmpty) return 0;
-    final specialty = preferredSpecialty(city);
+    final specialty = _managementService.effectiveSpecialty(branch);
     final marketIncome =
         60 +
         city.marketLevel * 20 +
@@ -241,8 +249,12 @@ class CompanyBranchService {
                   ? specialistDailyRevenueBonus
                   : 0),
         );
-    final levelMultiplier = 100 + (branch.level - 1) * levelRevenueBonusPercent;
-    return (gross * levelMultiplier / 100).round();
+    final multiplier =
+        100 +
+        (branch.level - 1) * levelRevenueBonusPercent +
+        _managementService.managerRevenueBonusPercent(branch) +
+        branch.localGoal.revenuePercent;
+    return (gross * multiplier / 100).round();
   }
 
   int dailyRevenueFor(PlayerState state, CompanyBranch branch) {
@@ -262,7 +274,10 @@ class CompanyBranchService {
     final discount =
         _regionService.payrollDiscount(state) +
         CompanyTrophyService.branchPayrollDiscount(state);
-    return (dailyPayroll(branch) * (100 - discount) / 100).round();
+    final multiplier = (100 + branch.localGoal.payrollPercent - discount)
+        .clamp(0, 200)
+        .toInt();
+    return (dailyPayroll(branch) * multiplier / 100).round();
   }
 
   CompanyBranch? _find(PlayerState state, int cityId) {
@@ -299,9 +314,14 @@ class CompanyBranchService {
         net +=
             dailyRevenueFor(current, branch) - dailyPayrollFor(current, branch);
       }
+      final updatedBranches = [
+        for (final branch in current.branches)
+          _managementService.applyDailyGoal(branch),
+      ];
       if (net != 0) {
         current = current.copyWith(
           companyFunds: current.companyFunds + net,
+          branches: updatedBranches,
           financeLedger: CompanyFinanceRecorder.record(
             current,
             FinanceCategory.companyBranch,
@@ -313,6 +333,10 @@ class CompanyBranchService {
               ? 'Bayiler şirkete +₺$net kazandırdı.'
               : 'Bayi giderleri şirket kasasından ₺${net.abs()} aldı.',
         );
+      } else if (updatedBranches.indexed.any(
+        (entry) => !identical(entry.$2, current.branches[entry.$1]),
+      )) {
+        current = current.copyWith(branches: updatedBranches);
       }
     }
     return CompanyBranchOperationResult(state: current, messages: messages);

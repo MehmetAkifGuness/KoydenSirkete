@@ -1,5 +1,16 @@
 # Changelog
 
+## 2.27.0
+
+- Bayi çalışanlarından yönetici atama eklendi; yönetici performansı, kıdemi ve liderlik uzmanlığı günlük geliri artırır.
+- Dengeli operasyon, pazar büyümesi, maliyet kontrolü ve ekip gelişimi olmak üzere dört yerel hedef eklendi.
+- Yerel hedefler gelir, maaş, tükenmişlik ve çalışan deneyimi arasında görünür ve dengeli tercihler oluşturur.
+- Her bayi operasyon, satış, finans, teknoloji, lojistik veya liderlik uzmanlığına yönlendirilebilir.
+- Şube uzmanlığıyla eşleşen çalışanlar günlük ek gelir sağlar; şehrin önerilen uzmanlığı seçim ekranında gösterilir.
+- İşten ayrılan veya çıkarılan yöneticilerin ataması güvenli biçimde temizlenir.
+- Bayi yönetim seçimleri mevcut şube JSON kaydında tutulur; SQLite v30 ve eski kayıt uyumluluğu korunur.
+- Bayi çalışanlarının deneyim, kıdem, tükenmişlik ve zam talebi alanlarının eksiksiz kaydedilmesi sağlandı.
+
 ## 2.26.0
 
 - Her proje için merkez çalışanlarından ayrı ekip kurma ve çalışan atama sistemi eklendi.
