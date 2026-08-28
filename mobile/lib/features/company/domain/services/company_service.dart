@@ -7,6 +7,7 @@ import 'company_employee_catalog.dart';
 import 'company_finance_recorder.dart';
 import 'company_project_catalog.dart';
 import 'company_project_strategy_service.dart';
+import 'company_project_team_service.dart';
 import 'company_season_reward_service.dart';
 import '../../../finance/domain/entities/finance_ledger.dart';
 
@@ -43,8 +44,11 @@ class CompanyOperationResult {
 class CompanyService {
   CompanyService({
     CompanyProjectStrategyService? projectStrategy,
+    CompanyProjectTeamService? projectTeamService,
     CompanySeasonRewardService? seasonRewardService,
   }) : _projectStrategy = projectStrategy ?? CompanyProjectStrategyService(),
+       _projectTeamService =
+           projectTeamService ?? const CompanyProjectTeamService(),
        _seasonRewardService =
            seasonRewardService ?? const CompanySeasonRewardService();
   static const establishmentCost = 15000;
@@ -52,6 +56,7 @@ class CompanyService {
   static const dailyBaseRevenue = 50;
   static const dailyEmployeeRevenue = 75;
   final CompanyProjectStrategyService _projectStrategy;
+  final CompanyProjectTeamService _projectTeamService;
   final CompanySeasonRewardService _seasonRewardService;
   static int upgradeCost(int level) => switch (level) {
     1 => 25000,
@@ -117,7 +122,8 @@ class CompanyService {
           payroll: payroll,
         ),
       );
-      if (employeesFor(current).isEmpty) {
+      final project = CompanyProjectCatalog.byId(current.activeProjectId);
+      if (_projectTeamService.teamFor(current, project).isEmpty) {
         continue;
       }
       final projectResult = CompanyProjectOperations(
@@ -219,6 +225,7 @@ class CompanyService {
     return state.copyWith(
       employeeCount: remaining.length,
       employees: remaining,
+      companyProjectTeams: state.companyProjectTeams.removeEmployee(employeeId),
     );
   }
 
@@ -278,18 +285,18 @@ extension CompanyProjectOperations on CompanyService {
   ) => _projectStrategy.forecast(
     state: state,
     project: project,
-    employees: CompanyService.employeesFor(state),
+    employees: _projectTeamService.teamFor(state, project),
   );
 
   CompanyActionResult advanceProject(PlayerState state) {
     if (state.companyLevel == 0) {
       throw const GameRuleException('Önce şirketini kurmalısın.');
     }
-    final employees = CompanyService.employeesFor(state);
-    if (employees.isEmpty) {
-      throw const GameRuleException('Proje için en az bir çalışan almalısın.');
-    }
     final project = CompanyProjectCatalog.byId(state.activeProjectId);
+    final employees = _projectTeamService.teamFor(state, project);
+    if (employees.isEmpty) {
+      throw const GameRuleException('Projeye en az bir çalışan atamalısın.');
+    }
     if (project.requiresSeasonInvitation &&
         !_seasonRewardService.hasProjectInvitation(state)) {
       throw const GameRuleException('Özel proje daveti artık kullanılamıyor.');

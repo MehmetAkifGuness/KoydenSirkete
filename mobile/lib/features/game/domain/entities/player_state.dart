@@ -6,6 +6,7 @@ import '../../../company/domain/entities/company_branch.dart';
 import '../../../company/domain/entities/company_competition_state.dart';
 import '../../../company/domain/entities/company_expansion_state.dart';
 import '../../../company/domain/entities/company_project_outcome.dart';
+import '../../../company/domain/entities/company_project_team_state.dart';
 import '../../../finance/domain/entities/finance_ledger.dart';
 
 class PlayerState {
@@ -60,6 +61,7 @@ class PlayerState {
     this.projectProgress = 0,
     this.projectElapsedDays = 0,
     this.lastProjectOutcome,
+    this.companyProjectTeams = const CompanyProjectTeamState(),
     this.totalEarned = 0,
     this.totalWorkSessions = 0,
     this.totalTrainingSessions = 0,
@@ -72,7 +74,7 @@ class PlayerState {
     this.isOnboarded = false,
   }) : _legacyActiveActivity = activeActivity;
   static const initial = PlayerState(
-    schemaVersion: 29,
+    schemaVersion: 30,
     money: 240,
     energy: 100,
     knowledge: 0,
@@ -129,6 +131,7 @@ class PlayerState {
   final int projectProgress;
   final int projectElapsedDays;
   final CompanyProjectOutcome? lastProjectOutcome;
+  final CompanyProjectTeamState companyProjectTeams;
   final int totalEarned;
   final int totalWorkSessions;
   final int totalTrainingSessions;
@@ -188,6 +191,7 @@ class PlayerState {
     int? projectProgress,
     int? projectElapsedDays,
     Object? lastProjectOutcome = _unset,
+    CompanyProjectTeamState? companyProjectTeams,
     int? totalEarned,
     int? totalWorkSessions,
     int? totalTrainingSessions,
@@ -287,6 +291,7 @@ class PlayerState {
       lastProjectOutcome: identical(lastProjectOutcome, _unset)
           ? this.lastProjectOutcome
           : lastProjectOutcome as CompanyProjectOutcome?,
+      companyProjectTeams: companyProjectTeams ?? this.companyProjectTeams,
       totalEarned: totalEarned ?? this.totalEarned,
       totalWorkSessions: totalWorkSessions ?? this.totalWorkSessions,
       totalTrainingSessions:

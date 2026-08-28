@@ -269,6 +269,14 @@ Android-first, tamamen offline kariyer ve şirket simülasyonu.
 - Görev uyumu, çalışanın uzmanlığı ile aktif proje ihtiyacını eşleştirerek hız, gecikme ve kaliteyi etkiler.
 - Tüm ilerleme mevcut çalışan JSON verisinde kalıcı tutulur ve eski kayıtlar güvenli varsayılanlarla açılır.
 
+## v2.26.0 proje ekipleri
+
+- Aktif projeye merkez çalışanları ayrı ayrı atanabilir; her proje kendi ekip seçimini saklar.
+- Proje hızı, başarı olasılığı, gecikme riski ve kalite yalnızca atanmış ekibe göre hesaplanır.
+- Ekip paneli çalışanların uzmanlığını, görev uyumunu, uzman sayısını ve boşta/atanmış durumunu gösterir.
+- Boş ekip projeyi duraklatır; işten çıkarılan çalışanların eski atamaları otomatik temizlenir.
+- SQLite v30 migrasyonu ekip seçimlerini saklarken yapılandırılmamış eski kayıtlar mevcut davranışla açılır.
+
 ## Çalıştırma
 
 ```powershell

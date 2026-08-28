@@ -269,6 +269,9 @@ void main() {
     expect(session.state.money, 4000);
     expect(session.state.companyFunds, 3000);
 
+    await tester.pump(const Duration(seconds: 4));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('Kâr payı çek'));
     await tester.tap(find.text('Kâr payı çek'));
     await tester.pumpAndSettle();
     expect(find.text('Vergi ₺100 · Cüzdana net ₺900'), findsOneWidget);
@@ -414,6 +417,50 @@ void main() {
     );
     expect(find.text('Senin şirketin'), findsOneWidget);
     expect(find.text('Atlas Global'), findsWidgets);
+    session.dispose();
+  });
+
+  testWidgets('company project team assignment updates the active project', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(800, 800));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final employee = CompanyEmployeeCatalog.candidates.first;
+    final session = await _readySession(
+      PlayerState.initial.copyWith(
+        companyLevel: 1,
+        companyFunds: 500,
+        employeeCount: 1,
+        employees: [employee],
+      ),
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.dark(),
+        home: AppGradientBackground(child: CompanyPage(session: session)),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final checkbox = find.byKey(
+      ValueKey('project-team-checkbox-${employee.id}'),
+    );
+    await tester.scrollUntilVisible(
+      checkbox,
+      250,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.ensureVisible(checkbox);
+    await tester.pumpAndSettle();
+    expect(tester.widget<Checkbox>(checkbox).value, isTrue);
+
+    await tester.tap(checkbox);
+    await tester.pumpAndSettle();
+
+    expect(session.state.companyProjectTeams.isConfigured(1), isTrue);
+    expect(session.state.companyProjectTeams.employeeIdsFor(1), isEmpty);
+    expect(tester.widget<Checkbox>(checkbox).value, isFalse);
+    expect(find.text('0 çalışan'), findsOneWidget);
     session.dispose();
   });
 

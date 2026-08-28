@@ -60,6 +60,7 @@ class PlayerStateRecord {
     this.projectProgress = 0,
     this.projectElapsedDays = 0,
     this.lastProjectOutcomeJson,
+    this.companyProjectTeamsJson,
     this.totalEarned = 0,
     this.totalWorkSessions = 0,
     this.totalTrainingSessions = 0,
@@ -121,6 +122,7 @@ class PlayerStateRecord {
   final int projectProgress;
   final int projectElapsedDays;
   final String? lastProjectOutcomeJson;
+  final String? companyProjectTeamsJson;
   final int totalEarned;
   final int totalWorkSessions;
   final int totalTrainingSessions;

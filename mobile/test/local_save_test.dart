@@ -15,6 +15,7 @@ import 'package:kariyerden_sirkete/features/company/domain/entities/company_seas
 import 'package:kariyerden_sirkete/features/company/domain/entities/company_season_reward.dart';
 import 'package:kariyerden_sirkete/features/company/domain/entities/company_season_result.dart';
 import 'package:kariyerden_sirkete/features/company/domain/entities/company_project_outcome.dart';
+import 'package:kariyerden_sirkete/features/company/domain/entities/company_project_team_state.dart';
 import 'package:kariyerden_sirkete/features/finance/domain/entities/finance_ledger.dart';
 
 void main() {
@@ -47,6 +48,12 @@ void main() {
         succeeded: true,
         quality: CompanyProjectQuality.high,
         netIncome: 1400,
+      ),
+      companyProjectTeams: const CompanyProjectTeamState(
+        employeeIdsByProject: {
+          1: [1, 3],
+          2: [],
+        },
       ),
       negativeMoneyHours: 12,
       wheelMajorRewardsToday: 2,
@@ -142,6 +149,9 @@ void main() {
     expect(actual?.lastProjectOutcome?.projectId, 3);
     expect(actual?.lastProjectOutcome?.quality, CompanyProjectQuality.high);
     expect(actual?.lastProjectOutcome?.netIncome, 1400);
+    expect(actual?.companyProjectTeams.employeeIdsFor(1), [1, 3]);
+    expect(actual?.companyProjectTeams.isConfigured(2), isTrue);
+    expect(actual?.companyProjectTeams.employeeIdsFor(2), isEmpty);
     expect(actual?.negativeMoneyHours, expected.negativeMoneyHours);
     expect(actual?.wheelMajorRewardsToday, expected.wheelMajorRewardsToday);
     expect(actual?.wheelDurationBuffPercent, expected.wheelDurationBuffPercent);

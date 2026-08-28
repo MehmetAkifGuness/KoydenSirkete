@@ -25,7 +25,7 @@ MÜDÜR — 10/10 HEDEF PLANI
 - [TAMAMLANDI — v2.23.0] Şirket proje sayısını en az 15’e çıkar ve projeleri kısa, orta, büyük ve stratejik sözleşme olarak sınıflandır.
 - [TAMAMLANDI — v2.24.0] Projelere müşteri türü, teslim süresi, gecikme riski ve kalite sonucu ekle.
 - [TAMAMLANDI — v2.25.0] Çalışanlara deneyim, kıdem, terfi, zam talebi, tükenmişlik ve görev uyumu ekle.
-- Çalışanların uzmanlıklarına göre ekip kurma ve projeye çalışan atama sistemi ekle.
+- [TAMAMLANDI — v2.26.0] Çalışanların uzmanlıklarına göre ekip kurma ve projeye çalışan atama sistemi ekle.
 - Şube ekranına yönetici atama, yerel hedef ve şube uzmanlığı seçenekleri ekle.
 - Şirket giderlerine kontrollü ofis, pazarlama, Ar-Ge ve bakım bütçeleri ekle.
 - Finansal kararların gelir, itibar, moral ve risk üzerinde açıkça görünen sonuçları olmalı.

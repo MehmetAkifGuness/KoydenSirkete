@@ -243,6 +243,20 @@ extension GameSessionFeatureApplication on GameSessionApplicationService {
     CompanyProject project,
   ) => _persist(_companyService.selectProject(state, project));
 
+  Future<PlayerState> setCompanyProjectEmployeeAssignment(
+    PlayerState state, {
+    required CompanyProject project,
+    required int employeeId,
+    required bool assigned,
+  }) => _persist(
+    _companyProjectTeamService.setAssignment(
+      state,
+      project: project,
+      employeeId: employeeId,
+      assigned: assigned,
+    ),
+  );
+
   Future<PlayerState> selectCompanyCompetitionStrategy(
     PlayerState state,
     CompanyCompetitionStrategy strategy,

@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.26.0
+
+- Her proje için merkez çalışanlarından ayrı ekip kurma ve çalışan atama sistemi eklendi.
+- Yalnızca projeye atanan çalışanlar ilerleme, başarı, gecikme ve kalite hesaplarına katılır.
+- Proje ekibi özeti çalışan sayısını, doğru uzman sayısını ve ortalama görev uyumunu gösterir.
+- Boş bırakılan proje ekibi ilerlemeyi güvenle duraklatır; günlük şirket gelir ve maaş işlemleri devam eder.
+- İşten çıkarılan çalışan tüm proje ekiplerinden temizlenir; yeniden işe alındığında eski atamalar kendiliğinden dönmez.
+- Yapılandırılmamış eski kayıtlar tüm merkez çalışanlarını kullanarak önceki oynanışı korur.
+- Proje ekipleri SQLite v30 ile kalıcı tutulur; codec, kayıt, hesap ve arayüz akışları hedefli testlerle doğrulandı.
+
 ## 2.25.0
 
 - Merkez ve bayi çalışanları günlük işlerden, başarılı piyasa sonuçlarından ve gelişim eğitimlerinden deneyim kazanır.

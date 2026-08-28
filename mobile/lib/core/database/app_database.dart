@@ -17,7 +17,7 @@ class AppDatabase extends SqlitePlayerStateStore {
     final databasePath = join(await getDatabasesPath(), _databaseName);
     return _database = await openDatabase(
       databasePath,
-      version: 29,
+      version: 30,
       onCreate: (database, _) async {
         await database.execute('''
           CREATE TABLE $_tableName (
@@ -73,6 +73,7 @@ class AppDatabase extends SqlitePlayerStateStore {
             project_progress INTEGER NOT NULL DEFAULT 0,
             project_elapsed_days INTEGER NOT NULL DEFAULT 0,
             last_project_outcome_json TEXT,
+            company_project_teams_json TEXT,
             total_earned INTEGER NOT NULL DEFAULT 0,
             total_work_sessions INTEGER NOT NULL DEFAULT 0,
             total_training_sessions INTEGER NOT NULL DEFAULT 0,
@@ -288,6 +289,11 @@ class AppDatabase extends SqlitePlayerStateStore {
             'ALTER TABLE $_tableName ADD COLUMN last_project_outcome_json TEXT',
           );
         }
+        if (oldVersion < 30) {
+          await database.execute(
+            'ALTER TABLE $_tableName ADD COLUMN company_project_teams_json TEXT',
+          );
+        }
       },
     );
   }
@@ -367,6 +373,7 @@ abstract class SqlitePlayerStateStore implements PlayerStateStore {
       projectProgress: row['project_progress'] as int? ?? 0,
       projectElapsedDays: row['project_elapsed_days'] as int? ?? 0,
       lastProjectOutcomeJson: row['last_project_outcome_json'] as String?,
+      companyProjectTeamsJson: row['company_project_teams_json'] as String?,
       totalEarned: row['total_earned'] as int? ?? 0,
       totalWorkSessions: row['total_work_sessions'] as int? ?? 0,
       totalTrainingSessions: row['total_training_sessions'] as int? ?? 0,
@@ -432,6 +439,7 @@ abstract class SqlitePlayerStateStore implements PlayerStateStore {
       'project_progress': record.projectProgress,
       'project_elapsed_days': record.projectElapsedDays,
       'last_project_outcome_json': record.lastProjectOutcomeJson,
+      'company_project_teams_json': record.companyProjectTeamsJson,
       'total_earned': record.totalEarned,
       'total_work_sessions': record.totalWorkSessions,
       'total_training_sessions': record.totalTrainingSessions,

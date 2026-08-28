@@ -10,6 +10,7 @@ import '../../cities/domain/services/city_service.dart';
 import '../../cities/domain/services/living_cost_service.dart';
 import '../../cities/domain/services/city_salary_service.dart';
 import '../../company/domain/services/company_service.dart';
+import '../../company/domain/services/company_project_team_service.dart';
 import '../../company/domain/services/company_employee_development_service.dart';
 import '../../company/domain/services/company_employee_management_service.dart';
 import '../../company/domain/services/company_employee_wellbeing_service.dart';
@@ -57,6 +58,7 @@ class GameSessionApplicationService {
     CityService? cityService,
     LivingCostService? livingCostService,
     CompanyService? companyService,
+    CompanyProjectTeamService? companyProjectTeamService,
     CompanyEmployeeDevelopmentService? employeeDevelopmentService,
     CompanyEmployeeManagementService? employeeManagementService,
     CompanyEmployeeWellbeingService? employeeWellbeingService,
@@ -84,6 +86,8 @@ class GameSessionApplicationService {
        _cityService = cityService ?? CityService(),
        _livingCostService = livingCostService ?? LivingCostService(),
        _companyService = companyService ?? CompanyService(),
+       _companyProjectTeamService =
+           companyProjectTeamService ?? const CompanyProjectTeamService(),
        _employeeDevelopmentService =
            employeeDevelopmentService ?? CompanyEmployeeDevelopmentService(),
        _employeeManagementService =
@@ -118,6 +122,7 @@ class GameSessionApplicationService {
   final CityService _cityService;
   final LivingCostService _livingCostService;
   final CompanyService _companyService;
+  final CompanyProjectTeamService _companyProjectTeamService;
   final CompanyEmployeeDevelopmentService _employeeDevelopmentService;
   final CompanyEmployeeManagementService _employeeManagementService;
   final CompanyEmployeeWellbeingService _employeeWellbeingService;

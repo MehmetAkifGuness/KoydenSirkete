@@ -262,6 +262,23 @@ extension GameSessionFeatureController on GameSessionController {
     message: (_) => '${project.name} projesi seçildi.',
   );
 
+  Future<String?> setCompanyProjectEmployeeAssignment(
+    CompanyProject project,
+    CompanyEmployee employee, {
+    required bool assigned,
+  }) => _execute(
+    action: (state) => _applicationService.setCompanyProjectEmployeeAssignment(
+      state,
+      project: project,
+      employeeId: employee.id,
+      assigned: assigned,
+    ),
+    stateOf: (result) => result,
+    message: (_) => assigned
+        ? '${employee.name} proje ekibine atandı.'
+        : '${employee.name} proje ekibinden çıkarıldı.',
+  );
+
   Future<String?> selectCompanyCompetitionStrategy(
     CompanyCompetitionStrategy strategy,
   ) => _execute(
