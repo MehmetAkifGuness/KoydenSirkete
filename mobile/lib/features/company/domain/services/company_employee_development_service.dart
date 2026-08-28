@@ -110,7 +110,7 @@ class CompanyEmployeeDevelopmentService {
       isEligible: true,
       reason:
           'Şirket kasasından ₺$cost: performans +$performanceGain, '
-          'moral +8, sadakat +5.',
+          'moral +8, sadakat +5, deneyim +10, tükenmişlik -12.',
       cost: cost,
     );
   }
@@ -122,6 +122,8 @@ class CompanyEmployeeDevelopmentService {
     ),
     morale: (employee.morale + 8).clamp(0, 100),
     loyalty: (employee.loyalty + 5).clamp(0, 100),
+    experience: employee.experience + 10,
+    burnout: (employee.burnout - 12).clamp(0, 100),
   );
 
   CompanyEmployee? _findEmployee(

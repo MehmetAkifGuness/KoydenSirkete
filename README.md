@@ -261,6 +261,14 @@ Android-first, tamamen offline kariyer ve şirket simülasyonu.
 - Son kalite ve teslimat sonucu kalıcı olarak saklanır ve şirket ekranında gösterilir.
 - SQLite v29 migrasyonu mevcut kayıtları sıfırlamadan yeni proje alanlarını ekler.
 
+## v2.25.0 çalışan kariyeri ve iş yükü
+
+- Çalışanlar günlük operasyon ve eğitimlerden deneyim kazanarak başlangıçtan liderliğe kadar terfi edebilir.
+- Zam talepleri kabul veya reddedilebilir; kararlar maaşı, morali, sadakati ve tükenmişliği değiştirir.
+- Yoğun ve başarısız dönemler tükenmişliği artırıp etkin gücü düşürür; iyi dönemler ve gelişim çalışmaları toparlanma sağlar.
+- Görev uyumu, çalışanın uzmanlığı ile aktif proje ihtiyacını eşleştirerek hız, gecikme ve kaliteyi etkiler.
+- Tüm ilerleme mevcut çalışan JSON verisinde kalıcı tutulur ve eski kayıtlar güvenli varsayılanlarla açılır.
+
 ## Çalıştırma
 
 ```powershell

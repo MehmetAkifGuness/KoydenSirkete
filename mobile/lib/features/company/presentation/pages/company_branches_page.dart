@@ -410,6 +410,7 @@ class _BranchEmployeeTile extends StatelessWidget {
       cityId,
       employee.id,
     );
+    final promotion = session.checkBranchEmployeePromotion(cityId, employee.id);
     return Row(
       children: [
         Container(
@@ -454,6 +455,49 @@ class _BranchEmployeeTile extends StatelessWidget {
                   fontSize: 10,
                 ),
               ),
+              const SizedBox(height: 3),
+              Text(
+                '${employee.seniority.label} · Deneyim ${employee.experience} · '
+                'Tükenmişlik %${employee.burnout}',
+                style: TextStyle(
+                  color: employee.burnout >= 80
+                      ? AppPalette.warning
+                      : AppPalette.textSecondary,
+                  fontSize: 10,
+                  fontWeight: employee.burnout >= 80
+                      ? FontWeight.w700
+                      : FontWeight.w400,
+                ),
+              ),
+              if (employee.requestedDailySalary case final requested?) ...[
+                const SizedBox(height: 4),
+                Wrap(
+                  spacing: 5,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    Text(
+                      'Zam: ₺$requested/gün',
+                      style: const TextStyle(
+                        color: AppPalette.warning,
+                        fontSize: 9,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: session.isBusy
+                          ? null
+                          : () => _respondToRaise(context, accept: true),
+                      child: const Text('Kabul'),
+                    ),
+                    TextButton(
+                      onPressed: session.isBusy
+                          ? null
+                          : () => _respondToRaise(context, accept: false),
+                      child: const Text('Reddet'),
+                    ),
+                  ],
+                ),
+              ],
             ],
           ),
         ),
@@ -466,6 +510,14 @@ class _BranchEmployeeTile extends StatelessWidget {
           color: AppPalette.secondary,
         ),
         IconButton(
+          tooltip: promotion.reason,
+          onPressed: promotion.isEligible && !session.isBusy
+              ? () => _promote(context)
+              : null,
+          icon: const Icon(Icons.workspace_premium_outlined, size: 18),
+          color: AppPalette.tertiary,
+        ),
+        IconButton(
           onPressed: session.isBusy ? null : () => _dismiss(context),
           icon: const Icon(Icons.person_remove_outlined, size: 18),
           color: AppPalette.textMuted,
@@ -476,6 +528,23 @@ class _BranchEmployeeTile extends StatelessWidget {
 
   Future<void> _develop(BuildContext context) async {
     final message = await session.developBranchEmployee(cityId, employee.id);
+    if (context.mounted && message != null) AppFeedback.show(context, message);
+  }
+
+  Future<void> _promote(BuildContext context) async {
+    final message = await session.promoteBranchEmployee(cityId, employee.id);
+    if (context.mounted && message != null) AppFeedback.show(context, message);
+  }
+
+  Future<void> _respondToRaise(
+    BuildContext context, {
+    required bool accept,
+  }) async {
+    final message = await session.respondToBranchEmployeeRaise(
+      cityId,
+      employee.id,
+      accept: accept,
+    );
     if (context.mounted && message != null) AppFeedback.show(context, message);
   }
 

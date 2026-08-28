@@ -115,6 +115,28 @@ extension GameSessionFeatureApplication on GameSessionApplicationService {
         _employeeDevelopmentService.developHeadquarters(state, employeeId),
       );
 
+  EmployeePromotionCheck checkEmployeePromotion(
+    PlayerState state,
+    int employeeId,
+  ) => _employeeManagementService.checkHeadquarters(state, employeeId);
+
+  Future<PlayerState> promoteEmployee(PlayerState state, int employeeId) =>
+      _persist(
+        _employeeManagementService.promoteHeadquarters(state, employeeId),
+      );
+
+  Future<PlayerState> respondToEmployeeRaise(
+    PlayerState state,
+    int employeeId, {
+    required bool accept,
+  }) => _persist(
+    _employeeManagementService.respondToHeadquartersRaise(
+      state,
+      employeeId,
+      accept: accept,
+    ),
+  );
+
   CompanyCheckResult checkBranchOpen(PlayerState state, City city) =>
       _companyBranchService.checkOpen(state, city);
 
@@ -150,6 +172,34 @@ extension GameSessionFeatureApplication on GameSessionApplicationService {
     int employeeId,
   ) => _persist(
     _employeeDevelopmentService.developBranch(state, cityId, employeeId),
+  );
+
+  EmployeePromotionCheck checkBranchEmployeePromotion(
+    PlayerState state,
+    int cityId,
+    int employeeId,
+  ) => _employeeManagementService.checkBranch(state, cityId, employeeId);
+
+  Future<PlayerState> promoteBranchEmployee(
+    PlayerState state,
+    int cityId,
+    int employeeId,
+  ) => _persist(
+    _employeeManagementService.promoteBranch(state, cityId, employeeId),
+  );
+
+  Future<PlayerState> respondToBranchEmployeeRaise(
+    PlayerState state,
+    int cityId,
+    int employeeId, {
+    required bool accept,
+  }) => _persist(
+    _employeeManagementService.respondToBranchRaise(
+      state,
+      cityId,
+      employeeId,
+      accept: accept,
+    ),
   );
 
   CompanyCheckResult checkBranchUpgrade(PlayerState state, int cityId) =>

@@ -230,6 +230,10 @@ void main() {
       dailySalary: 55,
       morale: 64,
       loyalty: 81,
+      experience: 145,
+      seniority: CompanyEmployeeSeniority.specialist,
+      burnout: 38,
+      requestedDailySalary: 64,
     );
     final expected = PlayerState.initial.copyWith(
       companyLevel: 1,
@@ -245,6 +249,13 @@ void main() {
     expect(actual?.employees.single.dailySalary, employee.dailySalary);
     expect(actual?.employees.single.morale, employee.morale);
     expect(actual?.employees.single.loyalty, employee.loyalty);
+    expect(actual?.employees.single.experience, employee.experience);
+    expect(actual?.employees.single.seniority, employee.seniority);
+    expect(actual?.employees.single.burnout, employee.burnout);
+    expect(
+      actual?.employees.single.requestedDailySalary,
+      employee.requestedDailySalary,
+    );
   });
 
   test('legacy employee records receive safe wellbeing defaults', () {
@@ -255,6 +266,10 @@ void main() {
 
     expect(employee.morale, 70);
     expect(employee.loyalty, 70);
+    expect(employee.experience, 0);
+    expect(employee.seniority, CompanyEmployeeSeniority.junior);
+    expect(employee.burnout, 0);
+    expect(employee.requestedDailySalary, isNull);
   });
 
   test('legacy finance records default to the personal account', () {

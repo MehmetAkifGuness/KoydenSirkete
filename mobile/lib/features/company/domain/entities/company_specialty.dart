@@ -46,4 +46,30 @@ extension CompanyEmployeeSpecialty on CompanyEmployee {
     }
     return CompanySpecialty.operations;
   }
+
+  int jobFitPercentFor(CompanySpecialty target) {
+    final own = specialty;
+    if (own == target) return 100;
+    if ((own == CompanySpecialty.operations &&
+            target == CompanySpecialty.logistics) ||
+        (own == CompanySpecialty.logistics &&
+            target == CompanySpecialty.operations) ||
+        (own == CompanySpecialty.sales &&
+            target == CompanySpecialty.leadership) ||
+        (own == CompanySpecialty.leadership &&
+            target == CompanySpecialty.sales)) {
+      return 75;
+    }
+    if ((own == CompanySpecialty.finance &&
+            target == CompanySpecialty.leadership) ||
+        (own == CompanySpecialty.leadership &&
+            target == CompanySpecialty.finance) ||
+        (own == CompanySpecialty.technology &&
+            target == CompanySpecialty.operations) ||
+        (own == CompanySpecialty.operations &&
+            target == CompanySpecialty.technology)) {
+      return 70;
+    }
+    return 50;
+  }
 }

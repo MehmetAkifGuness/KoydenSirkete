@@ -58,9 +58,18 @@ class CompanyProjectStrategyService {
         (project.progressPerEmployee * employee.effectivePerformance / 100)
             .round(),
       );
+      final fitAdjusted = base <= 2
+          ? base
+          : math.max(
+              1,
+              (base *
+                      (50 + employee.jobFitPercentFor(project.specialty) / 2) /
+                      100)
+                  .ceil(),
+            );
       final progress = employee.specialty == project.specialty
-          ? (base * (100 + specialistProgressBonusPercent) / 100).ceil()
-          : base;
+          ? (fitAdjusted * (100 + specialistProgressBonusPercent) / 100).ceil()
+          : fitAdjusted;
       return total + progress;
     });
     final levelMultiplier = 1 + math.max(0, state.companyLevel - 1) * .10;
@@ -214,11 +223,13 @@ class CompanyProjectStrategyService {
       estimatedCompletionDays - project.deliveryDays,
     );
     final performanceReduction = math.max(0, averagePerformance - 55) ~/ 5;
+    final fitPenalty = (100 - _averageJobFit(employees, project)) ~/ 8;
     return (project.delayRiskPercent +
             levelGap * 8 +
             scheduleOverrun * 10 -
             specialists * 4 -
-            performanceReduction)
+            performanceReduction +
+            fitPenalty)
         .clamp(5, 90)
         .toInt();
   }
@@ -253,6 +264,7 @@ class CompanyProjectStrategyService {
         math.min(15, specialists * 5) +
         levelAdvantage * 4 -
         levelGap * 8 -
+        (100 - _averageJobFit(employees, project)) ~/ 3 -
         (delayed ? 10 : 0) +
         variance;
     if (score >= 90) return CompanyProjectQuality.excellent;
@@ -260,4 +272,12 @@ class CompanyProjectStrategyService {
     if (score >= 60) return CompanyProjectQuality.standard;
     return CompanyProjectQuality.low;
   }
+
+  int _averageJobFit(List<CompanyEmployee> employees, CompanyProject project) =>
+      employees.fold<int>(
+        0,
+        (total, employee) =>
+            total + employee.jobFitPercentFor(project.specialty),
+      ) ~/
+      employees.length;
 }

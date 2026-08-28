@@ -307,7 +307,11 @@ void main() {
     tester,
   ) async {
     final city = CityCatalog.cities.first;
-    final branch = CompanyBranch(id: city.id, cityId: city.id);
+    final branch = CompanyBranch(
+      id: city.id,
+      cityId: city.id,
+      employees: [CompanyEmployeeCatalog.candidates.first],
+    );
     final cost = CompanyBranchService.upgradeCost(branch);
     final session = await _readySession(
       PlayerState.initial.copyWith(
@@ -335,6 +339,9 @@ void main() {
     await tester.ensureVisible(action);
     await tester.pumpAndSettle();
     expect(find.textContaining('odağı'), findsOneWidget);
+    expect(find.textContaining('Başlangıç'), findsWidgets);
+    expect(find.textContaining('Deneyim 0'), findsWidgets);
+    expect(find.textContaining('Tükenmişlik %0'), findsWidgets);
     await tester.tap(action);
     await tester.pumpAndSettle();
 
@@ -415,7 +422,9 @@ void main() {
   ) async {
     await tester.binding.setSurfaceSize(const Size(800, 800));
     addTearDown(() => tester.binding.setSurfaceSize(null));
-    final employee = CompanyEmployeeCatalog.candidates.first;
+    final employee = CompanyEmployeeCatalog.candidates.first.copyWith(
+      requestedDailySalary: 35,
+    );
     final cost = CompanyEmployeeDevelopmentService.developmentCost(employee);
     final session = await _readySession(
       PlayerState.initial.copyWith(
@@ -441,6 +450,13 @@ void main() {
     await tester.ensureVisible(action);
     await tester.pumpAndSettle();
     expect(find.textContaining('Moral %70'), findsWidgets);
+    expect(find.textContaining('Başlangıç'), findsWidgets);
+    expect(find.textContaining('Deneyim 0'), findsWidgets);
+    expect(find.textContaining('Tükenmişlik %0'), findsWidgets);
+    expect(find.textContaining('Görev uyumu'), findsWidgets);
+    expect(find.textContaining('Zam talebi: ₺35/gün'), findsOneWidget);
+    expect(find.text('Kabul'), findsOneWidget);
+    expect(find.text('Reddet'), findsOneWidget);
     await tester.tap(action);
     await tester.pumpAndSettle();
 

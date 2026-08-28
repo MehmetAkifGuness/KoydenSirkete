@@ -184,6 +184,11 @@ class CompanyMarketPanel extends StatelessWidget {
                 children: [
                   AppPill(label: 'Moral %${wellbeing.averageMorale}'),
                   AppPill(label: 'Sadakat %${wellbeing.averageLoyalty}'),
+                  if (wellbeing.burnoutRiskCount > 0)
+                    AppPill(
+                      label: '${wellbeing.burnoutRiskCount} tükenmişlik riski',
+                      color: AppPalette.warning,
+                    ),
                   if (wellbeing.atRiskCount > 0)
                     AppPill(
                       label: '${wellbeing.atRiskCount} ayrılma riski',

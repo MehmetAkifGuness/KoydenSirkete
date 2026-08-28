@@ -11,6 +11,7 @@ import '../../cities/domain/services/living_cost_service.dart';
 import '../../cities/domain/services/city_salary_service.dart';
 import '../../company/domain/services/company_service.dart';
 import '../../company/domain/services/company_employee_development_service.dart';
+import '../../company/domain/services/company_employee_management_service.dart';
 import '../../company/domain/services/company_employee_wellbeing_service.dart';
 import '../../company/domain/services/company_market_service.dart';
 import '../../company/domain/services/company_competition_service.dart';
@@ -57,6 +58,7 @@ class GameSessionApplicationService {
     LivingCostService? livingCostService,
     CompanyService? companyService,
     CompanyEmployeeDevelopmentService? employeeDevelopmentService,
+    CompanyEmployeeManagementService? employeeManagementService,
     CompanyEmployeeWellbeingService? employeeWellbeingService,
     CompanyMarketService? companyMarketService,
     CompanyCompetitionService? companyCompetitionService,
@@ -84,6 +86,8 @@ class GameSessionApplicationService {
        _companyService = companyService ?? CompanyService(),
        _employeeDevelopmentService =
            employeeDevelopmentService ?? CompanyEmployeeDevelopmentService(),
+       _employeeManagementService =
+           employeeManagementService ?? CompanyEmployeeManagementService(),
        _employeeWellbeingService =
            employeeWellbeingService ?? CompanyEmployeeWellbeingService(),
        _companyMarketService = companyMarketService ?? CompanyMarketService(),
@@ -115,6 +119,7 @@ class GameSessionApplicationService {
   final LivingCostService _livingCostService;
   final CompanyService _companyService;
   final CompanyEmployeeDevelopmentService _employeeDevelopmentService;
+  final CompanyEmployeeManagementService _employeeManagementService;
   final CompanyEmployeeWellbeingService _employeeWellbeingService;
   final CompanyMarketService _companyMarketService;
   final CompanyCompetitionService _companyCompetitionService;

@@ -1,5 +1,16 @@
 # Changelog
 
+## 2.25.0
+
+- Merkez ve bayi çalışanları günlük işlerden, başarılı piyasa sonuçlarından ve gelişim eğitimlerinden deneyim kazanır.
+- Başlangıç, uzman, kıdemli ve lider basamakları; deneyim, performans ve şirket bütçesi şartlı terfi sistemiyle eklendi.
+- Çalışanlar deneyimlerine göre zam talep edebilir; kabul ve ret kararları maaş, moral, sadakat ve tükenmişliği etkiler.
+- Piyasa baskısıyla artan tükenmişlik etkin çalışan gücünü düşürür; olumlu dönemler ve gelişim eğitimi toparlanma sağlar.
+- Uzmanlığa dayalı görev uyumu aktif projelerin ilerleme hızını, gecikme riskini ve kalite sonucunu etkiler.
+- Kıdem, deneyim, tükenmişlik, görev uyumu, terfi ve zam kararları merkez ile bayi ekranlarına eklendi.
+- Yeni alanlar mevcut çalışan JSON kaydında tutulur; eski kayıtlar güvenli başlangıç değerleriyle açılır ve SQLite v29 korunur.
+- Çalışan ilerlemesi, kayıt uyumluluğu, uzun dönem ekonomi ve merkez/bayi arayüzleri 80 otomatik testle doğrulandı.
+
 ## 2.24.0
 
 - On beş şirket projesine müşteri türü, sözleşme teslim süresi ve temel gecikme riski eklendi.

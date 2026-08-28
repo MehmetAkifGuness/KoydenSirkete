@@ -68,6 +68,34 @@ extension GameSessionFeatureController on GameSessionController {
     },
   );
 
+  EmployeePromotionCheck checkEmployeePromotion(int employeeId) =>
+      _applicationService.checkEmployeePromotion(_state, employeeId);
+
+  Future<String?> promoteEmployee(int employeeId) => _execute(
+    action: (state) => _applicationService.promoteEmployee(state, employeeId),
+    stateOf: (result) => result,
+    message: (result) {
+      final employee = result.employees.firstWhere(
+        (current) => current.id == employeeId,
+      );
+      return '${employee.name}, ${employee.seniority.label} kıdemine terfi etti.';
+    },
+  );
+
+  Future<String?> respondToEmployeeRaise(
+    int employeeId, {
+    required bool accept,
+  }) => _execute(
+    action: (state) => _applicationService.respondToEmployeeRaise(
+      state,
+      employeeId,
+      accept: accept,
+    ),
+    stateOf: (result) => result,
+    message: (_) =>
+        accept ? 'Zam talebi kabul edildi.' : 'Zam talebi reddedildi.',
+  );
+
   CompanyCheckResult checkBranchOpen(City city) =>
       _applicationService.checkBranchOpen(_state, city);
 
@@ -123,6 +151,39 @@ extension GameSessionFeatureController on GameSessionController {
       );
       return '${employee.name} performansını %${employee.performance} seviyesine çıkardı.';
     },
+  );
+
+  EmployeePromotionCheck checkBranchEmployeePromotion(
+    int cityId,
+    int employeeId,
+  ) => _applicationService.checkBranchEmployeePromotion(
+    _state,
+    cityId,
+    employeeId,
+  );
+
+  Future<String?> promoteBranchEmployee(int cityId, int employeeId) => _execute(
+    action: (state) =>
+        _applicationService.promoteBranchEmployee(state, cityId, employeeId),
+    stateOf: (result) => result,
+    message: (_) => 'Bayi çalışanı terfi etti.',
+  );
+
+  Future<String?> respondToBranchEmployeeRaise(
+    int cityId,
+    int employeeId, {
+    required bool accept,
+  }) => _execute(
+    action: (state) => _applicationService.respondToBranchEmployeeRaise(
+      state,
+      cityId,
+      employeeId,
+      accept: accept,
+    ),
+    stateOf: (result) => result,
+    message: (_) => accept
+        ? 'Bayi çalışanının zam talebi kabul edildi.'
+        : 'Bayi çalışanının zam talebi reddedildi.',
   );
 
   CompanyCheckResult checkBranchUpgrade(int cityId) =>

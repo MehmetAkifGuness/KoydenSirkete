@@ -34,6 +34,10 @@ class CompanyEmployeeCodec {
     'required_company_level': employee.requiredCompanyLevel,
     'morale': employee.morale,
     'loyalty': employee.loyalty,
+    'experience': employee.experience,
+    'seniority': employee.seniority.name,
+    'burnout': employee.burnout,
+    'requested_daily_salary': employee.requestedDailySalary,
   };
 
   CompanyEmployee _fromJson(Map<String, dynamic> json) => CompanyEmployee(
@@ -45,5 +49,19 @@ class CompanyEmployeeCodec {
     requiredCompanyLevel: json['required_company_level'] as int? ?? 1,
     morale: json['morale'] as int? ?? 70,
     loyalty: json['loyalty'] as int? ?? 70,
+    experience: (json['experience'] as int? ?? 0).clamp(0, 1 << 30),
+    seniority: _seniority(json['seniority']),
+    burnout: (json['burnout'] as int? ?? 0).clamp(0, 100),
+    requestedDailySalary: _requestedSalary(json['requested_daily_salary']),
   );
+
+  CompanyEmployeeSeniority _seniority(Object? value) {
+    for (final seniority in CompanyEmployeeSeniority.values) {
+      if (seniority.name == value) return seniority;
+    }
+    return CompanyEmployeeSeniority.junior;
+  }
+
+  int? _requestedSalary(Object? value) =>
+      value is int && value > 0 ? value.clamp(1, 1 << 30).toInt() : null;
 }

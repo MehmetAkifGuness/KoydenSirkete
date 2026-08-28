@@ -683,6 +683,8 @@ class _EmployeeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final development = session.checkEmployeeDevelopment(employee.id);
+    final promotion = session.checkEmployeePromotion(employee.id);
+    final project = CompanyProjectCatalog.byId(session.state.activeProjectId);
     return _PersonCard(
       employee: employee,
       action: 'Çıkar',
@@ -693,11 +695,39 @@ class _EmployeeCard extends StatelessWidget {
       onDevelop: development.isEligible && !session.isBusy
           ? () => _develop(context)
           : null,
+      jobFitPercent: employee.jobFitPercentFor(project.specialty),
+      promotionCost: promotion.cost,
+      promotionReason: promotion.reason,
+      onPromote: promotion.isEligible && !session.isBusy
+          ? () => _promote(context)
+          : null,
+      onRaiseAccept: employee.hasRaiseRequest && !session.isBusy
+          ? () => _respondToRaise(context, accept: true)
+          : null,
+      onRaiseReject: employee.hasRaiseRequest && !session.isBusy
+          ? () => _respondToRaise(context, accept: false)
+          : null,
     );
   }
 
   Future<void> _develop(BuildContext context) async {
     final message = await session.developEmployee(employee.id);
+    if (context.mounted && message != null) AppFeedback.show(context, message);
+  }
+
+  Future<void> _promote(BuildContext context) async {
+    final message = await session.promoteEmployee(employee.id);
+    if (context.mounted && message != null) AppFeedback.show(context, message);
+  }
+
+  Future<void> _respondToRaise(
+    BuildContext context, {
+    required bool accept,
+  }) async {
+    final message = await session.respondToEmployeeRaise(
+      employee.id,
+      accept: accept,
+    );
     if (context.mounted && message != null) AppFeedback.show(context, message);
   }
 
@@ -732,12 +762,16 @@ class _CandidateCard extends StatelessWidget {
   final GameSessionController session;
 
   @override
-  Widget build(BuildContext context) => _PersonCard(
-    employee: employee,
-    action: 'İşe al',
-    onAction: session.isBusy ? null : () => _hire(context),
-    accent: AppPalette.secondary,
-  );
+  Widget build(BuildContext context) {
+    final project = CompanyProjectCatalog.byId(session.state.activeProjectId);
+    return _PersonCard(
+      employee: employee,
+      action: 'İşe al',
+      onAction: session.isBusy ? null : () => _hire(context),
+      accent: AppPalette.secondary,
+      jobFitPercent: employee.jobFitPercentFor(project.specialty),
+    );
+  }
 
   Future<void> _hire(BuildContext context) async {
     final message = await session.recruitEmployee(employee);
@@ -754,6 +788,12 @@ class _PersonCard extends StatelessWidget {
     this.developmentCost,
     this.developmentReason,
     this.onDevelop,
+    this.jobFitPercent,
+    this.promotionCost,
+    this.promotionReason,
+    this.onPromote,
+    this.onRaiseAccept,
+    this.onRaiseReject,
   });
 
   final CompanyEmployee employee;
@@ -763,6 +803,12 @@ class _PersonCard extends StatelessWidget {
   final int? developmentCost;
   final String? developmentReason;
   final VoidCallback? onDevelop;
+  final int? jobFitPercent;
+  final int? promotionCost;
+  final String? promotionReason;
+  final VoidCallback? onPromote;
+  final VoidCallback? onRaiseAccept;
+  final VoidCallback? onRaiseReject;
 
   @override
   Widget build(BuildContext context) {
@@ -809,11 +855,51 @@ class _PersonCard extends StatelessWidget {
                     fontSize: 10,
                   ),
                 ),
+                const SizedBox(height: 3),
+                Text(
+                  '${employee.seniority.label} · Deneyim ${employee.experience} · '
+                  'Tükenmişlik %${employee.burnout}'
+                  '${jobFitPercent == null ? '' : ' · Görev uyumu %$jobFitPercent'}',
+                  style: TextStyle(
+                    color: employee.burnout >= 80
+                        ? AppPalette.warning
+                        : AppPalette.textSecondary,
+                    fontSize: 10,
+                    fontWeight: employee.burnout >= 80
+                        ? FontWeight.w700
+                        : FontWeight.w400,
+                  ),
+                ),
                 const SizedBox(height: 7),
                 AppProgressLine(
                   value: employee.performance / 100,
                   color: accent,
                 ),
+                if (employee.requestedDailySalary case final requested?) ...[
+                  const SizedBox(height: 7),
+                  Wrap(
+                    spacing: 6,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      Text(
+                        'Zam talebi: ₺$requested/gün',
+                        style: const TextStyle(
+                          color: AppPalette.warning,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: onRaiseAccept,
+                        child: const Text('Kabul'),
+                      ),
+                      TextButton(
+                        onPressed: onRaiseReject,
+                        child: const Text('Reddet'),
+                      ),
+                    ],
+                  ),
+                ],
               ],
             ),
           ),
@@ -839,6 +925,18 @@ class _PersonCard extends StatelessWidget {
                       employee.isFullyDeveloped
                           ? 'Maksimum'
                           : 'Kasa ₺$developmentCost',
+                    ),
+                  ),
+                ),
+              if (promotionCost != null)
+                Tooltip(
+                  message: promotionReason ?? '',
+                  child: TextButton(
+                    onPressed: onPromote,
+                    child: Text(
+                      employee.seniority.next == null
+                          ? 'Son kıdem'
+                          : 'Terfi ₺$promotionCost',
                     ),
                   ),
                 ),
