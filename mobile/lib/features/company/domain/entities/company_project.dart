@@ -11,6 +11,18 @@ enum CompanyProjectCategory {
   final String label;
 }
 
+enum CompanyCustomerType {
+  localBusiness('Yerel işletme'),
+  startup('Girişim'),
+  corporate('Kurumsal şirket'),
+  publicInstitution('Kamu kurumu'),
+  international('Uluslararası müşteri');
+
+  const CompanyCustomerType(this.label);
+
+  final String label;
+}
+
 class CompanyProject {
   const CompanyProject({
     required this.id,
@@ -24,6 +36,9 @@ class CompanyProject {
     required this.recommendedCompanyLevel,
     required this.specialty,
     required this.category,
+    required this.customerType,
+    required this.deliveryDays,
+    required this.delayRiskPercent,
     this.requiresSeasonInvitation = false,
   });
 
@@ -38,5 +53,8 @@ class CompanyProject {
   final int recommendedCompanyLevel;
   final CompanySpecialty specialty;
   final CompanyProjectCategory category;
+  final CompanyCustomerType customerType;
+  final int deliveryDays;
+  final int delayRiskPercent;
   final bool requiresSeasonInvitation;
 }

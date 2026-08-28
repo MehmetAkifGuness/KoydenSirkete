@@ -253,6 +253,14 @@ Android-first, tamamen offline kariyer ve şirket simülasyonu.
 - Projeler kısa, orta, büyük ve stratejik sözleşme kategorilerinde dengeli biçimde dağıtıldı.
 - Portföy ekranı projeleri kategori başlıkları altında sunar ve sözleşme türünü her kartta gösterir.
 
+## v2.24.0 proje teslimatı ve kalite
+
+- Her proje müşteri türü, teslim süresi ve ekibin durumuna göre değişen gecikme olasılığı taşır.
+- Aktif çalışma günleri teslim süresiyle karşılaştırılır; uzmanlık, performans ve şirket seviyesi teslimat riskini azaltır.
+- Başarılı projeler düşükten mükemmele kalite üretir; kalite ve gecikme net şirket gelirini değiştirir.
+- Son kalite ve teslimat sonucu kalıcı olarak saklanır ve şirket ekranında gösterilir.
+- SQLite v29 migrasyonu mevcut kayıtları sıfırlamadan yeni proje alanlarını ekler.
+
 ## Çalıştırma
 
 ```powershell

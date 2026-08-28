@@ -206,6 +206,7 @@ extension GameSessionFeatureApplication on GameSessionApplicationService {
       state: await _persist(result.state),
       message: result.message,
       succeeded: result.succeeded,
+      projectOutcome: result.projectOutcome,
     );
   }
 

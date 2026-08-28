@@ -29,7 +29,13 @@ void main() {
       expect(project.progressPerEmployee, greaterThan(0));
       expect(project.riskPercent, inInclusiveRange(0, 100));
       expect(project.recommendedCompanyLevel, inInclusiveRange(1, 3));
+      expect(project.deliveryDays, greaterThan(0));
+      expect(project.delayRiskPercent, inInclusiveRange(0, 100));
     }
+    expect(
+      projects.map((project) => project.customerType).toSet(),
+      containsAll(CompanyCustomerType.values),
+    );
 
     final invited = projects.singleWhere(
       (project) => project.requiresSeasonInvitation,

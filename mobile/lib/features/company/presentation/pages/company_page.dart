@@ -241,6 +241,10 @@ class _CompanyViewState extends State<_CompanyView> {
     final capacity = CompanyService.employeeCapacity(state.companyLevel);
     final project = CompanyProjectCatalog.byId(state.activeProjectId);
     final forecast = service.projectForecast(state, project);
+    final lastOutcome = state.lastProjectOutcome;
+    final lastProject = lastOutcome == null
+        ? null
+        : CompanyProjectCatalog.byId(lastOutcome.projectId);
     return ListView(
       padding: const EdgeInsets.fromLTRB(18, 8, 18, 28),
       children: [
@@ -355,8 +359,41 @@ class _CompanyViewState extends State<_CompanyView> {
                         ? 'Ekip gerekli'
                         : '~${forecast.estimatedDays} gün',
                   ),
+                  AppPill(label: 'Müşteri · ${project.customerType.label}'),
+                  AppPill(
+                    label:
+                        'Teslim · ${state.projectElapsedDays}/${project.deliveryDays} gün',
+                    color: state.projectElapsedDays > project.deliveryDays
+                        ? AppPalette.warning
+                        : AppPalette.secondary,
+                  ),
+                  AppPill(
+                    label: '%${forecast.delayChance} gecikme riski',
+                    color: forecast.delayChance <= 25
+                        ? AppPalette.success
+                        : AppPalette.warning,
+                  ),
+                  AppPill(
+                    label:
+                        'Beklenen kalite · ${forecast.expectedQuality.label}',
+                    color: AppPalette.tertiary,
+                  ),
                 ],
               ),
+              if (lastOutcome != null && lastProject != null) ...[
+                const SizedBox(height: 13),
+                Text(
+                  'Son sonuç · ${lastProject.name} · ${lastOutcome.quality.label} kalite · '
+                  '${lastOutcome.delayed ? 'Gecikmeli' : 'Zamanında'}',
+                  style: TextStyle(
+                    color: lastOutcome.succeeded
+                        ? AppPalette.success
+                        : AppPalette.warning,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ],
             ],
           ),
         ),
@@ -549,6 +586,7 @@ class _ProjectCard extends StatelessWidget {
                     runSpacing: 6,
                     children: [
                       AppPill(label: project.category.label),
+                      AppPill(label: project.customerType.label),
                       AppPill(label: '${project.specialty.label} uzmanlığı'),
                       AppPill(
                         label: '%${forecast.successChance} başarı',
@@ -560,6 +598,17 @@ class _ProjectCard extends StatelessWidget {
                         label: forecast.estimatedDays == 0
                             ? 'Ekip gerekli'
                             : '~${forecast.estimatedDays} gün',
+                      ),
+                      AppPill(label: '${project.deliveryDays} gün teslim'),
+                      AppPill(
+                        label: '%${forecast.delayChance} gecikme riski',
+                        color: forecast.delayChance <= 25
+                            ? AppPalette.success
+                            : AppPalette.warning,
+                      ),
+                      AppPill(
+                        label: '${forecast.expectedQuality.label} kalite',
+                        color: AppPalette.tertiary,
                       ),
                       AppPill(
                         label:

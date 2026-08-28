@@ -2,6 +2,7 @@ import '../../../../core/errors/game_rule_exception.dart';
 import '../../../game/domain/entities/player_state.dart';
 import '../entities/company_employee.dart';
 import '../entities/company_project.dart';
+import '../entities/company_project_outcome.dart';
 import 'company_employee_catalog.dart';
 import 'company_finance_recorder.dart';
 import 'company_project_catalog.dart';
@@ -21,11 +22,13 @@ class CompanyActionResult {
     required this.state,
     required this.message,
     this.succeeded,
+    this.projectOutcome,
   });
 
   final PlayerState state;
   final String message;
   final bool? succeeded;
+  final CompanyProjectOutcome? projectOutcome;
 
   bool get resolved => succeeded != null;
 }
@@ -117,7 +120,9 @@ class CompanyService {
       if (employeesFor(current).isEmpty) {
         continue;
       }
-      final projectResult = CompanyProjectOperations(this).advanceProject(current);
+      final projectResult = CompanyProjectOperations(
+        this,
+      ).advanceProject(current);
       current = projectResult.state;
       if (projectResult.resolved) {
         messages.add(projectResult.message);
@@ -164,6 +169,8 @@ class CompanyService {
       companyFunds: 500,
       employeeCount: 0,
       projectProgress: 0,
+      projectElapsedDays: 0,
+      lastProjectOutcome: null,
       activeProjectId: CompanyProjectCatalog.projects.first.id,
       completedProjects: 0,
       financeLedger: CompanyFinanceRecorder.recordEstablishment(
@@ -256,7 +263,6 @@ class CompanyService {
       ),
     );
   }
-
 }
 
 extension CompanyProjectOperations on CompanyService {
@@ -289,6 +295,7 @@ extension CompanyProjectOperations on CompanyService {
       throw const GameRuleException('Özel proje daveti artık kullanılamıyor.');
     }
     final totalProgress = state.projectProgress + dailyProjectProgress(state);
+    final elapsedDays = state.projectElapsedDays + 1;
     final completed = totalProgress >= 100;
     final succeeded = completed
         ? _projectStrategy.succeeds(
@@ -297,22 +304,30 @@ extension CompanyProjectOperations on CompanyService {
             employees: employees,
           )
         : null;
-    final netReward = project.reward - project.cost;
+    final outcome = succeeded == null
+        ? null
+        : _projectStrategy.resolveOutcome(
+            state: state,
+            project: project,
+            employees: employees,
+            succeeded: succeeded,
+            elapsedDays: elapsedDays,
+          );
     final invitationUsed = completed && project.requiresSeasonInvitation;
     final rewardState = invitationUsed
         ? _seasonRewardService.consumeProjectInvitation(state)
         : state;
-    final nextFunds = switch (succeeded) {
-      true => state.companyFunds + netReward,
-      false => (state.companyFunds - project.cost).clamp(0, 1 << 62).toInt(),
-      null => state.companyFunds,
-    };
+    final nextFunds = outcome == null
+        ? state.companyFunds
+        : (state.companyFunds + outcome.netIncome).clamp(0, 1 << 62).toInt();
     final nextState = rewardState.copyWith(
       companyFunds: nextFunds,
       activeProjectId: invitationUsed
           ? CompanyProjectCatalog.projects.first.id
           : state.activeProjectId,
       projectProgress: completed ? 0 : totalProgress,
+      projectElapsedDays: completed ? 0 : elapsedDays,
+      lastProjectOutcome: outcome ?? state.lastProjectOutcome,
       experience: succeeded == true
           ? state.experience + project.experienceReward
           : state.experience,
@@ -328,18 +343,22 @@ extension CompanyProjectOperations on CompanyService {
     final invitationMessage = invitationUsed
         ? ' Özel proje daveti kullanıldı.'
         : '';
+    final timingMessage = outcome?.delayed == true ? 'Gecikmeli' : 'Zamanında';
     return CompanyActionResult(
       state: nextState,
       message: switch (succeeded) {
         true =>
-          'Proje başarıyla tamamlandı. Net şirket geliri: ₺$netReward.'
+          'Proje başarıyla tamamlandı. Kalite: ${outcome!.quality.label}. '
+              'Teslimat: $timingMessage. Net şirket geliri: ₺${outcome.netIncome}.'
               '$invitationMessage',
         false =>
-          'Proje başarısız oldu. Şirket kasasından ₺${project.cost} gider yazıldı.'
+          'Proje başarısız oldu. Kalite: ${outcome!.quality.label}. '
+              'Teslimat: $timingMessage. Şirket kasasından ₺${project.cost} gider yazıldı.'
               '$invitationMessage',
         null => 'Proje otomatik olarak %$totalProgress ilerledi.',
       },
       succeeded: succeeded,
+      projectOutcome: outcome,
     );
   }
 
@@ -370,6 +389,9 @@ extension CompanyProjectOperations on CompanyService {
       activeProjectId: project.id,
       projectProgress: state.activeProjectId == project.id
           ? state.projectProgress
+          : 0,
+      projectElapsedDays: state.activeProjectId == project.id
+          ? state.projectElapsedDays
           : 0,
     );
   }

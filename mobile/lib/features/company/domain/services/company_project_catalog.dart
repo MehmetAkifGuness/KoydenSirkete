@@ -2,7 +2,7 @@ import '../entities/company_project.dart';
 import '../entities/company_specialty.dart';
 
 abstract final class CompanyProjectCatalog {
-  static const version = 5;
+  static const version = 6;
 
   static const projects = <CompanyProject>[
     CompanyProject(
@@ -17,6 +17,9 @@ abstract final class CompanyProjectCatalog {
       recommendedCompanyLevel: 1,
       specialty: CompanySpecialty.operations,
       category: CompanyProjectCategory.shortTerm,
+      customerType: CompanyCustomerType.localBusiness,
+      deliveryDays: 12,
+      delayRiskPercent: 8,
     ),
     CompanyProject(
       id: 2,
@@ -30,6 +33,9 @@ abstract final class CompanyProjectCatalog {
       recommendedCompanyLevel: 1,
       specialty: CompanySpecialty.technology,
       category: CompanyProjectCategory.shortTerm,
+      customerType: CompanyCustomerType.startup,
+      deliveryDays: 14,
+      delayRiskPercent: 15,
     ),
     CompanyProject(
       id: 3,
@@ -43,6 +49,9 @@ abstract final class CompanyProjectCatalog {
       recommendedCompanyLevel: 2,
       specialty: CompanySpecialty.finance,
       category: CompanyProjectCategory.mediumTerm,
+      customerType: CompanyCustomerType.corporate,
+      deliveryDays: 18,
+      delayRiskPercent: 18,
     ),
     CompanyProject(
       id: 4,
@@ -56,6 +65,9 @@ abstract final class CompanyProjectCatalog {
       recommendedCompanyLevel: 2,
       specialty: CompanySpecialty.logistics,
       category: CompanyProjectCategory.large,
+      customerType: CompanyCustomerType.corporate,
+      deliveryDays: 28,
+      delayRiskPercent: 24,
     ),
     CompanyProject(
       id: 5,
@@ -69,6 +81,9 @@ abstract final class CompanyProjectCatalog {
       recommendedCompanyLevel: 3,
       specialty: CompanySpecialty.technology,
       category: CompanyProjectCategory.large,
+      customerType: CompanyCustomerType.publicInstitution,
+      deliveryDays: 35,
+      delayRiskPercent: 32,
     ),
     CompanyProject(
       id: 6,
@@ -82,6 +97,9 @@ abstract final class CompanyProjectCatalog {
       recommendedCompanyLevel: 3,
       specialty: CompanySpecialty.leadership,
       category: CompanyProjectCategory.strategic,
+      customerType: CompanyCustomerType.international,
+      deliveryDays: 40,
+      delayRiskPercent: 38,
     ),
     CompanyProject(
       id: 7,
@@ -95,6 +113,9 @@ abstract final class CompanyProjectCatalog {
       recommendedCompanyLevel: 3,
       specialty: CompanySpecialty.leadership,
       category: CompanyProjectCategory.strategic,
+      customerType: CompanyCustomerType.international,
+      deliveryDays: 38,
+      delayRiskPercent: 20,
       requiresSeasonInvitation: true,
     ),
     CompanyProject(
@@ -109,6 +130,9 @@ abstract final class CompanyProjectCatalog {
       recommendedCompanyLevel: 1,
       specialty: CompanySpecialty.sales,
       category: CompanyProjectCategory.shortTerm,
+      customerType: CompanyCustomerType.localBusiness,
+      deliveryDays: 13,
+      delayRiskPercent: 10,
     ),
     CompanyProject(
       id: 9,
@@ -123,6 +147,9 @@ abstract final class CompanyProjectCatalog {
       recommendedCompanyLevel: 1,
       specialty: CompanySpecialty.logistics,
       category: CompanyProjectCategory.shortTerm,
+      customerType: CompanyCustomerType.startup,
+      deliveryDays: 12,
+      delayRiskPercent: 18,
     ),
     CompanyProject(
       id: 10,
@@ -136,6 +163,9 @@ abstract final class CompanyProjectCatalog {
       recommendedCompanyLevel: 2,
       specialty: CompanySpecialty.sales,
       category: CompanyProjectCategory.mediumTerm,
+      customerType: CompanyCustomerType.corporate,
+      deliveryDays: 20,
+      delayRiskPercent: 20,
     ),
     CompanyProject(
       id: 11,
@@ -149,6 +179,9 @@ abstract final class CompanyProjectCatalog {
       recommendedCompanyLevel: 2,
       specialty: CompanySpecialty.finance,
       category: CompanyProjectCategory.mediumTerm,
+      customerType: CompanyCustomerType.corporate,
+      deliveryDays: 22,
+      delayRiskPercent: 22,
     ),
     CompanyProject(
       id: 12,
@@ -162,6 +195,9 @@ abstract final class CompanyProjectCatalog {
       recommendedCompanyLevel: 2,
       specialty: CompanySpecialty.technology,
       category: CompanyProjectCategory.mediumTerm,
+      customerType: CompanyCustomerType.corporate,
+      deliveryDays: 20,
+      delayRiskPercent: 26,
     ),
     CompanyProject(
       id: 13,
@@ -176,6 +212,9 @@ abstract final class CompanyProjectCatalog {
       recommendedCompanyLevel: 3,
       specialty: CompanySpecialty.logistics,
       category: CompanyProjectCategory.large,
+      customerType: CompanyCustomerType.international,
+      deliveryDays: 30,
+      delayRiskPercent: 30,
     ),
     CompanyProject(
       id: 14,
@@ -190,6 +229,9 @@ abstract final class CompanyProjectCatalog {
       recommendedCompanyLevel: 3,
       specialty: CompanySpecialty.operations,
       category: CompanyProjectCategory.large,
+      customerType: CompanyCustomerType.corporate,
+      deliveryDays: 32,
+      delayRiskPercent: 34,
     ),
     CompanyProject(
       id: 15,
@@ -204,6 +246,9 @@ abstract final class CompanyProjectCatalog {
       recommendedCompanyLevel: 3,
       specialty: CompanySpecialty.finance,
       category: CompanyProjectCategory.strategic,
+      customerType: CompanyCustomerType.international,
+      deliveryDays: 42,
+      delayRiskPercent: 36,
     ),
   ];
 

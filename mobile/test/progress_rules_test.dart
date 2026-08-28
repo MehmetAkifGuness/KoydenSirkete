@@ -146,7 +146,11 @@ void main() {
       final completed = service.advanceProject(
         tick.state.copyWith(projectProgress: 95),
       );
-      expect(completed.state.companyFunds, tick.state.companyFunds + 500 - 100);
+      expect(completed.projectOutcome, isNotNull);
+      expect(
+        completed.state.companyFunds,
+        tick.state.companyFunds + completed.projectOutcome!.netIncome,
+      );
       expect(completed.state.money, tick.state.money);
     },
   );

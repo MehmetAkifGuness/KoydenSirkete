@@ -5,6 +5,7 @@ import '../../../company/domain/entities/company_employee.dart';
 import '../../../company/domain/entities/company_branch.dart';
 import '../../../company/domain/entities/company_competition_state.dart';
 import '../../../company/domain/entities/company_expansion_state.dart';
+import '../../../company/domain/entities/company_project_outcome.dart';
 import '../../../finance/domain/entities/finance_ledger.dart';
 
 class PlayerState {
@@ -57,6 +58,8 @@ class PlayerState {
     this.financeLedger = const FinanceLedger(),
     this.ownedCarId,
     this.projectProgress = 0,
+    this.projectElapsedDays = 0,
+    this.lastProjectOutcome,
     this.totalEarned = 0,
     this.totalWorkSessions = 0,
     this.totalTrainingSessions = 0,
@@ -69,7 +72,7 @@ class PlayerState {
     this.isOnboarded = false,
   }) : _legacyActiveActivity = activeActivity;
   static const initial = PlayerState(
-    schemaVersion: 28,
+    schemaVersion: 29,
     money: 240,
     energy: 100,
     knowledge: 0,
@@ -124,6 +127,8 @@ class PlayerState {
   final FinanceLedger financeLedger;
   final int? ownedCarId;
   final int projectProgress;
+  final int projectElapsedDays;
+  final CompanyProjectOutcome? lastProjectOutcome;
   final int totalEarned;
   final int totalWorkSessions;
   final int totalTrainingSessions;
@@ -181,6 +186,8 @@ class PlayerState {
     FinanceLedger? financeLedger,
     Object? ownedCarId = _unset,
     int? projectProgress,
+    int? projectElapsedDays,
+    Object? lastProjectOutcome = _unset,
     int? totalEarned,
     int? totalWorkSessions,
     int? totalTrainingSessions,
@@ -276,6 +283,10 @@ class PlayerState {
           ? this.ownedCarId
           : ownedCarId as int?,
       projectProgress: projectProgress ?? this.projectProgress,
+      projectElapsedDays: projectElapsedDays ?? this.projectElapsedDays,
+      lastProjectOutcome: identical(lastProjectOutcome, _unset)
+          ? this.lastProjectOutcome
+          : lastProjectOutcome as CompanyProjectOutcome?,
       totalEarned: totalEarned ?? this.totalEarned,
       totalWorkSessions: totalWorkSessions ?? this.totalWorkSessions,
       totalTrainingSessions:

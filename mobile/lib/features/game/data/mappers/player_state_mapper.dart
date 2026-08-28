@@ -50,6 +50,8 @@ class PlayerStateMapper {
       financeLedger: model.financeLedger,
       ownedCarId: model.ownedCarId,
       projectProgress: model.projectProgress,
+      projectElapsedDays: model.projectElapsedDays,
+      lastProjectOutcome: model.lastProjectOutcome,
       totalEarned: model.totalEarned,
       totalWorkSessions: model.totalWorkSessions,
       totalTrainingSessions: model.totalTrainingSessions,

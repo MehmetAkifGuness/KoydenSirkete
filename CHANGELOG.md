@@ -1,5 +1,16 @@
 # Changelog
 
+## 2.24.0
+
+- On beş şirket projesine müşteri türü, sözleşme teslim süresi ve temel gecikme riski eklendi.
+- Aktif proje günleri kalıcı olarak izlenir; süre aşımı teslimat sonucunu doğrudan gecikmeli yapar.
+- Ekip performansı, uzman çalışanlar, şirket seviyesi ve tahmini süre etkin gecikme olasılığını belirler.
+- Tamamlanan projeler reddedildi, düşük, standart, yüksek veya mükemmel kalite sonucu üretir.
+- Kalite ödül tutarını, gecikme ise ödülü ve kalite puanını etkiler; sonuç şirket finans hareketine yansır.
+- Son proje sonucu ve aktif sözleşmenin müşteri, süre, gecikme ve kalite tahmini şirket ekranında gösterilir.
+- Aktif gün ve son sonuç SQLite v29 migrasyonuyla saklanır; eski kayıtlar güvenli varsayılanlarla açılır.
+- Katalog, sonuç kuralları, kayıt codec'i, ekonomi, sezon daveti ve arayüz 96 otomatik testle doğrulandı.
+
 ## 2.23.0
 
 - Şirket proje kataloğu 7 projeden 15 projeye çıkarıldı.

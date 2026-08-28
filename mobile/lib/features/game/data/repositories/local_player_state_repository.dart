@@ -12,6 +12,7 @@ import '../mappers/owned_asset_ids_codec.dart';
 import '../mappers/finance_ledger_codec.dart';
 import '../mappers/company_competition_codec.dart';
 import '../mappers/company_expansion_codec.dart';
+import '../mappers/company_project_outcome_codec.dart';
 
 class LocalPlayerStateRepository implements PlayerStateRepository {
   LocalPlayerStateRepository({
@@ -93,6 +94,10 @@ class LocalPlayerStateRepository implements PlayerStateRepository {
         companyFunds: model.companyFunds,
         employeeCount: model.employeeCount,
         projectProgress: model.projectProgress,
+        projectElapsedDays: model.projectElapsedDays,
+        lastProjectOutcomeJson: CompanyProjectOutcomeCodec().encode(
+          model.lastProjectOutcome,
+        ),
         totalEarned: model.totalEarned,
         totalWorkSessions: model.totalWorkSessions,
         totalTrainingSessions: model.totalTrainingSessions,

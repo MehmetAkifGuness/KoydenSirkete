@@ -13,9 +13,11 @@ import '../mappers/owned_asset_ids_codec.dart';
 import '../mappers/finance_ledger_codec.dart';
 import '../mappers/company_competition_codec.dart';
 import '../mappers/company_expansion_codec.dart';
+import '../mappers/company_project_outcome_codec.dart';
 import '../../../company/domain/entities/company_branch.dart';
 import '../../../company/domain/entities/company_competition_state.dart';
 import '../../../company/domain/entities/company_expansion_state.dart';
+import '../../../company/domain/entities/company_project_outcome.dart';
 import '../../../finance/domain/entities/finance_ledger.dart';
 
 class PlayerStateModel {
@@ -66,6 +68,8 @@ class PlayerStateModel {
     this.companyFunds = 0,
     this.employeeCount = 0,
     this.projectProgress = 0,
+    this.projectElapsedDays = 0,
+    this.lastProjectOutcome,
     this.totalEarned = 0,
     this.totalWorkSessions = 0,
     this.totalTrainingSessions = 0,
@@ -135,6 +139,10 @@ class PlayerStateModel {
       companyFunds: record.companyFunds,
       employeeCount: record.employeeCount,
       projectProgress: record.projectProgress,
+      projectElapsedDays: record.projectElapsedDays,
+      lastProjectOutcome: CompanyProjectOutcomeCodec().decode(
+        record.lastProjectOutcomeJson,
+      ),
       totalEarned: record.totalEarned,
       totalWorkSessions: record.totalWorkSessions,
       totalTrainingSessions: record.totalTrainingSessions,
@@ -199,6 +207,8 @@ class PlayerStateModel {
   final int companyFunds;
   final int employeeCount;
   final int projectProgress;
+  final int projectElapsedDays;
+  final CompanyProjectOutcome? lastProjectOutcome;
   final int totalEarned;
   final int totalWorkSessions;
   final int totalTrainingSessions;
@@ -258,6 +268,8 @@ class PlayerStateModel {
       companyFunds: entity.companyFunds,
       employeeCount: entity.employeeCount,
       projectProgress: entity.projectProgress,
+      projectElapsedDays: entity.projectElapsedDays,
+      lastProjectOutcome: entity.lastProjectOutcome,
       totalEarned: entity.totalEarned,
       totalWorkSessions: entity.totalWorkSessions,
       totalTrainingSessions: entity.totalTrainingSessions,
