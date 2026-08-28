@@ -6,11 +6,21 @@ import '../../../../core/widgets/app_page.dart';
 import '../../../game/presentation/state/game_session_controller.dart';
 import '../../domain/entities/company_employee.dart';
 import '../../domain/entities/company_project.dart';
+import '../../domain/entities/company_specialty.dart';
 import '../../domain/services/company_project_catalog.dart';
 import '../../domain/services/company_service.dart';
 import '../models/employee_candidate_filter.dart';
 import '../widgets/employee_filter_bar.dart';
 import '../widgets/company_growth_panel.dart';
+import '../widgets/company_market_panel.dart';
+import '../widgets/company_rival_profiles_panel.dart';
+import '../widgets/company_strategy_panel.dart';
+import '../widgets/company_season_reward_panel.dart';
+import '../widgets/company_competition_panel.dart';
+import '../widgets/company_stage_panel.dart';
+import '../widgets/company_expansion_panel.dart';
+import '../widgets/company_treasury_panel.dart';
+import '../widgets/company_trophy_panel.dart';
 import 'company_branches_page.dart';
 
 class CompanyPage extends StatelessWidget {
@@ -82,7 +92,7 @@ class _EstablishmentView extends StatelessWidget {
               ),
               const SizedBox(height: 18),
               const AppPill(
-                label: 'Kurulum maliyeti · ₺1000',
+                label: 'Kişisel cüzdan · ₺${CompanyService.establishmentCost}',
                 color: AppPalette.tertiary,
                 icon: Icons.payments_outlined,
               ),
@@ -106,7 +116,7 @@ class _EstablishmentView extends StatelessWidget {
                       ? () => _establish(context)
                       : null,
                   icon: const Icon(Icons.add_business_rounded),
-                  label: const Text('Şirketimi kur'),
+                  label: const Text('Kişisel cüzdandan şirketimi kur'),
                 ),
               ),
             ],
@@ -229,6 +239,7 @@ class _CompanyViewState extends State<_CompanyView> {
     );
     final capacity = CompanyService.employeeCapacity(state.companyLevel);
     final project = CompanyProjectCatalog.byId(state.activeProjectId);
+    final forecast = service.projectForecast(state, project);
     return ListView(
       padding: const EdgeInsets.fromLTRB(18, 8, 18, 28),
       children: [
@@ -275,7 +286,7 @@ class _CompanyViewState extends State<_CompanyView> {
                     ),
                   ),
                   AppPill(
-                    label: '₺${state.companyFunds}',
+                    label: 'Şirket kasası · ₺${state.companyFunds}',
                     color: AppPalette.tertiary,
                   ),
                 ],
@@ -306,7 +317,7 @@ class _CompanyViewState extends State<_CompanyView> {
                   ),
                   const Spacer(),
                   Text(
-                    '₺${project.reward} ödül',
+                    'Şirket kasasına ₺${project.reward} ödül',
                     style: const TextStyle(
                       color: AppPalette.tertiary,
                       fontSize: 11,
@@ -321,22 +332,35 @@ class _CompanyViewState extends State<_CompanyView> {
                 runSpacing: 7,
                 children: [
                   AppPill(
-                    label: '+₺${service.dailyRevenue(state)}/gün gelir',
+                    label: 'Kasaya +₺${service.dailyRevenue(state)}/gün gelir',
                     color: AppPalette.primary,
                   ),
                   AppPill(
-                    label: '-₺${service.dailyPayroll(state)}/gün maaş',
+                    label: 'Kasadan -₺${service.dailyPayroll(state)}/gün maaş',
                     color: AppPalette.warning,
                   ),
                   AppPill(
                     label: '+${service.dailyProjectProgress(state)} proje/gün',
                     color: AppPalette.secondary,
                   ),
+                  AppPill(
+                    label: '%${forecast.successChance} başarı',
+                    color: forecast.successChance >= 70
+                        ? AppPalette.success
+                        : AppPalette.warning,
+                  ),
+                  AppPill(
+                    label: forecast.estimatedDays == 0
+                        ? 'Ekip gerekli'
+                        : '~${forecast.estimatedDays} gün',
+                  ),
                 ],
               ),
             ],
           ),
         ),
+        const SizedBox(height: 12),
+        CompanyTreasuryPanel(session: session),
         const SizedBox(height: 12),
         Row(
           children: [
@@ -350,7 +374,7 @@ class _CompanyViewState extends State<_CompanyView> {
                       : null,
                   icon: const Icon(Icons.trending_up_rounded, size: 18),
                   label: Text(
-                    'Yükselt · ₺${CompanyService.upgradeCost(state.companyLevel)}',
+                    'Kasa · ₺${CompanyService.upgradeCost(state.companyLevel)}',
                   ),
                 ),
               ),
@@ -372,6 +396,10 @@ class _CompanyViewState extends State<_CompanyView> {
           ],
         ),
         const SizedBox(height: 25),
+        CompanyStagePanel(state: state),
+        const SizedBox(height: 25),
+        CompanyExpansionPanel(session: session),
+        const SizedBox(height: 25),
         const AppSectionHeader(
           title: 'Proje portföyü',
           caption: 'Şirketinin bir sonraki büyüme hamlesini seç.',
@@ -383,6 +411,18 @@ class _CompanyViewState extends State<_CompanyView> {
         ],
         const SizedBox(height: 17),
         CompanyGrowthPanel(state: state),
+        const SizedBox(height: 25),
+        CompanyMarketPanel(state: state),
+        const SizedBox(height: 25),
+        CompanyRivalProfilesPanel(state: state),
+        const SizedBox(height: 25),
+        CompanyStrategyPanel(session: session),
+        const SizedBox(height: 25),
+        CompanyCompetitionPanel(state: state),
+        const SizedBox(height: 25),
+        CompanySeasonRewardPanel(state: state),
+        const SizedBox(height: 25),
+        CompanyTrophyPanel(state: state),
         const SizedBox(height: 25),
         AppSectionHeader(
           title: 'Ekip',
@@ -434,9 +474,16 @@ class _ProjectCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = session.state;
+    final service = CompanyService();
+    final forecast = service.projectForecast(state, project);
+    final check = service.checkProjectSelection(state, project);
     final selected = state.activeProjectId == project.id;
-    final selectable = !selected && !session.isBusy;
-    final accent = selected ? AppPalette.primary : AppPalette.outline;
+    final selectable = !selected && check.isEligible && !session.isBusy;
+    final accent = selected
+        ? AppPalette.primary
+        : check.isEligible
+        ? AppPalette.outline
+        : AppPalette.warning;
     return AppInfoCard(
       accent: accent,
       padding: const EdgeInsets.all(14),
@@ -455,6 +502,8 @@ class _ProjectCard extends StatelessWidget {
               child: Icon(
                 selected
                     ? Icons.check_rounded
+                    : !check.isEligible
+                    ? Icons.lock_outline_rounded
                     : Icons.radio_button_unchecked_rounded,
                 color: selected ? AppPalette.primary : AppPalette.textMuted,
                 size: 18,
@@ -474,12 +523,56 @@ class _ProjectCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 3),
                   Text(
-                    '${project.description} · ₺${project.reward} brüt ödül',
+                    '${project.description} · Şirket kasası: -₺${project.cost} / +₺${project.reward}',
                     style: const TextStyle(
                       color: AppPalette.textMuted,
                       fontSize: 11,
                     ),
                   ),
+                  const SizedBox(height: 7),
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 6,
+                    children: [
+                      AppPill(label: '${project.specialty.label} uzmanlığı'),
+                      AppPill(
+                        label: '%${forecast.successChance} başarı',
+                        color: forecast.successChance >= 70
+                            ? AppPalette.success
+                            : AppPalette.warning,
+                      ),
+                      AppPill(
+                        label: forecast.estimatedDays == 0
+                            ? 'Ekip gerekli'
+                            : '~${forecast.estimatedDays} gün',
+                      ),
+                      AppPill(
+                        label:
+                            'Önerilen seviye ${project.recommendedCompanyLevel}',
+                      ),
+                      if (project.requiresSeasonInvitation)
+                        AppPill(
+                          label: check.isEligible
+                              ? 'Davet hazır'
+                              : 'Sezon daveti gerekli',
+                          icon: Icons.mark_email_unread_outlined,
+                          color: check.isEligible
+                              ? AppPalette.secondary
+                              : AppPalette.warning,
+                        ),
+                    ],
+                  ),
+                  if (!check.isEligible) ...[
+                    const SizedBox(height: 7),
+                    Text(
+                      check.reason,
+                      style: const TextStyle(
+                        color: AppPalette.warning,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -524,12 +617,25 @@ class _EmployeeCard extends StatelessWidget {
   final GameSessionController session;
 
   @override
-  Widget build(BuildContext context) => _PersonCard(
-    employee: employee,
-    action: 'Çıkar',
-    onAction: session.isBusy ? null : () => _dismiss(context),
-    accent: AppPalette.primary,
-  );
+  Widget build(BuildContext context) {
+    final development = session.checkEmployeeDevelopment(employee.id);
+    return _PersonCard(
+      employee: employee,
+      action: 'Çıkar',
+      onAction: session.isBusy ? null : () => _dismiss(context),
+      accent: AppPalette.primary,
+      developmentCost: development.cost,
+      developmentReason: development.reason,
+      onDevelop: development.isEligible && !session.isBusy
+          ? () => _develop(context)
+          : null,
+    );
+  }
+
+  Future<void> _develop(BuildContext context) async {
+    final message = await session.developEmployee(employee.id);
+    if (context.mounted && message != null) AppFeedback.show(context, message);
+  }
 
   Future<void> _dismiss(BuildContext context) async {
     final confirmed = await showDialog<bool>(
@@ -581,12 +687,18 @@ class _PersonCard extends StatelessWidget {
     required this.action,
     required this.onAction,
     required this.accent,
+    this.developmentCost,
+    this.developmentReason,
+    this.onDevelop,
   });
 
   final CompanyEmployee employee;
   final String action;
   final VoidCallback? onAction;
   final Color accent;
+  final int? developmentCost;
+  final String? developmentReason;
+  final VoidCallback? onDevelop;
 
   @override
   Widget build(BuildContext context) {
@@ -618,10 +730,19 @@ class _PersonCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 3),
                 Text(
-                  '${employee.role} · ₺${employee.dailySalary}/gün',
+                  '${employee.role} · ${employee.specialty.label} · ₺${employee.dailySalary}/gün',
                   style: const TextStyle(
                     color: AppPalette.textMuted,
                     fontSize: 11,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Moral %${employee.morale} · Sadakat %${employee.loyalty} · '
+                  'Etkin güç %${employee.effectivePerformance}',
+                  style: const TextStyle(
+                    color: AppPalette.textSecondary,
+                    fontSize: 10,
                   ),
                 ),
                 const SizedBox(height: 7),
@@ -645,6 +766,18 @@ class _PersonCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 5),
+              if (developmentCost != null)
+                Tooltip(
+                  message: developmentReason ?? '',
+                  child: TextButton(
+                    onPressed: onDevelop,
+                    child: Text(
+                      employee.isFullyDeveloped
+                          ? 'Maksimum'
+                          : 'Kasa ₺$developmentCost',
+                    ),
+                  ),
+                ),
               TextButton(onPressed: onAction, child: Text(action)),
             ],
           ),

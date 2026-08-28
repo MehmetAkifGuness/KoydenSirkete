@@ -3,6 +3,8 @@ import '../../../skills/domain/entities/skill_profile.dart';
 import '../../../employment/domain/entities/employment.dart';
 import '../../../company/domain/entities/company_employee.dart';
 import '../../../company/domain/entities/company_branch.dart';
+import '../../../company/domain/entities/company_competition_state.dart';
+import '../../../company/domain/entities/company_expansion_state.dart';
 import '../../../finance/domain/entities/finance_ledger.dart';
 
 class PlayerState {
@@ -61,10 +63,13 @@ class PlayerState {
     this.unlockedAchievementsMask = 0,
     this.activeProjectId = 1,
     this.completedProjects = 0,
+    this.companyCompetition = const CompanyCompetitionState(),
+    this.companyExpansion = const CompanyExpansionState(),
+    this.companyStageIndex = 0,
     this.isOnboarded = false,
   }) : _legacyActiveActivity = activeActivity;
   static const initial = PlayerState(
-    schemaVersion: 25,
+    schemaVersion: 28,
     money: 240,
     energy: 100,
     knowledge: 0,
@@ -125,6 +130,9 @@ class PlayerState {
   final int unlockedAchievementsMask;
   final int activeProjectId;
   final int completedProjects;
+  final CompanyCompetitionState companyCompetition;
+  final CompanyExpansionState companyExpansion;
+  final int companyStageIndex;
   final bool isOnboarded;
   PlayerState copyWith({
     int? schemaVersion,
@@ -179,6 +187,9 @@ class PlayerState {
     int? unlockedAchievementsMask,
     int? activeProjectId,
     int? completedProjects,
+    CompanyCompetitionState? companyCompetition,
+    CompanyExpansionState? companyExpansion,
+    int? companyStageIndex,
     bool? isOnboarded,
   }) {
     return PlayerState(
@@ -273,6 +284,9 @@ class PlayerState {
           unlockedAchievementsMask ?? this.unlockedAchievementsMask,
       activeProjectId: activeProjectId ?? this.activeProjectId,
       completedProjects: completedProjects ?? this.completedProjects,
+      companyCompetition: companyCompetition ?? this.companyCompetition,
+      companyExpansion: companyExpansion ?? this.companyExpansion,
+      companyStageIndex: companyStageIndex ?? this.companyStageIndex,
       isOnboarded: isOnboarded ?? this.isOnboarded,
     );
   }
@@ -282,16 +296,11 @@ class PlayerState {
       ? activeActivities.first
       : _legacyActiveActivity;
   List<ActiveActivity> get activities {
-    if (activeActivities.isNotEmpty) {
-      return List.unmodifiable(activeActivities);
-    }
+    if (activeActivities.isNotEmpty) return List.unmodifiable(activeActivities);
     final legacy = _legacyActiveActivity;
-    return legacy == null
-        ? const <ActiveActivity>[]
-        : List.unmodifiable([legacy]);
+    return legacy == null ? const [] : List.unmodifiable([legacy]);
   }
 
   int get activityCapacity => careerLevel < 1 ? 1 : careerLevel;
   bool get hasActivityCapacity => activities.length < activityCapacity;
-
 }

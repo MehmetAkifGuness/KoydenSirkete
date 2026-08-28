@@ -14,6 +14,13 @@ import 'package:kariyerden_sirkete/features/assets/domain/services/home_catalog.
 import 'package:kariyerden_sirkete/features/career/presentation/pages/career_page.dart';
 import 'package:kariyerden_sirkete/features/company/presentation/pages/company_branches_page.dart';
 import 'package:kariyerden_sirkete/features/company/presentation/pages/company_page.dart';
+import 'package:kariyerden_sirkete/features/company/domain/entities/company_branch.dart';
+import 'package:kariyerden_sirkete/features/company/domain/entities/company_competition_state.dart';
+import 'package:kariyerden_sirkete/features/company/domain/entities/company_season_trophy.dart';
+import 'package:kariyerden_sirkete/features/company/domain/services/company_branch_service.dart';
+import 'package:kariyerden_sirkete/features/company/domain/services/company_employee_catalog.dart';
+import 'package:kariyerden_sirkete/features/company/domain/services/company_employee_development_service.dart';
+import 'package:kariyerden_sirkete/features/company/domain/services/company_expansion_service.dart';
 import 'package:kariyerden_sirkete/features/cities/presentation/pages/cities_page.dart';
 import 'package:kariyerden_sirkete/features/cities/domain/services/city_catalog.dart';
 import 'package:kariyerden_sirkete/features/dashboard/presentation/pages/dashboard_page.dart';
@@ -196,10 +203,16 @@ void main() {
   testWidgets('finance page renders projections and recorded movements', (
     tester,
   ) async {
-    final ledger = const FinanceLedger().record(
+    var ledger = const FinanceLedger().record(
       day: 1,
       category: FinanceCategory.casualIncome,
       amount: 150,
+    );
+    ledger = ledger.record(
+      day: 1,
+      category: FinanceCategory.companyRevenue,
+      amount: 500,
+      account: FinanceAccount.company,
     );
     final session = await _readySession(
       PlayerState.initial.copyWith(financeLedger: ledger),
@@ -214,7 +227,55 @@ void main() {
 
     expect(find.text('GÜNLÜK SABİT BÜTÇE'), findsOneWidget);
     expect(find.text('Ek kazanç'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('Şirket hareketleri'),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.text('Şirket operasyon geliri'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('Son 7 gün'),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
     expect(find.text('Son 7 gün'), findsOneWidget);
+    session.dispose();
+  });
+
+  testWidgets('company treasury transfers money in both directions', (
+    tester,
+  ) async {
+    final session = await _readySession(
+      PlayerState.initial.copyWith(
+        money: 5000,
+        companyLevel: 1,
+        companyFunds: 2000,
+        unlockedAchievementsMask: (1 << 12) - 1,
+      ),
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.dark(),
+        home: AppGradientBackground(child: CompanyPage(session: session)),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('HESAPLAR ARASI AKTARIM'), findsOneWidget);
+    await tester.tap(find.text('Sermaye aktar'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(FilledButton, 'Aktar'));
+    await tester.pumpAndSettle();
+    expect(session.state.money, 4000);
+    expect(session.state.companyFunds, 3000);
+
+    await tester.tap(find.text('Kâr payı çek'));
+    await tester.pumpAndSettle();
+    expect(find.text('Vergi ₺100 · Cüzdana net ₺900'), findsOneWidget);
+    await tester.tap(find.widgetWithText(FilledButton, 'Aktar'));
+    await tester.pumpAndSettle();
+    expect(session.state.money, 4900);
+    expect(session.state.companyFunds, 2000);
     session.dispose();
   });
 
@@ -232,11 +293,59 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    expect(find.text('Bölgesel hâkimiyet'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('Yeni bayi aç'),
+      400,
+      scrollable: find.byType(Scrollable).first,
+    );
     expect(find.text('Yeni bayi aç'), findsOneWidget);
     expect(find.text('Ankara'), findsOneWidget);
   });
 
-  testWidgets('level one company can select every project', (tester) async {
+  testWidgets('branch upgrade is visible and persists the new level', (
+    tester,
+  ) async {
+    final city = CityCatalog.cities.first;
+    final branch = CompanyBranch(id: city.id, cityId: city.id);
+    final cost = CompanyBranchService.upgradeCost(branch);
+    final session = await _readySession(
+      PlayerState.initial.copyWith(
+        companyLevel: 3,
+        companyFunds: cost + 100,
+        branches: [branch],
+      ),
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.dark(),
+        home: AppGradientBackground(
+          child: CompanyBranchesPage(session: session),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final action = find.text('Yükselt · Kasa ₺$cost');
+    await tester.scrollUntilVisible(
+      action,
+      400,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.ensureVisible(action);
+    await tester.pumpAndSettle();
+    expect(find.textContaining('odağı'), findsOneWidget);
+    await tester.tap(action);
+    await tester.pumpAndSettle();
+
+    expect(session.state.branches.single.level, 2);
+    expect(session.state.companyFunds, 100);
+    session.dispose();
+  });
+
+  testWidgets('standard projects stay open while invited project stays locked', (
+    tester,
+  ) async {
     final session = await _readySession(
       PlayerState.initial.copyWith(
         companyLevel: 1,
@@ -253,14 +362,241 @@ void main() {
     await tester.pumpAndSettle();
 
     await tester.scrollUntilVisible(
+      find.text('Şirket yol haritası'),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.text('Yerel girişim'), findsWidgets);
+    expect(find.text('Bölgesel şirket'), findsOneWidget);
+    expect(find.text('Ulusal marka'), findsOneWidget);
+    expect(find.text('Holding'), findsOneWidget);
+    await tester.scrollUntilVisible(
       find.text('Kurumsal çözüm'),
       300,
       scrollable: find.byType(Scrollable).first,
     );
+    expect(find.textContaining('başarı'), findsWidgets);
+    expect(find.textContaining('uzmanlığı'), findsWidgets);
     await tester.tap(find.text('Kurumsal çözüm'));
     await tester.pumpAndSettle();
 
     expect(session.state.activeProjectId, 3);
+    await tester.scrollUntilVisible(
+      find.text('Özel dönüşüm ortaklığı'),
+      400,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.text('Sezon daveti gerekli'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('Piyasa ve rekabet'),
+      500,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.text('Piyasa ve rekabet'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('30 günlük rekabet sezonu'),
+      400,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.text('Senin şirketin'), findsOneWidget);
+    expect(find.text('Atlas Global'), findsWidgets);
+    session.dispose();
+  });
+
+  testWidgets('company employee can be developed from the team card', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(800, 800));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final employee = CompanyEmployeeCatalog.candidates.first;
+    final cost = CompanyEmployeeDevelopmentService.developmentCost(employee);
+    final session = await _readySession(
+      PlayerState.initial.copyWith(
+        companyLevel: 1,
+        companyFunds: cost + 100,
+        employeeCount: 1,
+        employees: [employee],
+      ),
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.dark(),
+        home: AppGradientBackground(child: CompanyPage(session: session)),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final action = find.text('Kasa ₺$cost');
+    await tester.scrollUntilVisible(
+      action,
+      400,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.ensureVisible(action);
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Moral %70'), findsWidgets);
+    await tester.tap(action);
+    await tester.pumpAndSettle();
+
+    expect(
+      session.state.employees.single.performance,
+      employee.performance + CompanyEmployeeDevelopmentService.performanceGain,
+    );
+    expect(session.state.companyFunds, 100);
+    session.dispose();
+  });
+
+  testWidgets('eligible company acquisition requires confirmation', (
+    tester,
+  ) async {
+    final deal = CompanyExpansionService.deals.first;
+    final session = await _readySession(
+      PlayerState.initial.copyWith(
+        companyLevel: 3,
+        companyStageIndex: 1,
+        companyFunds: deal.cost + 250,
+      ),
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.dark(),
+        home: AppGradientBackground(child: CompanyPage(session: session)),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final action = find.byKey(ValueKey('complete-company-deal-${deal.id}'));
+    await tester.scrollUntilVisible(
+      action,
+      400,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.ensureVisible(action);
+    await tester.pumpAndSettle();
+    await tester.tap(action);
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('geri alınamaz'), findsOneWidget);
+    await tester.tap(find.text('İşlemi tamamla'));
+    await tester.pumpAndSettle();
+
+    expect(session.state.companyFunds, 250);
+    expect(session.state.companyExpansion.hasCompleted(deal.id), isTrue);
+    expect(
+      session.state.financeLedger.entries.last.category,
+      FinanceCategory.companyExpansion,
+    );
+    session.dispose();
+  });
+
+  testWidgets('company page shows trophy history and unlocked benefits', (
+    tester,
+  ) async {
+    final session = await _readySession(
+      PlayerState.initial.copyWith(
+        companyLevel: 3,
+        companyCompetition: const CompanyCompetitionState(
+          championships: 1,
+          trophies: [
+            CompanySeasonTrophy(seasonNumber: 1, points: 84, reward: 6000),
+          ],
+        ),
+      ),
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.dark(),
+        home: AppGradientBackground(child: CompanyPage(session: session)),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final title = find.text('Kupa geçmişi ve avantajlar');
+    await tester.scrollUntilVisible(
+      title,
+      600,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.ensureVisible(title);
+    await tester.pumpAndSettle();
+
+    expect(title, findsOneWidget);
+    expect(find.text('Proje güvencesi'), findsOneWidget);
+    expect(find.text('1. sezon şampiyonluğu'), findsOneWidget);
+    expect(find.text('84 puan · +₺6000'), findsOneWidget);
+    session.dispose();
+  });
+
+  testWidgets('company strategy selection is confirmed and season locked', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(800, 800));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final session = await _readySession(
+      PlayerState.initial.copyWith(
+        day: 7,
+        companyLevel: 1,
+        companyFunds: 10000,
+      ),
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.dark(),
+        home: AppGradientBackground(child: CompanyPage(session: session)),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final section = find.text('Rekabet stratejisi');
+    await tester.scrollUntilVisible(
+      section,
+      700,
+      scrollable: find.byType(Scrollable).first,
+    );
+    final action = find.byKey(
+      const ValueKey('select-company-strategy-price_leadership'),
+    );
+    await tester.scrollUntilVisible(
+      action,
+      500,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.ensureVisible(action);
+    await tester.pumpAndSettle();
+    await tester.tap(action);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Fiyat liderliği'), findsWidgets);
+    expect(find.textContaining('değiştirilemez'), findsWidgets);
+    await tester.tap(find.text('Stratejiyi seç'));
+    await tester.pumpAndSettle();
+
+    expect(session.state.companyCompetition.strategyId, 'price_leadership');
+    expect(find.text('Seçildi · sezon sonuna kadar kilitli'), findsOneWidget);
+    session.dispose();
+  });
+
+  testWidgets('progress page shows an open-ended career score target', (
+    tester,
+  ) async {
+    final session = await _readySession(
+      PlayerState.initial.copyWith(
+        totalWorkSessions: 12,
+        totalTrainingSessions: 4,
+      ),
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.dark(),
+        home: AppGradientBackground(child: ProgressPage(session: session)),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Devam eden kariyer özeti'), findsOneWidget);
+    expect(find.byKey(const ValueKey('career-score-total')), findsOneWidget);
+    expect(find.text('Bitiş yok · Prestij devam eder'), findsOneWidget);
+    expect(find.text('Sıradaki puan hedefleri'), findsOneWidget);
+    expect(find.text('Çalışma serisi'), findsOneWidget);
     session.dispose();
   });
 

@@ -9,9 +9,13 @@ import '../../../cities/domain/services/city_catalog.dart';
 import '../../../game/presentation/state/game_session_controller.dart';
 import '../../domain/entities/company_branch.dart';
 import '../../domain/entities/company_employee.dart';
+import '../../domain/entities/company_specialty.dart';
+import '../../domain/entities/company_region.dart';
 import '../../domain/services/company_branch_service.dart';
+import '../../domain/services/company_region_service.dart';
 import '../models/employee_candidate_filter.dart';
 import '../widgets/employee_filter_bar.dart';
+import '../widgets/company_region_panel.dart';
 
 class CompanyBranchesPage extends StatelessWidget {
   const CompanyBranchesPage({required this.session, super.key});
@@ -22,7 +26,7 @@ class CompanyBranchesPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppPage(
       title: 'Bayiler',
-      subtitle: 'Şirketini şehir şehir büyüt',
+      subtitle: 'Stratejik bölgelerde hâkimiyet kur',
       child: AnimatedBuilder(
         animation: session,
         builder: (context, _) {
@@ -31,9 +35,30 @@ class CompanyBranchesPage extends StatelessWidget {
             final branchCities = branches
                 .map((branch) => branch.cityId)
                 .toSet();
+            final regionService = CompanyRegionService();
+            final regionProgress = {
+              for (final progress in regionService.allProgress(session.state))
+                progress.definition.region: progress,
+            };
             final availableCities = CityCatalog.cities
                 .where((city) => !branchCities.contains(city.id))
-                .toList(growable: false);
+                .toList();
+            availableCities.sort((left, right) {
+              final leftRegion = regionService.definitionForCity(left)!;
+              final rightRegion = regionService.definitionForCity(right)!;
+              final leftProgress = regionProgress[leftRegion.region]!;
+              final rightProgress = regionProgress[rightRegion.region]!;
+              final leftPriority = leftProgress.isControlled
+                  ? -1
+                  : leftProgress.influence;
+              final rightPriority = rightProgress.isControlled
+                  ? -1
+                  : rightProgress.influence;
+              final influenceOrder = rightPriority.compareTo(leftPriority);
+              return influenceOrder != 0
+                  ? influenceOrder
+                  : right.marketLevel.compareTo(left.marketLevel);
+            });
             return ListView(
               padding: const EdgeInsets.fromLTRB(18, 8, 18, 28),
               children: [
@@ -41,6 +66,8 @@ class CompanyBranchesPage extends StatelessWidget {
                   branches: branches.length,
                   funds: session.state.companyFunds,
                 ),
+                const SizedBox(height: 25),
+                CompanyRegionPanel(state: session.state),
                 const SizedBox(height: 25),
                 if (branches.isNotEmpty) ...[
                   const AppSectionHeader(
@@ -145,7 +172,11 @@ class _CityBranchCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final check = session.checkBranchOpen(city);
-    final cost = CompanyBranchService.openingCost(city);
+    final branchService = CompanyBranchService();
+    final cost = branchService.openingCostFor(session.state, city);
+    final regionService = CompanyRegionService();
+    final region = regionService.definitionForCity(city)!;
+    final regionProgress = regionService.progress(session.state, region);
     return AppInfoCard(
       accent: check.isEligible ? AppPalette.secondary : AppPalette.outline,
       padding: const EdgeInsets.all(14),
@@ -178,10 +209,18 @@ class _CityBranchCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Nüfus ${city.population} · Pazar ${city.marketLevel} · ₺$cost',
+                  'Nüfus ${city.population} · Pazar ${city.marketLevel} · Şirket kasası ₺$cost',
                   style: const TextStyle(
                     color: AppPalette.textMuted,
                     fontSize: 11,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '${region.name} · Etki ${regionProgress.influence}/${CompanyRegionProgress.controlTarget} · ${region.advantage}',
+                  style: const TextStyle(
+                    color: AppPalette.textSecondary,
+                    fontSize: 10,
                   ),
                 ),
                 const SizedBox(height: 5),
@@ -203,7 +242,7 @@ class _CityBranchCard extends StatelessWidget {
             onPressed: check.isEligible && !session.isBusy
                 ? () => _open(context)
                 : null,
-            child: const Text('Aç'),
+            child: Text('Aç · ₺$cost'),
           ),
         ],
       ),
@@ -241,6 +280,11 @@ class _BranchCardState extends State<_BranchCard> {
     );
     final capacity = CompanyBranchService.employeeCapacity(branch);
     final service = CompanyBranchService();
+    final upgradeCheck = session.checkBranchUpgrade(branch.cityId);
+    final upgradeCost = service.upgradeCostFor(session.state, branch);
+    final specialty = city == null
+        ? CompanySpecialty.operations
+        : CompanyBranchService.preferredSpecialty(city);
     return AppInfoCard(
       accent: AppPalette.primary,
       child: Column(
@@ -265,12 +309,41 @@ class _BranchCardState extends State<_BranchCard> {
           ),
           const SizedBox(height: 5),
           Text(
-            '${branch.employees.length}/$capacity çalışan · +₺${service.dailyRevenue(branch)} gelir · -₺${service.dailyPayroll(branch)} maaş',
+            '${branch.employees.length}/$capacity çalışan · +₺${service.dailyRevenueFor(session.state, branch)} gelir · -₺${service.dailyPayrollFor(session.state, branch)} maaş',
             style: const TextStyle(
               color: AppPalette.textSecondary,
               fontSize: 12,
             ),
           ),
+          const SizedBox(height: 9),
+          Wrap(
+            spacing: 7,
+            runSpacing: 7,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              AppPill(
+                label:
+                    '${specialty.label} odağı · uzman +₺${CompanyBranchService.specialistDailyRevenueBonus}',
+                color: AppPalette.secondary,
+              ),
+              if (branch.level < CompanyBranchService.maxBranchLevel)
+                OutlinedButton.icon(
+                  onPressed: upgradeCheck.isEligible && !session.isBusy
+                      ? () => _upgrade(context)
+                      : null,
+                  icon: const Icon(Icons.upgrade_rounded, size: 17),
+                  label: Text('Yükselt · Kasa ₺$upgradeCost'),
+                ),
+            ],
+          ),
+          if (!upgradeCheck.isEligible &&
+              branch.level < CompanyBranchService.maxBranchLevel) ...[
+            const SizedBox(height: 5),
+            Text(
+              upgradeCheck.reason,
+              style: const TextStyle(color: AppPalette.textMuted, fontSize: 10),
+            ),
+          ],
           const Divider(height: 22),
           for (final employee in branch.employees) ...[
             _BranchEmployeeTile(
@@ -313,6 +386,11 @@ class _BranchCardState extends State<_BranchCard> {
       ),
     );
   }
+
+  Future<void> _upgrade(BuildContext context) async {
+    final message = await widget.session.upgradeBranch(widget.branch.cityId);
+    if (context.mounted && message != null) AppFeedback.show(context, message);
+  }
 }
 
 class _BranchEmployeeTile extends StatelessWidget {
@@ -328,6 +406,10 @@ class _BranchEmployeeTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final development = session.checkBranchEmployeeDevelopment(
+      cityId,
+      employee.id,
+    );
     return Row(
       children: [
         Container(
@@ -357,14 +439,31 @@ class _BranchEmployeeTile extends StatelessWidget {
               ),
               const SizedBox(height: 3),
               Text(
-                '${employee.role} · %${employee.performance} performans · ₺${employee.dailySalary}/gün',
+                '${employee.role} · ${employee.specialty.label} · %${employee.performance} · ₺${employee.dailySalary}/gün',
                 style: const TextStyle(
                   color: AppPalette.textMuted,
                   fontSize: 10,
                 ),
               ),
+              const SizedBox(height: 3),
+              Text(
+                'Moral %${employee.morale} · Sadakat %${employee.loyalty} · '
+                'Etkin güç %${employee.effectivePerformance}',
+                style: const TextStyle(
+                  color: AppPalette.textSecondary,
+                  fontSize: 10,
+                ),
+              ),
             ],
           ),
+        ),
+        IconButton(
+          tooltip: development.reason,
+          onPressed: development.isEligible && !session.isBusy
+              ? () => _develop(context)
+              : null,
+          icon: const Icon(Icons.school_outlined, size: 18),
+          color: AppPalette.secondary,
         ),
         IconButton(
           onPressed: session.isBusy ? null : () => _dismiss(context),
@@ -373,6 +472,11 @@ class _BranchEmployeeTile extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  Future<void> _develop(BuildContext context) async {
+    final message = await session.developBranchEmployee(cityId, employee.id);
+    if (context.mounted && message != null) AppFeedback.show(context, message);
   }
 
   Future<void> _dismiss(BuildContext context) async {
@@ -441,7 +545,7 @@ class _BranchCandidateTile extends StatelessWidget {
               ),
               const SizedBox(height: 3),
               Text(
-                '${employee.role} · %${employee.performance} performans · ₺${employee.dailySalary}/gün',
+                '${employee.role} · ${employee.specialty.label} · %${employee.performance} · ₺${employee.dailySalary}/gün',
                 style: const TextStyle(
                   color: AppPalette.textMuted,
                   fontSize: 10,

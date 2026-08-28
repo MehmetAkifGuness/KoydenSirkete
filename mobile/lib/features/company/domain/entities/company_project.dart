@@ -1,3 +1,5 @@
+import 'company_specialty.dart';
+
 class CompanyProject {
   const CompanyProject({
     required this.id,
@@ -7,6 +9,10 @@ class CompanyProject {
     required this.reward,
     required this.progressPerEmployee,
     required this.experienceReward,
+    required this.riskPercent,
+    required this.recommendedCompanyLevel,
+    required this.specialty,
+    this.requiresSeasonInvitation = false,
   });
 
   final int id;
@@ -16,4 +22,8 @@ class CompanyProject {
   final int reward;
   final int progressPerEmployee;
   final int experienceReward;
+  final int riskPercent;
+  final int recommendedCompanyLevel;
+  final CompanySpecialty specialty;
+  final bool requiresSeasonInvitation;
 }

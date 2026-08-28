@@ -17,7 +17,7 @@ class AppDatabase extends SqlitePlayerStateStore {
     final databasePath = join(await getDatabasesPath(), _databaseName);
     return _database = await openDatabase(
       databasePath,
-      version: 25,
+      version: 28,
       onCreate: (database, _) async {
         await database.execute('''
           CREATE TABLE $_tableName (
@@ -44,6 +44,9 @@ class AppDatabase extends SqlitePlayerStateStore {
             owned_home_ids_json TEXT,
             rented_home_ids_json TEXT,
             finance_ledger_json TEXT,
+            company_competition_json TEXT,
+            company_expansion_json TEXT,
+            company_stage_index INTEGER NOT NULL DEFAULT 0,
             owned_car_id INTEGER,
             application_blocked_job_id INTEGER,
             application_blocked_until_day INTEGER NOT NULL DEFAULT 0,
@@ -260,6 +263,21 @@ class AppDatabase extends SqlitePlayerStateStore {
             'ALTER TABLE $_tableName ADD COLUMN finance_ledger_json TEXT',
           );
         }
+        if (oldVersion < 26) {
+          await database.execute(
+            'ALTER TABLE $_tableName ADD COLUMN company_competition_json TEXT',
+          );
+        }
+        if (oldVersion < 27) {
+          await database.execute(
+            'ALTER TABLE $_tableName ADD COLUMN company_stage_index INTEGER NOT NULL DEFAULT 0',
+          );
+        }
+        if (oldVersion < 28) {
+          await database.execute(
+            'ALTER TABLE $_tableName ADD COLUMN company_expansion_json TEXT',
+          );
+        }
       },
     );
   }
@@ -309,6 +327,9 @@ abstract class SqlitePlayerStateStore implements PlayerStateStore {
       ownedHomeIdsJson: row['owned_home_ids_json'] as String?,
       rentedHomeIdsJson: row['rented_home_ids_json'] as String?,
       financeLedgerJson: row['finance_ledger_json'] as String?,
+      companyCompetitionJson: row['company_competition_json'] as String?,
+      companyExpansionJson: row['company_expansion_json'] as String?,
+      companyStageIndex: row['company_stage_index'] as int? ?? 0,
       ownedCarId: row['owned_car_id'] as int?,
       applicationBlockedJobId: row['application_blocked_job_id'] as int?,
       applicationBlockedUntilDay:
@@ -370,6 +391,9 @@ abstract class SqlitePlayerStateStore implements PlayerStateStore {
       'owned_home_ids_json': record.ownedHomeIdsJson,
       'rented_home_ids_json': record.rentedHomeIdsJson,
       'finance_ledger_json': record.financeLedgerJson,
+      'company_competition_json': record.companyCompetitionJson,
+      'company_expansion_json': record.companyExpansionJson,
+      'company_stage_index': record.companyStageIndex,
       'owned_car_id': record.ownedCarId,
       'application_blocked_job_id': record.applicationBlockedJobId,
       'application_blocked_until_day': record.applicationBlockedUntilDay,

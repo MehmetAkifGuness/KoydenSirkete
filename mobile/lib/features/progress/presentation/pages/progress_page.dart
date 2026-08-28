@@ -6,6 +6,7 @@ import '../../../game/domain/entities/player_state.dart';
 import '../../../game/presentation/state/game_session_controller.dart';
 import '../../domain/entities/achievement.dart';
 import '../../domain/services/achievement_service.dart';
+import '../widgets/career_score_panel.dart';
 
 class ProgressPage extends StatelessWidget {
   const ProgressPage({required this.session, super.key});
@@ -16,7 +17,7 @@ class ProgressPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppPage(
       title: 'İlerleme',
-      subtitle: 'Bugünkü adımların, yarının hikâyesi',
+      subtitle: 'Biten bir oyun değil, büyüyen bir kariyer',
       child: AnimatedBuilder(
         animation: session,
         builder: (context, _) {
@@ -25,9 +26,11 @@ class ProgressPage extends StatelessWidget {
           return ListView(
             padding: const EdgeInsets.fromLTRB(18, 8, 18, 28),
             children: [
+              CareerScorePanel(state: state),
+              const SizedBox(height: 28),
               const AppSectionHeader(
-                title: 'Kariyer özeti',
-                caption: 'Şimdiye kadar oluşturduğun değer',
+                title: 'Temel istatistikler',
+                caption: 'Kariyer puanını besleyen toplamların.',
               ),
               const SizedBox(height: 12),
               GridView.count(

@@ -10,6 +10,8 @@ import '../mappers/company_employee_codec.dart';
 import '../mappers/company_branch_codec.dart';
 import '../mappers/owned_asset_ids_codec.dart';
 import '../mappers/finance_ledger_codec.dart';
+import '../mappers/company_competition_codec.dart';
+import '../mappers/company_expansion_codec.dart';
 
 class LocalPlayerStateRepository implements PlayerStateRepository {
   LocalPlayerStateRepository({
@@ -65,6 +67,13 @@ class LocalPlayerStateRepository implements PlayerStateRepository {
         ownedHomeIdsJson: OwnedAssetIdsCodec().encode(model.ownedHomeIds),
         rentedHomeIdsJson: OwnedAssetIdsCodec().encode(model.rentedHomeIds),
         financeLedgerJson: FinanceLedgerCodec().encode(model.financeLedger),
+        companyCompetitionJson: CompanyCompetitionCodec().encode(
+          model.companyCompetition,
+        ),
+        companyExpansionJson: CompanyExpansionCodec().encode(
+          model.companyExpansion,
+        ),
+        companyStageIndex: model.companyStageIndex,
         ownedCarId: model.ownedCarId,
         applicationBlockedJobId: model.applicationBlockedJobId,
         applicationBlockedUntilDay: model.applicationBlockedUntilDay,

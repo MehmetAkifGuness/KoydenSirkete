@@ -19,47 +19,70 @@ class FinancePage extends StatelessWidget {
       animation: session,
       builder: (context, _) {
         final state = session.state;
-        final costs = LivingCostService().breakdown(
-          state,
-          state.currentCityId,
-        );
-        final today = state.financeLedger.forDay(state.day).reversed.toList();
-        final weekly = state.financeLedger.totals(
+        final costs = LivingCostService().breakdown(state, state.currentCityId);
+        final personalToday = state.financeLedger
+            .forDay(state.day, account: FinanceAccount.personal)
+            .reversed
+            .toList();
+        final companyToday = state.financeLedger
+            .forDay(state.day, account: FinanceAccount.company)
+            .reversed
+            .toList();
+        final personalWeekly = state.financeLedger.totals(
           fromDay: (state.day - 6).clamp(1, state.day),
           toDay: state.day,
+          account: FinanceAccount.personal,
+        );
+        final companyWeekly = state.financeLedger.totals(
+          fromDay: (state.day - 6).clamp(1, state.day),
+          toDay: state.day,
+          account: FinanceAccount.company,
         );
         return ListView(
           padding: const EdgeInsets.fromLTRB(18, 8, 18, 28),
           children: [
-            _ProjectionCard(costs: costs),
-            const SizedBox(height: 24),
-            AppSectionHeader(
-              title: 'Bugünkü hareketler',
-              caption: today.isEmpty
-                  ? 'Henüz para hareketi oluşmadı.'
-                  : '${today.length} kategori işlendi',
+            _AccountBalances(
+              personal: state.money,
+              company: state.companyFunds,
             ),
             const SizedBox(height: 12),
-            if (today.isEmpty)
-              const _EmptyHistory()
-            else
-              for (final entry in today) ...[
-                _FinanceEntryTile(entry: entry),
-                const SizedBox(height: 8),
-              ],
-            const SizedBox(height: 20),
+            _ProjectionCard(costs: costs),
+            const SizedBox(height: 24),
+            _AccountHistory(
+              title: 'Kişisel hareketler',
+              caption: 'Maaş, yaşam giderleri ve kişisel varlıklar',
+              entries: personalToday,
+            ),
+            const SizedBox(height: 22),
+            _AccountHistory(
+              title: 'Şirket hareketleri',
+              caption: 'Projeler, maaşlar, bayiler ve piyasa etkileri',
+              entries: companyToday,
+            ),
+            const SizedBox(height: 22),
             AppSectionHeader(
               title: 'Son 7 gün',
               caption:
-                  'Gelir ₺${weekly.income} · Gider ₺${weekly.expense} · Net ${_signedMoney(weekly.net)}',
+                  'Kişisel ${_signedMoney(personalWeekly.net)} · Şirket ${_signedMoney(companyWeekly.net)}',
             ),
             const SizedBox(height: 12),
-            for (var day = (state.day - 6).clamp(1, state.day);
-                day <= state.day;
-                day++) ...[
+            for (
+              var day = (state.day - 6).clamp(1, state.day);
+              day <= state.day;
+              day++
+            ) ...[
               _DailyFinanceRow(
                 day: day,
-                totals: state.financeLedger.totals(fromDay: day, toDay: day),
+                personal: state.financeLedger.totals(
+                  fromDay: day,
+                  toDay: day,
+                  account: FinanceAccount.personal,
+                ),
+                company: state.financeLedger.totals(
+                  fromDay: day,
+                  toDay: day,
+                  account: FinanceAccount.company,
+                ),
               ),
               const SizedBox(height: 8),
             ],
@@ -67,6 +90,98 @@ class FinancePage extends StatelessWidget {
         );
       },
     ),
+  );
+}
+
+class _AccountBalances extends StatelessWidget {
+  const _AccountBalances({required this.personal, required this.company});
+
+  final int personal;
+  final int company;
+
+  @override
+  Widget build(BuildContext context) => AppInfoCard(
+    accent: AppPalette.secondary,
+    child: Row(
+      children: [
+        Expanded(
+          child: _BalanceColumn(
+            title: 'Kişisel cüzdan',
+            amount: personal,
+            color: AppPalette.secondary,
+          ),
+        ),
+        Container(width: 1, height: 44, color: AppPalette.outlineMuted),
+        const SizedBox(width: 14),
+        Expanded(
+          child: _BalanceColumn(
+            title: 'Şirket kasası',
+            amount: company,
+            color: AppPalette.tertiary,
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+class _BalanceColumn extends StatelessWidget {
+  const _BalanceColumn({
+    required this.title,
+    required this.amount,
+    required this.color,
+  });
+
+  final String title;
+  final int amount;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(
+        title,
+        style: const TextStyle(color: AppPalette.textMuted, fontSize: 10),
+      ),
+      const SizedBox(height: 4),
+      Text(
+        '₺$amount',
+        style: TextStyle(
+          color: color,
+          fontSize: 19,
+          fontWeight: FontWeight.w900,
+        ),
+      ),
+    ],
+  );
+}
+
+class _AccountHistory extends StatelessWidget {
+  const _AccountHistory({
+    required this.title,
+    required this.caption,
+    required this.entries,
+  });
+
+  final String title;
+  final String caption;
+  final List<FinanceEntry> entries;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      AppSectionHeader(title: title, caption: caption),
+      const SizedBox(height: 12),
+      if (entries.isEmpty)
+        const _EmptyHistory()
+      else
+        for (final entry in entries) ...[
+          _FinanceEntryTile(entry: entry),
+          const SizedBox(height: 8),
+        ],
+    ],
   );
 }
 
@@ -174,14 +289,21 @@ class _FinanceEntryTile extends StatelessWidget {
 }
 
 class _DailyFinanceRow extends StatelessWidget {
-  const _DailyFinanceRow({required this.day, required this.totals});
+  const _DailyFinanceRow({
+    required this.day,
+    required this.personal,
+    required this.company,
+  });
 
   final int day;
-  final FinanceTotals totals;
+  final FinanceTotals personal;
+  final FinanceTotals company;
 
   @override
   Widget build(BuildContext context) => AppInfoCard(
-    accent: totals.net >= 0 ? AppPalette.success : AppPalette.outline,
+    accent: personal.net + company.net >= 0
+        ? AppPalette.success
+        : AppPalette.outline,
     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
     child: Row(
       children: [
@@ -193,18 +315,33 @@ class _DailyFinanceRow extends StatelessWidget {
           ),
         ),
         Expanded(
-          child: Text(
-            '+₺${totals.income}  -₺${totals.expense}',
-            style: const TextStyle(
-              color: AppPalette.textSecondary,
-              fontSize: 11,
-            ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Kişisel ${_signedMoney(personal.net)}',
+                style: const TextStyle(
+                  color: AppPalette.textSecondary,
+                  fontSize: 11,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                'Şirket ${_signedMoney(company.net)}',
+                style: const TextStyle(
+                  color: AppPalette.textMuted,
+                  fontSize: 10,
+                ),
+              ),
+            ],
           ),
         ),
         Text(
-          _signedMoney(totals.net),
+          _signedMoney(personal.net + company.net),
           style: TextStyle(
-            color: totals.net >= 0 ? AppPalette.success : AppPalette.warning,
+            color: personal.net + company.net >= 0
+                ? AppPalette.success
+                : AppPalette.warning,
             fontSize: 12,
             fontWeight: FontWeight.w900,
           ),
@@ -227,8 +364,7 @@ class _EmptyHistory extends StatelessWidget {
   );
 }
 
-String _signedMoney(int amount) =>
-    '${amount >= 0 ? '+' : '-'}₺${amount.abs()}';
+String _signedMoney(int amount) => '${amount >= 0 ? '+' : '-'}₺${amount.abs()}';
 
 extension on FinanceCategory {
   String get label => switch (this) {
@@ -247,6 +383,17 @@ extension on FinanceCategory {
     FinanceCategory.rentalMaintenance => 'Kiralık ev bakımı',
     FinanceCategory.wheel => 'Esnaf çarkı',
     FinanceCategory.companyInvestment => 'Şirket yatırımı',
+    FinanceCategory.companyCapital => 'Sermaye aktarımı',
+    FinanceCategory.companyDividend => 'Kâr payı',
+    FinanceCategory.dividendTax => 'Kâr payı vergisi',
+    FinanceCategory.companyRevenue => 'Şirket operasyon geliri',
+    FinanceCategory.companyPayroll => 'Çalışan maaşları',
+    FinanceCategory.companyProject => 'Proje sonucu',
+    FinanceCategory.companyBranch => 'Bayi operasyonları',
+    FinanceCategory.companyMarket => 'Piyasa ve rekabet',
+    FinanceCategory.companySeason => 'Rekabet sezonu ödülü',
+    FinanceCategory.companyDevelopment => 'Çalışan gelişimi',
+    FinanceCategory.companyExpansion => 'Satın alma ve birleşme',
   };
 
   IconData get icon => switch (this) {
@@ -265,5 +412,16 @@ extension on FinanceCategory {
     FinanceCategory.rentalMaintenance => Icons.home_repair_service_outlined,
     FinanceCategory.wheel => Icons.casino_outlined,
     FinanceCategory.companyInvestment => Icons.business_center_outlined,
+    FinanceCategory.companyCapital => Icons.swap_horiz_rounded,
+    FinanceCategory.companyDividend => Icons.savings_outlined,
+    FinanceCategory.dividendTax => Icons.account_balance_outlined,
+    FinanceCategory.companyRevenue => Icons.trending_up_rounded,
+    FinanceCategory.companyPayroll => Icons.groups_outlined,
+    FinanceCategory.companyProject => Icons.assignment_turned_in_outlined,
+    FinanceCategory.companyBranch => Icons.storefront_outlined,
+    FinanceCategory.companyMarket => Icons.show_chart_rounded,
+    FinanceCategory.companySeason => Icons.emoji_events_outlined,
+    FinanceCategory.companyDevelopment => Icons.school_outlined,
+    FinanceCategory.companyExpansion => Icons.handshake_outlined,
   };
 }

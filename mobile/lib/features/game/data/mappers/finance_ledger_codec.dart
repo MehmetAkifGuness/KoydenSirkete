@@ -9,6 +9,7 @@ class FinanceLedgerCodec {
         'day': entry.day,
         'category': entry.category.name,
         'amount': entry.amount,
+        'account': entry.account.name,
       },
   ]);
 
@@ -27,9 +28,18 @@ class FinanceLedgerCodec {
         if (category.isEmpty) continue;
         final day = item['day'];
         final amount = item['amount'];
+        final accountName = item['account'];
+        final account = FinanceAccount.values.where(
+          (candidate) => candidate.name == accountName,
+        );
         if (day is! int || amount is! int || amount == 0) continue;
         entries.add(
-          FinanceEntry(day: day, category: category.first, amount: amount),
+          FinanceEntry(
+            day: day,
+            category: category.first,
+            amount: amount,
+            account: account.isEmpty ? FinanceAccount.personal : account.first,
+          ),
         );
       }
       return FinanceLedger(entries: List<FinanceEntry>.unmodifiable(entries));

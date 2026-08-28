@@ -11,7 +11,11 @@ import '../mappers/company_employee_codec.dart';
 import '../mappers/company_branch_codec.dart';
 import '../mappers/owned_asset_ids_codec.dart';
 import '../mappers/finance_ledger_codec.dart';
+import '../mappers/company_competition_codec.dart';
+import '../mappers/company_expansion_codec.dart';
 import '../../../company/domain/entities/company_branch.dart';
+import '../../../company/domain/entities/company_competition_state.dart';
+import '../../../company/domain/entities/company_expansion_state.dart';
 import '../../../finance/domain/entities/finance_ledger.dart';
 
 class PlayerStateModel {
@@ -68,6 +72,9 @@ class PlayerStateModel {
     this.unlockedAchievementsMask = 0,
     this.activeProjectId = 1,
     this.completedProjects = 0,
+    this.companyCompetition = const CompanyCompetitionState(),
+    this.companyExpansion = const CompanyExpansionState(),
+    this.companyStageIndex = 0,
     this.isOnboarded = false,
   });
 
@@ -134,6 +141,14 @@ class PlayerStateModel {
       unlockedAchievementsMask: record.unlockedAchievementsMask,
       activeProjectId: record.activeProjectId,
       completedProjects: record.completedProjects,
+      companyCompetition: CompanyCompetitionCodec().decode(
+        record.companyCompetitionJson,
+        day: record.day,
+      ),
+      companyExpansion: CompanyExpansionCodec().decode(
+        record.companyExpansionJson,
+      ),
+      companyStageIndex: record.companyStageIndex,
       isOnboarded: record.isOnboarded,
     );
   }
@@ -190,6 +205,9 @@ class PlayerStateModel {
   final int unlockedAchievementsMask;
   final int activeProjectId;
   final int completedProjects;
+  final CompanyCompetitionState companyCompetition;
+  final CompanyExpansionState companyExpansion;
+  final int companyStageIndex;
   final bool isOnboarded;
 
   factory PlayerStateModel.fromEntity(PlayerState entity) {
@@ -246,6 +264,9 @@ class PlayerStateModel {
       unlockedAchievementsMask: entity.unlockedAchievementsMask,
       activeProjectId: entity.activeProjectId,
       completedProjects: entity.completedProjects,
+      companyCompetition: entity.companyCompetition,
+      companyExpansion: entity.companyExpansion,
+      companyStageIndex: entity.companyStageIndex,
       isOnboarded: entity.isOnboarded,
     );
   }

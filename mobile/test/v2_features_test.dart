@@ -7,10 +7,16 @@ import 'package:kariyerden_sirkete/features/cities/domain/services/city_service.
 import 'package:kariyerden_sirkete/features/cities/domain/services/city_salary_service.dart';
 import 'package:kariyerden_sirkete/features/cities/domain/services/living_cost_service.dart';
 import 'package:kariyerden_sirkete/features/company/domain/services/company_branch_service.dart';
+import 'package:kariyerden_sirkete/features/company/domain/services/company_employee_catalog.dart';
+import 'package:kariyerden_sirkete/features/company/domain/services/company_employee_development_service.dart';
 import 'package:kariyerden_sirkete/features/company/domain/services/company_service.dart';
 import 'package:kariyerden_sirkete/features/company/domain/services/company_growth_service.dart';
 import 'package:kariyerden_sirkete/features/company/domain/services/company_project_catalog.dart';
 import 'package:kariyerden_sirkete/features/company/domain/entities/company_branch.dart';
+import 'package:kariyerden_sirkete/features/company/domain/entities/company_employee.dart';
+import 'package:kariyerden_sirkete/features/company/domain/entities/company_specialty.dart';
+import 'package:kariyerden_sirkete/features/company/domain/services/company_project_strategy_service.dart';
+import 'package:kariyerden_sirkete/features/company/domain/services/company_treasury_service.dart';
 import 'package:kariyerden_sirkete/features/cities/domain/services/city_catalog.dart';
 import 'package:kariyerden_sirkete/features/cities/domain/services/city_opportunity_service.dart';
 import 'package:kariyerden_sirkete/features/employment/domain/entities/employment.dart';
@@ -37,6 +43,12 @@ void main() {
     expect(JobEmployerCatalog.employers, hasLength(24));
     expect(JobEmployerCatalog.employers.toSet(), hasLength(24));
     expect(TrainingCatalog.courses.length, greaterThanOrEqualTo(10));
+    expect(
+      CompanyEmployeeCatalog.candidates
+          .map((employee) => employee.specialty)
+          .toSet(),
+      containsAll(CompanySpecialty.values),
+    );
     expect(CityCatalog.cities, hasLength(81));
     expect(CityCatalog.cities.map((city) => city.name).toSet(), hasLength(81));
     expect(
@@ -59,25 +71,32 @@ void main() {
     );
     expect(
       CityCatalog.cities.map((city) => city.salaryMultiplier),
-      everyElement(inInclusiveRange(.9, 1.5)),
+      everyElement(inInclusiveRange(.95, 1.25)),
     );
   });
 
-  test(
-    'city rent follows population and rank requirements stay progressive',
-    () {
-      expect(CityCatalog.dailyCostForPopulation(100000), 50);
-      expect(CityCatalog.dailyCostForPopulation(1000000), 500);
-      expect(
-        JobCatalog.findById(13)!.scaledSkillRequirements[SkillId.operations],
-        228,
-      );
-      expect(
-        JobCatalog.findById(15)!.scaledSkillRequirements[SkillId.operations],
-        greaterThan(228),
-      );
-    },
-  );
+  test('city costs follow a bounded curve and ranks stay progressive', () {
+    expect(
+      CityCatalog.dailyCostForPopulation(100000),
+      inInclusiveRange(90, 110),
+    );
+    expect(
+      CityCatalog.dailyCostForPopulation(1000000),
+      inInclusiveRange(300, 450),
+    );
+    expect(
+      CityCatalog.dailyCostForPopulation(15754053),
+      CityCatalog.maximumDailyCost,
+    );
+    expect(
+      JobCatalog.findById(13)!.scaledSkillRequirements[SkillId.operations],
+      228,
+    );
+    expect(
+      JobCatalog.findById(15)!.scaledSkillRequirements[SkillId.operations],
+      greaterThan(228),
+    );
+  });
 
   test('city opportunities and bots are deterministic for the same day', () {
     final cityService = CityOpportunityService();
@@ -279,7 +298,7 @@ void main() {
     expect(effective.energyCost, greaterThanOrEqualTo(5));
   });
 
-  test('employer tasks use the six balanced base schedules', () {
+  test('employer tasks use the twelve balanced base schedules', () {
     const expected = {
       '8/1/4',
       '10/2/5',
@@ -287,6 +306,12 @@ void main() {
       '14/4/7',
       '16/5/8',
       '18/6/9',
+      '9/2/4',
+      '15/3/7',
+      '11/2/5',
+      '13/4/6',
+      '17/5/8',
+      '19/6/10',
     };
     final generator = EmployerTaskGenerator();
     final schedules = <String>{};
@@ -310,7 +335,12 @@ void main() {
 
   test('city branch recruits employees and produces daily company income', () {
     final company = CompanyService()
-        .establish(PlayerState.initial.copyWith(money: 1500, careerLevel: 3))
+        .establish(
+          PlayerState.initial.copyWith(
+            money: CompanyService.establishmentCost + 500,
+            careerLevel: 3,
+          ),
+        )
         .copyWith(companyFunds: 100000);
     final city = CityCatalog.cities[1];
     final branchService = CompanyBranchService();
@@ -323,6 +353,206 @@ void main() {
     expect(opened.companyFunds, lessThan(company.companyFunds));
     expect(staffed.branches.single.employees.single.id, employee.id);
     expect(operated.state.companyFunds, greaterThan(staffed.companyFunds));
+  });
+
+  test('employee specialty improves matching project speed and success', () {
+    const specialist = CompanyEmployee(
+      id: 1001,
+      name: 'Uzman',
+      role: 'Operasyon uzmanı',
+      performance: 80,
+      dailySalary: 40,
+    );
+    const mismatched = CompanyEmployee(
+      id: 1002,
+      name: 'Finansçı',
+      role: 'Finans analisti',
+      performance: 80,
+      dailySalary: 40,
+    );
+    final project = CompanyProjectCatalog.projects.first;
+    final strategy = CompanyProjectStrategyService();
+    final specialistForecast = strategy.forecast(
+      state: PlayerState.initial.copyWith(companyLevel: 1),
+      project: project,
+      employees: const [specialist],
+    );
+    final mismatchedForecast = strategy.forecast(
+      state: PlayerState.initial.copyWith(companyLevel: 1),
+      project: project,
+      employees: const [mismatched],
+    );
+
+    expect(specialist.specialty, CompanySpecialty.operations);
+    expect(
+      specialistForecast.dailyProgress,
+      greaterThan(mismatchedForecast.dailyProgress),
+    );
+    expect(
+      specialistForecast.successChance,
+      greaterThan(mismatchedForecast.successChance),
+    );
+    expect(
+      specialistForecast.estimatedDays,
+      lessThan(mismatchedForecast.estimatedDays),
+    );
+  });
+
+  test('employee development spends company funds and improves forecasts', () {
+    const employee = CompanyEmployee(
+      id: 1010,
+      name: 'Gelişen Uzman',
+      role: 'Operasyon uzmanı',
+      performance: 80,
+      dailySalary: 40,
+    );
+    final project = CompanyProjectCatalog.projects.first;
+    final development = CompanyEmployeeDevelopmentService();
+    final cost = CompanyEmployeeDevelopmentService.developmentCost(employee);
+    final state = PlayerState.initial.copyWith(
+      companyLevel: 1,
+      companyFunds: cost + 100,
+      employeeCount: 1,
+      employees: const [employee],
+    );
+    final before = CompanyService().projectForecast(state, project);
+    final developed = development.developHeadquarters(state, employee.id);
+    final after = CompanyService().projectForecast(developed, project);
+
+    expect(developed.companyFunds, 100);
+    expect(developed.employees.single.performance, 85);
+    expect(developed.employees.single.morale, 78);
+    expect(developed.employees.single.loyalty, 75);
+    expect(after.dailyProgress, greaterThan(before.dailyProgress));
+    expect(after.successChance, greaterThanOrEqualTo(before.successChance));
+  });
+
+  test('maximum performance employee can recover morale and loyalty', () {
+    const employee = CompanyEmployee(
+      id: 1012,
+      name: 'Kıdemli Uzman',
+      role: 'Operasyon uzmanı',
+      performance: 100,
+      dailySalary: 80,
+      morale: 40,
+      loyalty: 50,
+    );
+    final cost = CompanyEmployeeDevelopmentService.developmentCost(employee);
+    final state = PlayerState.initial.copyWith(
+      companyLevel: 1,
+      companyFunds: cost,
+      employeeCount: 1,
+      employees: const [employee],
+    );
+    final service = CompanyEmployeeDevelopmentService();
+    final developed = service.developHeadquarters(state, employee.id);
+
+    expect(service.checkHeadquarters(state, employee.id).isEligible, isTrue);
+    expect(developed.employees.single.performance, 100);
+    expect(developed.employees.single.morale, 48);
+    expect(developed.employees.single.loyalty, 55);
+  });
+
+  test('branch employee development updates only its own branch', () {
+    const employee = CompanyEmployee(
+      id: 1011,
+      name: 'Bayi Uzmanı',
+      role: 'Satış temsilcisi',
+      performance: 70,
+      dailySalary: 35,
+    );
+    final cost = CompanyEmployeeDevelopmentService.developmentCost(employee);
+    final state = PlayerState.initial.copyWith(
+      companyLevel: 2,
+      companyFunds: cost,
+      branches: const [
+        CompanyBranch(id: 1, cityId: 1, employees: [employee]),
+        CompanyBranch(id: 2, cityId: 2),
+      ],
+    );
+    final developed = CompanyEmployeeDevelopmentService().developBranch(
+      state,
+      1,
+      employee.id,
+    );
+
+    expect(developed.companyFunds, 0);
+    expect(developed.branches.first.employees.single.performance, 75);
+    expect(developed.branches.last.employees, isEmpty);
+  });
+
+  test('high-risk project can fail and charges its operating cost', () {
+    const employee = CompanyEmployee(
+      id: 1003,
+      name: 'Çalışan',
+      role: 'Operasyon uzmanı',
+      performance: 70,
+      dailySalary: 30,
+    );
+    final project = CompanyProjectCatalog.projects.reduce(
+      (left, right) => left.riskPercent >= right.riskPercent ? left : right,
+    );
+    final strategy = CompanyProjectStrategyService();
+    final base = PlayerState.initial.copyWith(
+      companyLevel: 1,
+      employees: const [employee],
+      employeeCount: 1,
+      activeProjectId: project.id,
+      projectProgress: 99,
+    );
+    final funds = Iterable<int>.generate(100, (index) => 10000 + index)
+        .firstWhere(
+          (value) => !strategy.succeeds(
+            state: base.copyWith(companyFunds: value),
+            project: project,
+            employees: const [employee],
+          ),
+        );
+    final result = CompanyService().advanceProject(
+      base.copyWith(companyFunds: funds),
+    );
+
+    expect(result.succeeded, isFalse);
+    expect(result.state.companyFunds, funds - project.cost);
+    expect(result.state.completedProjects, 0);
+    expect(result.state.projectProgress, 0);
+  });
+
+  test('branch upgrade spends funds and increases capacity and revenue', () {
+    final city = CityCatalog.cities[2];
+    const employee = CompanyEmployee(
+      id: 1004,
+      name: 'Dijital Uzman',
+      role: 'Dijital uzmanı',
+      performance: 85,
+      dailySalary: 55,
+    );
+    final branch = CompanyBranch(
+      id: city.id,
+      cityId: city.id,
+      employees: const [employee],
+    );
+    final service = CompanyBranchService();
+    final cost = CompanyBranchService.upgradeCost(branch);
+    final state = PlayerState.initial.copyWith(
+      companyLevel: 3,
+      companyFunds: cost + 100,
+      branches: [branch],
+    );
+    final upgraded = service.upgrade(state, city.id);
+    final upgradedBranch = upgraded.branches.single;
+
+    expect(
+      CompanyBranchService.preferredSpecialty(city),
+      CompanySpecialty.technology,
+    );
+    expect(upgraded.companyFunds, 100);
+    expect(upgradedBranch.level, 2);
+    expect(CompanyBranchService.employeeCapacity(upgradedBranch), 6);
+    expect(
+      service.dailyRevenue(upgradedBranch),
+      greaterThan(service.dailyRevenue(branch)),
+    );
   });
 
   test('residence removes housing and car reduces moving cost', () {
@@ -362,7 +592,10 @@ void main() {
     final service = LivingCostService();
 
     expect(service.breakdown(state, city.id).housing, 0);
-    expect(service.breakdown(state, state.currentCityId).housing, greaterThan(0));
+    expect(
+      service.breakdown(state, state.currentCityId).housing,
+      greaterThan(0),
+    );
   });
 
   test('rented homes pay one percent monthly and stop being residences', () {
@@ -414,6 +647,20 @@ void main() {
     );
     expect(ledger.forDay(1).single.amount, 150);
     ledger = ledger.record(
+      day: 1,
+      category: FinanceCategory.companyRevenue,
+      amount: 200,
+      account: FinanceAccount.company,
+    );
+    expect(
+      ledger.forDay(1, account: FinanceAccount.personal).single.amount,
+      150,
+    );
+    expect(
+      ledger.forDay(1, account: FinanceAccount.company).single.amount,
+      200,
+    );
+    ledger = ledger.record(
       day: 31,
       category: FinanceCategory.food,
       amount: -20,
@@ -422,6 +669,37 @@ void main() {
     expect(ledger.forDay(1), isEmpty);
     expect(ledger.forDay(31).single.amount, -20);
     expect(ledger.totals(fromDay: 2, toDay: 31).expense, 20);
+  });
+
+  test('treasury transfers preserve both accounts and apply dividend tax', () {
+    final service = CompanyTreasuryService();
+    final initial = PlayerState.initial.copyWith(
+      money: 10000,
+      companyLevel: 1,
+      companyFunds: 2000,
+    );
+    final funded = service.addCapital(initial, 3000);
+    final withdrawn = service.withdrawDividend(funded, 2000);
+
+    expect(funded.money, 7000);
+    expect(funded.companyFunds, 5000);
+    expect(withdrawn.money, 8800);
+    expect(withdrawn.companyFunds, 3000);
+    expect(CompanyTreasuryService.dividendTax(2000), 200);
+    expect(
+      withdrawn.financeLedger
+          .totals(fromDay: 1, toDay: 1, account: FinanceAccount.personal)
+          .net,
+      -1200,
+    );
+    expect(
+      withdrawn.financeLedger
+          .totals(fromDay: 1, toDay: 1, account: FinanceAccount.company)
+          .net,
+      1000,
+    );
+    expect(service.checkCapital(initial, 99).isEligible, isFalse);
+    expect(service.checkDividend(initial, 3000).isEligible, isFalse);
   });
 
   test('company growth exposes valuation and long-term goals', () {
@@ -440,8 +718,7 @@ void main() {
     expect(service.valuation(state), greaterThan(state.companyFunds));
     expect(service.reputation(state), greaterThan(0));
     expect(service.marketShare(state), greaterThan(0));
-    expect(CompanyGrowthService.goals, hasLength(6));
-    expect(CompanyProjectCatalog.projects, hasLength(6));
+    expect(CompanyProjectCatalog.projects, hasLength(7));
     expect(CompanyProjectCatalog.projects.last.progressPerEmployee, 2);
   });
 

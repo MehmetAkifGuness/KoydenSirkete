@@ -87,8 +87,8 @@ class ProfilePage extends StatelessWidget {
               const SizedBox(height: 9),
               _ProfileAction(
                 icon: Icons.emoji_events_outlined,
-                title: 'İstatistikler ve başarılar',
-                subtitle: 'İlerlemeni ve kazandığın ödülleri gör.',
+                title: 'Kariyer özeti ve başarı puanı',
+                subtitle: 'Prestij hedeflerini, puanını ve başarılarını gör.',
                 onTap: () => Navigator.of(context).push(
                   MaterialPageRoute<void>(
                     builder: (_) => ProgressPage(session: session),

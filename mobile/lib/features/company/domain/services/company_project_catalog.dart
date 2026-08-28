@@ -1,7 +1,8 @@
 import '../entities/company_project.dart';
+import '../entities/company_specialty.dart';
 
 abstract final class CompanyProjectCatalog {
-  static const version = 3;
+  static const version = 4;
 
   static const projects = <CompanyProject>[
     CompanyProject(
@@ -12,6 +13,9 @@ abstract final class CompanyProjectCatalog {
       reward: 500,
       progressPerEmployee: 10,
       experienceReward: 5,
+      riskPercent: 8,
+      recommendedCompanyLevel: 1,
+      specialty: CompanySpecialty.operations,
     ),
     CompanyProject(
       id: 2,
@@ -21,6 +25,9 @@ abstract final class CompanyProjectCatalog {
       reward: 900,
       progressPerEmployee: 8,
       experienceReward: 10,
+      riskPercent: 12,
+      recommendedCompanyLevel: 1,
+      specialty: CompanySpecialty.technology,
     ),
     CompanyProject(
       id: 3,
@@ -30,6 +37,9 @@ abstract final class CompanyProjectCatalog {
       reward: 1500,
       progressPerEmployee: 6,
       experienceReward: 18,
+      riskPercent: 18,
+      recommendedCompanyLevel: 2,
+      specialty: CompanySpecialty.finance,
     ),
     CompanyProject(
       id: 4,
@@ -39,6 +49,9 @@ abstract final class CompanyProjectCatalog {
       reward: 6000,
       progressPerEmployee: 4,
       experienceReward: 30,
+      riskPercent: 25,
+      recommendedCompanyLevel: 2,
+      specialty: CompanySpecialty.logistics,
     ),
     CompanyProject(
       id: 5,
@@ -48,6 +61,9 @@ abstract final class CompanyProjectCatalog {
       reward: 15000,
       progressPerEmployee: 3,
       experienceReward: 50,
+      riskPercent: 32,
+      recommendedCompanyLevel: 3,
+      specialty: CompanySpecialty.technology,
     ),
     CompanyProject(
       id: 6,
@@ -57,6 +73,22 @@ abstract final class CompanyProjectCatalog {
       reward: 35000,
       progressPerEmployee: 2,
       experienceReward: 80,
+      riskPercent: 40,
+      recommendedCompanyLevel: 3,
+      specialty: CompanySpecialty.leadership,
+    ),
+    CompanyProject(
+      id: 7,
+      name: 'Özel dönüşüm ortaklığı',
+      description: 'Yalnızca sezon davetiyle alınabilen prestij sözleşmesi.',
+      cost: 8000,
+      reward: 60000,
+      progressPerEmployee: 2,
+      experienceReward: 120,
+      riskPercent: 20,
+      recommendedCompanyLevel: 3,
+      specialty: CompanySpecialty.leadership,
+      requiresSeasonInvitation: true,
     ),
   ];
 

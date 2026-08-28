@@ -2,11 +2,17 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:kariyerden_sirkete/core/database/player_state_store.dart';
 import 'package:kariyerden_sirkete/features/game/data/mappers/player_state_mapper.dart';
+import 'package:kariyerden_sirkete/features/game/data/mappers/company_employee_codec.dart';
+import 'package:kariyerden_sirkete/features/game/data/mappers/finance_ledger_codec.dart';
 import 'package:kariyerden_sirkete/features/game/data/repositories/local_player_state_repository.dart';
 import 'package:kariyerden_sirkete/features/game/domain/entities/player_state.dart';
 import 'package:kariyerden_sirkete/features/game/domain/entities/active_activity.dart';
 import 'package:kariyerden_sirkete/features/company/domain/entities/company_employee.dart';
 import 'package:kariyerden_sirkete/features/company/domain/entities/company_branch.dart';
+import 'package:kariyerden_sirkete/features/company/domain/entities/company_competition_state.dart';
+import 'package:kariyerden_sirkete/features/company/domain/entities/company_expansion_state.dart';
+import 'package:kariyerden_sirkete/features/company/domain/entities/company_season_trophy.dart';
+import 'package:kariyerden_sirkete/features/company/domain/entities/company_season_reward.dart';
 import 'package:kariyerden_sirkete/features/finance/domain/entities/finance_ledger.dart';
 
 void main() {
@@ -38,6 +44,40 @@ void main() {
       wheelEnergyBuffTasks: 1,
       wheelRewardBuffPercent: 100,
       wheelRewardBuffTasks: 2,
+      companyCompetition: const CompanyCompetitionState(
+        seasonNumber: 4,
+        points: 24,
+        wins: 8,
+        losses: 3,
+        championships: 2,
+        bestRank: 1,
+        lastRank: 1,
+        lastReward: 6000,
+        strategyId: 'quality_advantage',
+        trophies: [
+          CompanySeasonTrophy(seasonNumber: 3, points: 81, reward: 6000),
+          CompanySeasonTrophy(seasonNumber: 4, points: 87, reward: 6000),
+        ],
+        seasonRewards: [
+          CompanySeasonReward(
+            seasonNumber: 2,
+            rank: 3,
+            type: CompanySeasonRewardType.projectInvitation,
+            value: 1,
+            consumed: true,
+          ),
+          CompanySeasonReward(
+            seasonNumber: 3,
+            rank: 2,
+            type: CompanySeasonRewardType.sponsorship,
+            value: 8,
+          ),
+        ],
+      ),
+      companyStageIndex: 2,
+      companyExpansion: const CompanyExpansionState(
+        completedDealIds: ['rota_logistics', 'mavi_software'],
+      ),
       isOnboarded: true,
     );
 
@@ -64,6 +104,26 @@ void main() {
     expect(actual?.wheelEnergyBuffTasks, expected.wheelEnergyBuffTasks);
     expect(actual?.wheelRewardBuffPercent, expected.wheelRewardBuffPercent);
     expect(actual?.wheelRewardBuffTasks, expected.wheelRewardBuffTasks);
+    expect(actual?.companyCompetition.seasonNumber, 4);
+    expect(actual?.companyCompetition.points, 24);
+    expect(actual?.companyCompetition.championships, 2);
+    expect(actual?.companyCompetition.bestRank, 1);
+    expect(actual?.companyCompetition.lastReward, 6000);
+    expect(actual?.companyCompetition.strategyId, 'quality_advantage');
+    expect(actual?.companyCompetition.trophies, hasLength(2));
+    expect(actual?.companyCompetition.trophies.last.seasonNumber, 4);
+    expect(actual?.companyCompetition.trophies.last.points, 87);
+    expect(actual?.companyCompetition.seasonRewards, hasLength(2));
+    expect(actual?.companyCompetition.seasonRewards.first.consumed, isTrue);
+    expect(
+      actual?.companyCompetition.seasonRewards.last.type,
+      CompanySeasonRewardType.sponsorship,
+    );
+    expect(actual?.companyStageIndex, 2);
+    expect(actual?.companyExpansion.completedDealIds, [
+      'rota_logistics',
+      'mavi_software',
+    ]);
     expect(actual?.isOnboarded, expected.isOnboarded);
   });
 
@@ -118,6 +178,8 @@ void main() {
       role: 'Dijital uzmanı',
       performance: 86,
       dailySalary: 55,
+      morale: 64,
+      loyalty: 81,
     );
     final expected = PlayerState.initial.copyWith(
       companyLevel: 1,
@@ -131,6 +193,40 @@ void main() {
     expect(actual?.employees.single.id, employee.id);
     expect(actual?.employees.single.performance, employee.performance);
     expect(actual?.employees.single.dailySalary, employee.dailySalary);
+    expect(actual?.employees.single.morale, employee.morale);
+    expect(actual?.employees.single.loyalty, employee.loyalty);
+  });
+
+  test('legacy employee records receive safe wellbeing defaults', () {
+    const legacy =
+        '[{"id":3,"name":"Zeynep Yılmaz","role":"Dijital uzmanı",'
+        '"performance":86,"daily_salary":55}]';
+    final employee = CompanyEmployeeCodec().decodeList(legacy).single;
+
+    expect(employee.morale, 70);
+    expect(employee.loyalty, 70);
+  });
+
+  test('legacy finance records default to the personal account', () {
+    const legacy = '[{"day":1,"category":"casualIncome","amount":150}]';
+    final entry = FinanceLedgerCodec().decode(legacy).entries.single;
+
+    expect(entry.account, FinanceAccount.personal);
+  });
+
+  test('finance codec persists company account movements', () {
+    final expected = const FinanceLedger().record(
+      day: 4,
+      category: FinanceCategory.companyRevenue,
+      amount: 750,
+      account: FinanceAccount.company,
+    );
+    final codec = FinanceLedgerCodec();
+    final actual = codec.decode(codec.encode(expected)).entries.single;
+
+    expect(actual.account, FinanceAccount.company);
+    expect(actual.category, FinanceCategory.companyRevenue);
+    expect(actual.amount, 750);
   });
 
   test('player state repository persists branches and owned assets', () async {
@@ -139,7 +235,7 @@ void main() {
       database: store,
       mapper: PlayerStateMapper(),
     );
-    const branch = CompanyBranch(id: 2, cityId: 2, level: 1);
+    const branch = CompanyBranch(id: 2, cityId: 2, level: 2);
     final expected = PlayerState.initial.copyWith(
       companyLevel: 1,
       branches: const [branch],
@@ -161,9 +257,13 @@ void main() {
 
     final actual = await repository.load();
     expect(actual?.branches.single.cityId, 2);
+    expect(actual?.branches.single.level, 2);
     expect(actual?.ownedHomeIds, [201, 202]);
     expect(actual?.rentedHomeIds, [202]);
-    expect(actual?.financeLedger.entries.single.category, FinanceCategory.rentalIncome);
+    expect(
+      actual?.financeLedger.entries.single.category,
+      FinanceCategory.rentalIncome,
+    );
     expect(actual?.financeLedger.entries.single.amount, 67);
     expect(actual?.ownedCarId, 2);
   });

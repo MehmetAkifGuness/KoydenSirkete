@@ -10,6 +10,16 @@ import '../../cities/domain/services/city_service.dart';
 import '../../cities/domain/services/living_cost_service.dart';
 import '../../cities/domain/services/city_salary_service.dart';
 import '../../company/domain/services/company_service.dart';
+import '../../company/domain/services/company_employee_development_service.dart';
+import '../../company/domain/services/company_employee_wellbeing_service.dart';
+import '../../company/domain/services/company_market_service.dart';
+import '../../company/domain/services/company_competition_service.dart';
+import '../../company/domain/services/company_stage_service.dart';
+import '../../company/domain/services/company_treasury_service.dart';
+import '../../company/domain/entities/company_deal.dart';
+import '../../company/domain/entities/company_competition_strategy.dart';
+import '../../company/domain/services/company_expansion_service.dart';
+import '../../company/domain/services/company_competition_strategy_service.dart';
 import '../domain/entities/player_state.dart';
 import '../domain/entities/debug_state_patch.dart';
 import '../../skills/domain/entities/skill_profile.dart';
@@ -46,6 +56,12 @@ class GameSessionApplicationService {
     CityService? cityService,
     LivingCostService? livingCostService,
     CompanyService? companyService,
+    CompanyEmployeeDevelopmentService? employeeDevelopmentService,
+    CompanyEmployeeWellbeingService? employeeWellbeingService,
+    CompanyMarketService? companyMarketService,
+    CompanyCompetitionService? companyCompetitionService,
+    CompanyStageService? companyStageService,
+    CompanyTreasuryService? companyTreasuryService,
     CompanyBranchService? companyBranchService,
     AssetService? assetService,
     DailyGoalService? dailyGoalService,
@@ -66,6 +82,16 @@ class GameSessionApplicationService {
        _cityService = cityService ?? CityService(),
        _livingCostService = livingCostService ?? LivingCostService(),
        _companyService = companyService ?? CompanyService(),
+       _employeeDevelopmentService =
+           employeeDevelopmentService ?? CompanyEmployeeDevelopmentService(),
+       _employeeWellbeingService =
+           employeeWellbeingService ?? CompanyEmployeeWellbeingService(),
+       _companyMarketService = companyMarketService ?? CompanyMarketService(),
+       _companyCompetitionService =
+           companyCompetitionService ?? CompanyCompetitionService(),
+       _companyStageService = companyStageService ?? CompanyStageService(),
+       _companyTreasuryService =
+           companyTreasuryService ?? CompanyTreasuryService(),
        _companyBranchService = companyBranchService ?? CompanyBranchService(),
        _assetService = assetService ?? AssetService(),
        _dailyGoalService = dailyGoalService ?? DailyGoalService(),
@@ -88,6 +114,12 @@ class GameSessionApplicationService {
   final CityService _cityService;
   final LivingCostService _livingCostService;
   final CompanyService _companyService;
+  final CompanyEmployeeDevelopmentService _employeeDevelopmentService;
+  final CompanyEmployeeWellbeingService _employeeWellbeingService;
+  final CompanyMarketService _companyMarketService;
+  final CompanyCompetitionService _companyCompetitionService;
+  final CompanyStageService _companyStageService;
+  final CompanyTreasuryService _companyTreasuryService;
   final CompanyBranchService _companyBranchService;
   final AssetService _assetService;
   final DailyGoalService _dailyGoalService;
@@ -238,6 +270,24 @@ class GameSessionApplicationService {
       );
       nextState = branchOperations.state;
       messages.addAll(branchOperations.messages);
+      final market = _companyMarketService.process(
+        nextState,
+        days: elapsedDays,
+      );
+      nextState = market.state;
+      messages.addAll(market.messages);
+      final wellbeing = _employeeWellbeingService.process(
+        nextState,
+        market.outcomes,
+      );
+      nextState = wellbeing.state;
+      messages.addAll(wellbeing.messages);
+      final competition = _companyCompetitionService.process(
+        nextState,
+        market.outcomes,
+      );
+      nextState = competition.state;
+      messages.addAll(competition.messages);
     }
     if (clock.dayChanged) {
       nextState = _employmentService.checkAttendance(nextState);
@@ -287,7 +337,8 @@ class GameSessionApplicationService {
     final normalized = settled.money >= 0 && !settled.isBankrupt
         ? settled.copyWith(negativeMoneyHours: 0)
         : settled;
-    final evaluated = _achievementService.evaluate(normalized).state;
+    final progressed = _companyStageService.evaluate(normalized);
+    final evaluated = _achievementService.evaluate(progressed).state;
     await _repository.save(evaluated);
     return evaluated;
   }

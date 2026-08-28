@@ -4,8 +4,14 @@ import '../../../cities/domain/services/city_catalog.dart';
 import '../../../game/domain/entities/player_state.dart';
 import '../entities/company_branch.dart';
 import '../entities/company_employee.dart';
+import '../entities/company_specialty.dart';
 import 'company_employee_catalog.dart';
+import 'company_finance_recorder.dart';
+import 'company_region_service.dart';
 import 'company_service.dart';
+import 'company_season_reward_service.dart';
+import 'company_trophy_service.dart';
+import '../../../finance/domain/entities/finance_ledger.dart';
 
 class CompanyBranchOperationResult {
   const CompanyBranchOperationResult({
@@ -18,12 +24,50 @@ class CompanyBranchOperationResult {
 }
 
 class CompanyBranchService {
+  CompanyBranchService({
+    CompanyRegionService? regionService,
+    CompanySeasonRewardService? seasonRewardService,
+  }) : _regionService = regionService ?? CompanyRegionService(),
+       _seasonRewardService =
+           seasonRewardService ?? const CompanySeasonRewardService();
+
   static const maxBranchLevel = 3;
+  static const levelRevenueBonusPercent = 25;
+  static const specialistDailyRevenueBonus = 35;
+  final CompanyRegionService _regionService;
+  final CompanySeasonRewardService _seasonRewardService;
 
   static int openingCost(City city) =>
-      (city.dailyCost * 4 + city.marketLevel * 500).clamp(3000, 150000);
+      (city.dailyCost * 12 + city.marketLevel * 2000).clamp(30000, 200000);
+
+  int openingCostFor(PlayerState state, City city) =>
+      (openingCost(city) *
+              (100 - _regionService.investmentDiscount(state)) /
+              100)
+          .round();
 
   static int employeeCapacity(CompanyBranch branch) => branch.level * 3;
+
+  static int upgradeCost(CompanyBranch branch) {
+    final city = CityCatalog.findById(branch.cityId);
+    if (city == null || branch.level >= maxBranchLevel) return 0;
+    final percent = branch.level == 1 ? 60 : 100;
+    return (openingCost(city) * percent / 100).round();
+  }
+
+  int upgradeCostFor(PlayerState state, CompanyBranch branch) =>
+      (upgradeCost(branch) *
+              (100 - _regionService.investmentDiscount(state)) /
+              100)
+          .round();
+
+  static CompanySpecialty preferredSpecialty(City city) =>
+      switch (city.economicLevel) {
+        CityEconomicLevel.regional => CompanySpecialty.operations,
+        CityEconomicLevel.developing => CompanySpecialty.logistics,
+        CityEconomicLevel.metropolis => CompanySpecialty.sales,
+        CityEconomicLevel.economicCenter => CompanySpecialty.technology,
+      };
 
   List<CompanyEmployee> availableEmployees(
     PlayerState state,
@@ -54,7 +98,7 @@ class CompanyBranchService {
         reason: 'Bu şehirde zaten bir bayin var.',
       );
     }
-    final cost = openingCost(city);
+    final cost = openingCostFor(state, city);
     if (state.companyFunds < cost) {
       return CompanyCheckResult(
         isEligible: false,
@@ -73,9 +117,15 @@ class CompanyBranchService {
       throw GameRuleException(check.reason);
     }
     final branch = CompanyBranch(id: city.id, cityId: city.id);
+    final cost = openingCostFor(state, city);
     return state.copyWith(
-      companyFunds: state.companyFunds - openingCost(city),
+      companyFunds: state.companyFunds - cost,
       branches: <CompanyBranch>[...state.branches, branch],
+      financeLedger: CompanyFinanceRecorder.record(
+        state,
+        FinanceCategory.companyBranch,
+        -cost,
+      ),
     );
   }
 
@@ -119,25 +169,101 @@ class CompanyBranchService {
     return _replaceBranch(state, branch.copyWith(employees: employees));
   }
 
+  CompanyCheckResult checkUpgrade(PlayerState state, int cityId) {
+    final branch = _find(state, cityId);
+    if (branch == null) {
+      return const CompanyCheckResult(
+        isEligible: false,
+        reason: 'Bayi bulunamadı.',
+      );
+    }
+    if (branch.level >= maxBranchLevel) {
+      return const CompanyCheckResult(
+        isEligible: false,
+        reason: 'Bayi en yüksek seviyede.',
+      );
+    }
+    if (state.companyLevel <= branch.level) {
+      return CompanyCheckResult(
+        isEligible: false,
+        reason: 'Önce şirketini seviye ${branch.level + 1} yapmalısın.',
+      );
+    }
+    final cost = upgradeCostFor(state, branch);
+    if (state.companyFunds < cost) {
+      return CompanyCheckResult(
+        isEligible: false,
+        reason: 'Bayi yükseltmesi için şirket kasasında ₺$cost olmalı.',
+      );
+    }
+    return CompanyCheckResult(
+      isEligible: true,
+      reason: 'Kapasite +3, gelir +%$levelRevenueBonusPercent.',
+    );
+  }
+
+  PlayerState upgrade(PlayerState state, int cityId) {
+    final check = checkUpgrade(state, cityId);
+    if (!check.isEligible) throw GameRuleException(check.reason);
+    final branch = _find(state, cityId)!;
+    final cost = upgradeCostFor(state, branch);
+    return _replaceBranch(
+      state.copyWith(
+        companyFunds: state.companyFunds - cost,
+        financeLedger: CompanyFinanceRecorder.record(
+          state,
+          FinanceCategory.companyBranch,
+          -cost,
+        ),
+      ),
+      branch.copyWith(level: branch.level + 1),
+    );
+  }
+
   int dailyRevenue(CompanyBranch branch) {
     final city = CityCatalog.findById(branch.cityId);
     if (city == null || branch.employees.isEmpty) return 0;
+    final specialty = preferredSpecialty(city);
     final marketIncome =
         60 +
         city.marketLevel * 20 +
         city.opportunityCount * 10 +
         branch.level * 50;
-    return marketIncome +
-        branch.employees.fold(
+    final gross =
+        marketIncome +
+        branch.employees.fold<int>(
           0,
-          (total, employee) => total + 80 + employee.performance ~/ 5,
+          (total, employee) =>
+              total +
+              80 +
+              employee.effectivePerformance ~/ 5 +
+              (employee.specialty == specialty
+                  ? specialistDailyRevenueBonus
+                  : 0),
         );
+    final levelMultiplier = 100 + (branch.level - 1) * levelRevenueBonusPercent;
+    return (gross * levelMultiplier / 100).round();
+  }
+
+  int dailyRevenueFor(PlayerState state, CompanyBranch branch) {
+    final bonus =
+        _regionService.revenueBonus(state) +
+        CompanyTrophyService.branchRevenueBonus(state) +
+        _seasonRewardService.sponsorshipRevenueBonus(state);
+    return (dailyRevenue(branch) * (100 + bonus) / 100).round();
   }
 
   int dailyPayroll(CompanyBranch branch) => branch.employees.fold(
     0,
     (total, employee) => total + employee.dailySalary,
   );
+
+  int dailyPayrollFor(PlayerState state, CompanyBranch branch) {
+    final discount =
+        _regionService.payrollDiscount(state) +
+        CompanyTrophyService.branchPayrollDiscount(state);
+    return (dailyPayroll(branch) * (100 - discount) / 100).round();
+  }
 
   CompanyBranch? _find(PlayerState state, int cityId) {
     for (final branch in state.branches) {
@@ -170,10 +296,18 @@ class CompanyBranchService {
     for (var day = 0; day < days; day++) {
       var net = 0;
       for (final branch in current.branches) {
-        net += dailyRevenue(branch) - dailyPayroll(branch);
+        net +=
+            dailyRevenueFor(current, branch) - dailyPayrollFor(current, branch);
       }
       if (net != 0) {
-        current = current.copyWith(companyFunds: current.companyFunds + net);
+        current = current.copyWith(
+          companyFunds: current.companyFunds + net,
+          financeLedger: CompanyFinanceRecorder.record(
+            current,
+            FinanceCategory.companyBranch,
+            net,
+          ),
+        );
         messages.add(
           net > 0
               ? 'Bayiler şirkete +₺$net kazandırdı.'

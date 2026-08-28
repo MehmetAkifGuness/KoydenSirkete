@@ -19,6 +19,25 @@ extension GameSessionFeatureController on GameSessionController {
     message: (_) => 'Şirketin kuruldu. Artık kendi işini büyütebilirsin.',
   );
 
+  Future<String?> addCompanyCapital(int amount) => _execute(
+    action: (state) => _applicationService.addCompanyCapital(state, amount),
+    stateOf: (result) => result,
+    message: (_) =>
+        'Kişisel cüzdandan şirket kasasına ₺$amount sermaye aktarıldı.',
+  );
+
+  Future<String?> withdrawCompanyDividend(int grossAmount) => _execute(
+    action: (state) =>
+        _applicationService.withdrawCompanyDividend(state, grossAmount),
+    stateOf: (result) => result,
+    message: (_) {
+      final tax = CompanyTreasuryService.dividendTax(grossAmount);
+      final net = CompanyTreasuryService.dividendNet(grossAmount);
+      return 'Şirket kasasından ₺$grossAmount çekildi; ₺$tax vergi sonrası '
+          'kişisel cüzdana ₺$net aktarıldı.';
+    },
+  );
+
   Future<String?> recruitEmployee(CompanyEmployee employee) => _execute(
     action: (state) =>
         _applicationService.recruitEmployee(state, employee: employee),
@@ -33,6 +52,20 @@ extension GameSessionFeatureController on GameSessionController {
     stateOf: (result) => result,
     message: (_) =>
         'Çalışanın işten çıkarıldı. Maaş gideri ve proje katkısı güncellendi.',
+  );
+
+  EmployeeDevelopmentCheck checkEmployeeDevelopment(int employeeId) =>
+      _applicationService.checkEmployeeDevelopment(_state, employeeId);
+
+  Future<String?> developEmployee(int employeeId) => _execute(
+    action: (state) => _applicationService.developEmployee(state, employeeId),
+    stateOf: (result) => result,
+    message: (result) {
+      final employee = result.employees.firstWhere(
+        (current) => current.id == employeeId,
+      );
+      return '${employee.name} performansını %${employee.performance} seviyesine çıkardı.';
+    },
   );
 
   CompanyCheckResult checkBranchOpen(City city) =>
@@ -66,6 +99,44 @@ extension GameSessionFeatureController on GameSessionController {
     ),
     stateOf: (result) => result,
     message: (_) => 'Bayi çalışanı işten çıkarıldı.',
+  );
+
+  EmployeeDevelopmentCheck checkBranchEmployeeDevelopment(
+    int cityId,
+    int employeeId,
+  ) => _applicationService.checkBranchEmployeeDevelopment(
+    _state,
+    cityId,
+    employeeId,
+  );
+
+  Future<String?> developBranchEmployee(int cityId, int employeeId) => _execute(
+    action: (state) =>
+        _applicationService.developBranchEmployee(state, cityId, employeeId),
+    stateOf: (result) => result,
+    message: (result) {
+      final branch = result.branches.firstWhere(
+        (current) => current.cityId == cityId,
+      );
+      final employee = branch.employees.firstWhere(
+        (current) => current.id == employeeId,
+      );
+      return '${employee.name} performansını %${employee.performance} seviyesine çıkardı.';
+    },
+  );
+
+  CompanyCheckResult checkBranchUpgrade(int cityId) =>
+      _applicationService.checkBranchUpgrade(_state, cityId);
+
+  Future<String?> upgradeBranch(int cityId) => _execute(
+    action: (state) => _applicationService.upgradeBranch(state, cityId),
+    stateOf: (result) => result,
+    message: (result) {
+      final branch = result.branches.firstWhere(
+        (current) => current.cityId == cityId,
+      );
+      return 'Bayi seviye ${branch.level} oldu; kapasite ve gelir arttı.';
+    },
   );
 
   AssetCheck checkHome(HomeAsset home, City city) =>
@@ -130,9 +201,31 @@ extension GameSessionFeatureController on GameSessionController {
     message: (_) => '${project.name} projesi seçildi.',
   );
 
+  Future<String?> selectCompanyCompetitionStrategy(
+    CompanyCompetitionStrategy strategy,
+  ) => _execute(
+    action: (state) =>
+        _applicationService.selectCompanyCompetitionStrategy(state, strategy),
+    stateOf: (result) => result,
+    message: (_) =>
+        '${strategy.title} bu sezonun rekabet stratejisi olarak seçildi.',
+  );
+
   Future<String?> advanceCompanyProject() => _execute(
     action: _applicationService.advanceCompanyProject,
     stateOf: (result) => result.state,
     message: (result) => result.message,
+  );
+
+  CompanyDealCheck checkCompanyDeal(CompanyDeal deal) =>
+      _applicationService.checkCompanyDeal(_state, deal);
+
+  Future<String?> completeCompanyDeal(CompanyDeal deal) => _execute(
+    action: (state) => _applicationService.completeCompanyDeal(state, deal),
+    stateOf: (result) => result,
+    message: (_) =>
+        '${deal.title}: ${deal.type.label} tamamlandı. '
+        'Şirket kasasından ₺${deal.cost} ödendi; değer +₺${deal.valuationGain}, '
+        'itibar +${deal.reputationGain}, pazar payı +%${deal.marketShareGain}.',
   );
 }

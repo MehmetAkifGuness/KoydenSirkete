@@ -22,6 +22,8 @@ class CompanyBranchCodec {
                       'performance': employee.performance,
                       'daily_salary': employee.dailySalary,
                       'required_company_level': employee.requiredCompanyLevel,
+                      'morale': employee.morale,
+                      'loyalty': employee.loyalty,
                     },
                   )
                   .toList(),
@@ -54,6 +56,8 @@ class CompanyBranchCodec {
             dailySalary: employee['daily_salary'] as int,
             requiredCompanyLevel:
                 employee['required_company_level'] as int? ?? 1,
+            morale: employee['morale'] as int? ?? 70,
+            loyalty: employee['loyalty'] as int? ?? 70,
           );
         })
         .toList(growable: false);

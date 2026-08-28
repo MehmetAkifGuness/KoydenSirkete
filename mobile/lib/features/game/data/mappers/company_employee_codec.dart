@@ -32,6 +32,8 @@ class CompanyEmployeeCodec {
     'performance': employee.performance,
     'daily_salary': employee.dailySalary,
     'required_company_level': employee.requiredCompanyLevel,
+    'morale': employee.morale,
+    'loyalty': employee.loyalty,
   };
 
   CompanyEmployee _fromJson(Map<String, dynamic> json) => CompanyEmployee(
@@ -41,5 +43,7 @@ class CompanyEmployeeCodec {
     performance: json['performance'] as int,
     dailySalary: json['daily_salary'] as int,
     requiredCompanyLevel: json['required_company_level'] as int? ?? 1,
+    morale: json['morale'] as int? ?? 70,
+    loyalty: json['loyalty'] as int? ?? 70,
   );
 }

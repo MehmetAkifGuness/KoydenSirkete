@@ -3,9 +3,11 @@ import 'dart:math' as math;
 import '../entities/city.dart';
 
 abstract final class CityCatalog {
-  static const version = 6;
+  static const version = 7;
   static const _minimumPopulation = 82836;
   static const _maximumPopulation = 15754053;
+  static const minimumDailyCost = 90;
+  static const maximumDailyCost = 1000;
 
   static const _names = <String>[
     'Kırşehir',
@@ -222,12 +224,21 @@ abstract final class CityCatalog {
     return (20 + ratio * 80).round().clamp(20, 100);
   }
 
-  static int dailyCostForPopulation(int population) =>
-      (population / 2000).round().clamp(1, 100000);
+  static int dailyCostForPopulation(int population) {
+    final normalized =
+        (math.log(population.clamp(_minimumPopulation, _maximumPopulation) /
+                    _minimumPopulation) /
+                math.log(_maximumPopulation / _minimumPopulation))
+            .clamp(0, 1);
+    return (minimumDailyCost +
+            math.pow(normalized, 1.6) *
+                (maximumDailyCost - minimumDailyCost))
+        .round();
+  }
 
   static double salaryMultiplierForTechnology(int technology) {
     final normalized = (technology.clamp(20, 100) - 20) / 80;
-    return (90 + normalized * 60).round() / 100;
+    return (95 + normalized * 30).round() / 100;
   }
 
   static CityEconomicLevel _economicLevelFor(int technology) {

@@ -56,6 +56,9 @@ class PlayerStateMapper {
       unlockedAchievementsMask: model.unlockedAchievementsMask,
       activeProjectId: model.activeProjectId,
       completedProjects: model.completedProjects,
+      companyCompetition: model.companyCompetition,
+      companyExpansion: model.companyExpansion,
+      companyStageIndex: model.companyStageIndex,
       isOnboarded: model.isOnboarded,
     );
   }

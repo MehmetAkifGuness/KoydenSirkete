@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:kariyerden_sirkete/features/company/domain/services/company_project_catalog.dart';
 import 'package:kariyerden_sirkete/features/company/domain/services/company_employee_catalog.dart';
 import 'package:kariyerden_sirkete/features/company/domain/services/company_service.dart';
+import 'package:kariyerden_sirkete/features/company/domain/services/company_market_service.dart';
 import 'package:kariyerden_sirkete/features/company/domain/entities/company_branch.dart';
 import 'package:kariyerden_sirkete/features/assets/domain/services/car_catalog.dart';
 import 'package:kariyerden_sirkete/features/assets/domain/services/home_catalog.dart';
@@ -71,7 +72,10 @@ void main() {
   test('v1.4 upgrades company and allows every project tier', () {
     final service = CompanyService();
     final company = service.establish(
-      PlayerState.initial.copyWith(money: 1500, careerLevel: 3),
+      PlayerState.initial.copyWith(
+        money: CompanyService.establishmentCost + 500,
+        careerLevel: 3,
+      ),
     );
     final upgraded = service.upgrade(
       company.copyWith(companyFunds: CompanyService.upgradeCost(1)),
@@ -92,7 +96,10 @@ void main() {
     () {
       final service = CompanyService();
       final company = service.establish(
-        PlayerState.initial.copyWith(money: 1500, careerLevel: 3),
+        PlayerState.initial.copyWith(
+          money: CompanyService.establishmentCost + 500,
+          careerLevel: 3,
+        ),
       );
       final candidates = service.availableEmployees(company);
       final employee = candidates.first;
@@ -114,19 +121,26 @@ void main() {
     () async {
       final service = CompanyService();
       final company = service
-          .establish(PlayerState.initial.copyWith(money: 1500, careerLevel: 3))
+          .establish(
+            PlayerState.initial.copyWith(
+              money: CompanyService.establishmentCost + 500,
+              careerLevel: 3,
+            ),
+          )
           .copyWith(employeeCount: 1);
       final repository = _MemoryRepository(company.copyWith(hour: 23));
       final application = GameSessionApplicationService(repository: repository);
       final tick = await application.tick(company.copyWith(hour: 23));
+      final operated = service.processDailyOperations(
+        company.copyWith(day: 2, hour: 0),
+      );
+      final expectedFunds = CompanyMarketService()
+          .process(operated.state)
+          .state
+          .companyFunds;
 
       expect(tick.state.day, 2);
-      expect(
-        tick.state.companyFunds,
-        company.companyFunds +
-            service.dailyRevenue(company) -
-            service.dailyPayroll(company),
-      );
+      expect(tick.state.companyFunds, expectedFunds);
       expect(tick.state.projectProgress, service.dailyProjectProgress(company));
 
       final completed = service.advanceProject(

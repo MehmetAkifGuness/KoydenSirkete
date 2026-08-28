@@ -302,23 +302,31 @@ void main() {
       expect(count(EsnafWheelRewardType.bigTender), 1);
       expect(count(EsnafWheelRewardType.tipRain), 1);
       expect(count(EsnafWheelRewardType.smallTip), 2);
+      for (var index = 0; index < sectors.length; index++) {
+        expect(sectors[index], isNot(sectors[(index + 1) % sectors.length]));
+      }
     });
 
     test('applies every cash reward and penalty amount', () {
+      final sectors = EsnafWheelRewardCatalog.sectorTypes;
       final penalty50 = EsnafWheelService(
-        random: _FixedRandom(10),
+        random: _FixedRandom(
+          sectors.indexOf(EsnafWheelRewardType.customerPenalty),
+        ),
       ).spin(PlayerState.initial.copyWith(money: 100));
       final penalty100 = EsnafWheelService(
-        random: _FixedRandom(7),
+        random: _FixedRandom(
+          sectors.indexOf(EsnafWheelRewardType.majorPenalty),
+        ),
       ).spin(PlayerState.initial.copyWith(money: 150));
       final tender = EsnafWheelService(
-        random: _FixedRandom(16),
+        random: _FixedRandom(sectors.indexOf(EsnafWheelRewardType.bigTender)),
       ).spin(PlayerState.initial.copyWith(money: 100));
       final reward100 = EsnafWheelService(
-        random: _FixedRandom(17),
+        random: _FixedRandom(sectors.indexOf(EsnafWheelRewardType.tipRain)),
       ).spin(PlayerState.initial.copyWith(money: 100));
       final reward50 = EsnafWheelService(
-        random: _FixedRandom(18),
+        random: _FixedRandom(sectors.indexOf(EsnafWheelRewardType.smallTip)),
       ).spin(PlayerState.initial.copyWith(money: 100));
 
       expect(penalty50.state.money, 0);
@@ -331,8 +339,11 @@ void main() {
     test(
       'chance reward halves work costs and doubles the next two incomes',
       () {
+        final chanceIndex = EsnafWheelRewardCatalog.sectorTypes.indexOf(
+          EsnafWheelRewardType.luckyDay,
+        );
         final outcome = EsnafWheelService(
-          random: _FixedRandom(15),
+          random: _FixedRandom(chanceIndex),
         ).spin(PlayerState.initial.copyWith(money: 100));
 
         expect(outcome.state.wheelDurationBuffPercent, 50);
@@ -347,7 +358,12 @@ void main() {
         money: 100,
         wheelMajorRewardsToday: 3,
       );
-      final outcome = EsnafWheelService(random: _FixedRandom(16)).spin(state);
+      final tenderIndex = EsnafWheelRewardCatalog.sectorTypes.indexOf(
+        EsnafWheelRewardType.bigTender,
+      );
+      final outcome = EsnafWheelService(
+        random: _FixedRandom(tenderIndex),
+      ).spin(state);
 
       expect(outcome.reward.type, EsnafWheelRewardType.tipRain);
       expect(outcome.state.wheelMajorRewardsToday, 3);
@@ -376,7 +392,7 @@ void main() {
     test('company can be established, staffed and progressed', () {
       final service = CompanyService();
       final ready = PlayerState.initial.copyWith(
-        money: 1500,
+        money: CompanyService.establishmentCost + 500,
         careerLevel: 3,
         currentJobId: 1,
         employment: const Employment(
@@ -414,7 +430,7 @@ void main() {
     expect(WorkTaskCatalog.forJob(4), isNotEmpty);
     expect(TrainingCatalog.version, 3);
     expect(TrainingCatalog.courses.length, greaterThanOrEqualTo(10));
-    expect(CityCatalog.version, 6);
+    expect(CityCatalog.version, 7);
     expect(CityCatalog.cities.length, 81);
   });
 }

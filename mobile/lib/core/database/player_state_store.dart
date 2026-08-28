@@ -36,6 +36,9 @@ class PlayerStateRecord {
     this.ownedHomeIdsJson,
     this.rentedHomeIdsJson,
     this.financeLedgerJson,
+    this.companyCompetitionJson,
+    this.companyExpansionJson,
+    this.companyStageIndex = 0,
     this.ownedCarId,
     this.applicationBlockedJobId,
     this.applicationBlockedUntilDay = 0,
@@ -92,6 +95,9 @@ class PlayerStateRecord {
   final String? ownedHomeIdsJson;
   final String? rentedHomeIdsJson;
   final String? financeLedgerJson;
+  final String? companyCompetitionJson;
+  final String? companyExpansionJson;
+  final int companyStageIndex;
   final int? ownedCarId;
   final int? applicationBlockedJobId;
   final int applicationBlockedUntilDay;

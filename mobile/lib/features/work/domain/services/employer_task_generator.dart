@@ -8,7 +8,7 @@ class EmployerTaskGenerator {
     required int cityId,
     required int day,
   }) {
-    final count = 3 + _seed(job.id, cityId, day) % 3;
+    final count = 4 + _seed(job.id, cityId, day) % 3;
     return List.generate(count, (index) {
       final template =
           _templates[(_seed(job.id, cityId, day) + index) % _templates.length];
@@ -109,6 +109,66 @@ class EmployerTaskGenerator {
       9,
       9,
       1.15,
+    ),
+    _TaskTemplate(
+      'Stok ve kaynak kontrolü',
+      'Günlük kaynak kullanımını inceleyip eksikleri raporla.',
+      9,
+      2,
+      .95,
+      4,
+      4,
+      .8,
+    ),
+    _TaskTemplate(
+      'Acil sorun çözümü',
+      'Beklenmedik operasyon sorununu süre dolmadan çöz.',
+      15,
+      3,
+      1.25,
+      7,
+      7,
+      1.05,
+    ),
+    _TaskTemplate(
+      'Kalite kontrolü',
+      'Teslimatları standartlara göre denetle ve hataları azalt.',
+      11,
+      2,
+      1.05,
+      5,
+      5,
+      .9,
+    ),
+    _TaskTemplate(
+      'Ekip desteği',
+      'Ekibin iş akışındaki darboğazları gider.',
+      13,
+      4,
+      1.15,
+      6,
+      6,
+      .85,
+    ),
+    _TaskTemplate(
+      'Müşteri sunumu',
+      'Kritik müşteriye sonuçları ve yeni önerileri sun.',
+      17,
+      5,
+      1.35,
+      8,
+      8,
+      1.1,
+    ),
+    _TaskTemplate(
+      'İnovasyon çalışması',
+      'Yeni bir iş fikrini uygulanabilir plana dönüştür.',
+      19,
+      6,
+      1.5,
+      9,
+      10,
+      1.2,
     ),
   ];
 }

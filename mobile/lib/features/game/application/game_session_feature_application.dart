@@ -82,8 +82,18 @@ extension GameSessionFeatureApplication on GameSessionApplicationService {
   CompanyCheck checkCompanyEstablishment(PlayerState state) =>
       _companyService.checkEstablishment(state);
 
-  Future<PlayerState> establishCompany(PlayerState state) =>
-      _persist(_companyService.establish(state));
+  Future<PlayerState> establishCompany(PlayerState state) {
+    final established = _companyService.establish(state);
+    return _persist(_companyCompetitionService.initialize(established));
+  }
+
+  Future<PlayerState> addCompanyCapital(PlayerState state, int amount) =>
+      _persist(_companyTreasuryService.addCapital(state, amount));
+
+  Future<PlayerState> withdrawCompanyDividend(
+    PlayerState state,
+    int grossAmount,
+  ) => _persist(_companyTreasuryService.withdrawDividend(state, grossAmount));
 
   Future<PlayerState> recruitEmployee(
     PlayerState state, {
@@ -94,6 +104,16 @@ extension GameSessionFeatureApplication on GameSessionApplicationService {
     PlayerState state, {
     required int employeeId,
   }) => _persist(_companyService.dismissEmployee(state, employeeId));
+
+  EmployeeDevelopmentCheck checkEmployeeDevelopment(
+    PlayerState state,
+    int employeeId,
+  ) => _employeeDevelopmentService.checkHeadquarters(state, employeeId);
+
+  Future<PlayerState> developEmployee(PlayerState state, int employeeId) =>
+      _persist(
+        _employeeDevelopmentService.developHeadquarters(state, employeeId),
+      );
 
   CompanyCheckResult checkBranchOpen(PlayerState state, City city) =>
       _companyBranchService.checkOpen(state, city);
@@ -117,6 +137,26 @@ extension GameSessionFeatureApplication on GameSessionApplicationService {
     required int cityId,
     required int employeeId,
   }) => _persist(_companyBranchService.dismiss(state, cityId, employeeId));
+
+  EmployeeDevelopmentCheck checkBranchEmployeeDevelopment(
+    PlayerState state,
+    int cityId,
+    int employeeId,
+  ) => _employeeDevelopmentService.checkBranch(state, cityId, employeeId);
+
+  Future<PlayerState> developBranchEmployee(
+    PlayerState state,
+    int cityId,
+    int employeeId,
+  ) => _persist(
+    _employeeDevelopmentService.developBranch(state, cityId, employeeId),
+  );
+
+  CompanyCheckResult checkBranchUpgrade(PlayerState state, int cityId) =>
+      _companyBranchService.checkUpgrade(state, cityId);
+
+  Future<PlayerState> upgradeBranch(PlayerState state, int cityId) =>
+      _persist(_companyBranchService.upgrade(state, cityId));
 
   AssetCheck checkHome(PlayerState state, HomeAsset home, City city) =>
       _assetService.checkHome(state, home, city);
@@ -153,11 +193,27 @@ extension GameSessionFeatureApplication on GameSessionApplicationService {
     CompanyProject project,
   ) => _persist(_companyService.selectProject(state, project));
 
+  Future<PlayerState> selectCompanyCompetitionStrategy(
+    PlayerState state,
+    CompanyCompetitionStrategy strategy,
+  ) => _persist(
+    const CompanyCompetitionStrategyService().select(state, strategy),
+  );
+
   Future<CompanyActionResult> advanceCompanyProject(PlayerState state) async {
     final result = _companyService.advanceProject(state);
     return CompanyActionResult(
       state: await _persist(result.state),
       message: result.message,
+      succeeded: result.succeeded,
     );
   }
+
+  CompanyDealCheck checkCompanyDeal(PlayerState state, CompanyDeal deal) =>
+      CompanyExpansionService().check(state, deal);
+
+  Future<PlayerState> completeCompanyDeal(
+    PlayerState state,
+    CompanyDeal deal,
+  ) => _persist(CompanyExpansionService().execute(state, deal));
 }
