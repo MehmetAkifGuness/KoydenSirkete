@@ -293,6 +293,12 @@ Android-first, tamamen offline kariyer ve şirket simülasyonu.
 - Giderler her oyun günü yalnızca şirket kasasından kesilir ve finans ekranında dört ayrı hareket olarak görünür.
 - SQLite v31 bütçe planını kalıcı tutar; eski kayıtlar sıfır bütçeyle ve ek gider olmadan açılır.
 
+## v2.30.0 dönem kararları
+
+- Her piyasa döneminde hızlı büyüme, ekip desteği veya temkinli yönetim arasından tek bir şirket kararı verilir.
+- Kasa, proje, itibar, moral ve tükenmişlik sonuçları seçimden önce birlikte gösterilir.
+- Tamamlanan olaylar tekrar uygulanamaz; karar geçmişi mevcut SQLite şirket kaydında kalıcı tutulur.
+
 ## Çalıştırma
 
 ```powershell

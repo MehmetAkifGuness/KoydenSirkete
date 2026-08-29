@@ -13,6 +13,9 @@ class CompanyCompetitionState {
     this.lastRank = 0,
     this.lastReward = 0,
     this.strategyId = '',
+    this.resolvedDecisionKeys = const <String>[],
+    this.lastDecisionChoiceId = '',
+    this.decisionReputation = 0,
     this.trophies = const <CompanySeasonTrophy>[],
     this.seasonRewards = const <CompanySeasonReward>[],
     this.seasonHistory = const <CompanySeasonResult>[],
@@ -30,6 +33,9 @@ class CompanyCompetitionState {
   final int lastRank;
   final int lastReward;
   final String strategyId;
+  final List<String> resolvedDecisionKeys;
+  final String lastDecisionChoiceId;
+  final int decisionReputation;
   final List<CompanySeasonTrophy> trophies;
   final List<CompanySeasonReward> seasonRewards;
   final List<CompanySeasonResult> seasonHistory;
@@ -59,6 +65,9 @@ class CompanyCompetitionState {
     int? lastRank,
     int? lastReward,
     String? strategyId,
+    List<String>? resolvedDecisionKeys,
+    String? lastDecisionChoiceId,
+    int? decisionReputation,
     List<CompanySeasonTrophy>? trophies,
     List<CompanySeasonReward>? seasonRewards,
     List<CompanySeasonResult>? seasonHistory,
@@ -72,6 +81,9 @@ class CompanyCompetitionState {
     lastRank: lastRank ?? this.lastRank,
     lastReward: lastReward ?? this.lastReward,
     strategyId: strategyId ?? this.strategyId,
+    resolvedDecisionKeys: resolvedDecisionKeys ?? this.resolvedDecisionKeys,
+    lastDecisionChoiceId: lastDecisionChoiceId ?? this.lastDecisionChoiceId,
+    decisionReputation: decisionReputation ?? this.decisionReputation,
     trophies: trophies ?? this.trophies,
     seasonRewards: seasonRewards ?? this.seasonRewards,
     seasonHistory: seasonHistory ?? this.seasonHistory,

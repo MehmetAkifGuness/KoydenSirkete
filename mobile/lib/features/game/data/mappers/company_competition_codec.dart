@@ -5,6 +5,7 @@ import '../../../company/domain/entities/company_season_reward.dart';
 import '../../../company/domain/entities/company_season_result.dart';
 import '../../../company/domain/entities/company_season_trophy.dart';
 import '../../../company/domain/services/company_competition_strategy_service.dart';
+import '../../../company/domain/services/company_decision_service.dart';
 
 class CompanyCompetitionCodec {
   static const maxStoredTrophies = 1000;
@@ -19,6 +20,9 @@ class CompanyCompetitionCodec {
     'lastRank': value.lastRank,
     'lastReward': value.lastReward,
     'strategyId': value.strategyId,
+    'resolvedDecisionKeys': value.resolvedDecisionKeys,
+    'lastDecisionChoiceId': value.lastDecisionChoiceId,
+    'decisionReputation': value.decisionReputation,
     'seasonRewards': [
       for (final reward in value.seasonRewards)
         {
@@ -83,6 +87,11 @@ class CompanyCompetitionCodec {
                   null
           ? strategyValue
           : '';
+      final resolvedDecisionKeys = _decodeDecisionKeys(
+        data['resolvedDecisionKeys'],
+      );
+      final choiceValue = data['lastDecisionChoiceId'];
+      final lastDecisionChoiceId = choiceValue is String ? choiceValue : '';
       final seasonRewards = _decodeSeasonRewards(data['seasonRewards']);
       final seasonNumber = read(
         'seasonNumber',
@@ -102,6 +111,9 @@ class CompanyCompetitionCodec {
         lastRank: lastRank,
         lastReward: read('lastReward'),
         strategyId: strategyId,
+        resolvedDecisionKeys: resolvedDecisionKeys,
+        lastDecisionChoiceId: lastDecisionChoiceId,
+        decisionReputation: read('decisionReputation').clamp(0, 100),
         trophies: normalizedTrophies,
         seasonRewards: seasonRewards,
         seasonHistory: seasonHistory,
@@ -109,6 +121,18 @@ class CompanyCompetitionCodec {
     } on FormatException {
       return fallback;
     }
+  }
+
+  List<String> _decodeDecisionKeys(Object? value) {
+    if (value is! List<dynamic>) return const <String>[];
+    final keys = value.whereType<String>().where((key) => key.isNotEmpty);
+    return List<String>.unmodifiable(
+      keys.length <= CompanyDecisionService.maxResolvedDecisions
+          ? keys
+          : keys.skip(
+              keys.length - CompanyDecisionService.maxResolvedDecisions,
+            ),
+    );
   }
 
   List<CompanySeasonTrophy> _decodeTrophies(Object? value) {

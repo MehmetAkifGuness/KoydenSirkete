@@ -25,6 +25,7 @@ import '../../../company/domain/entities/company_employee.dart';
 import '../../../company/domain/entities/company_branch.dart';
 import '../../../company/domain/entities/company_specialty.dart';
 import '../../../company/domain/entities/company_budget_state.dart';
+import '../../../company/domain/entities/company_decision.dart';
 import '../../../company/domain/services/company_branch_service.dart';
 import '../../../assets/domain/entities/home_asset.dart';
 import '../../../assets/domain/entities/car_asset.dart';

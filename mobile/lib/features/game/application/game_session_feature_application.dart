@@ -101,6 +101,11 @@ extension GameSessionFeatureApplication on GameSessionApplicationService {
     CompanyBudgetLevel level,
   ) => _persist(_companyBudgetService.setLevel(state, category, level));
 
+  Future<PlayerState> resolveCompanyDecision(
+    PlayerState state,
+    CompanyDecisionChoice choice,
+  ) => _persist(const CompanyDecisionService().resolve(state, choice));
+
   Future<PlayerState> recruitEmployee(
     PlayerState state, {
     CompanyEmployee? employee,

@@ -333,6 +333,41 @@ void main() {
     session.dispose();
   });
 
+  testWidgets('company decision shows outcomes and locks after selection', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(800, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final session = await _readySession(
+      PlayerState.initial.copyWith(
+        day: 2,
+        companyLevel: 1,
+        companyFunds: 1000,
+        unlockedAchievementsMask: (1 << 12) - 1,
+      ),
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.dark(),
+        home: AppGradientBackground(child: CompanyPage(session: session)),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final choice = find.byKey(const ValueKey('company-decision-people'));
+    await tester.ensureVisible(choice);
+    await tester.pumpAndSettle();
+    expect(find.text('Kasa -₺80'), findsOneWidget);
+    expect(find.text('Moral +7'), findsOneWidget);
+    await tester.tap(choice);
+    await tester.pumpAndSettle();
+
+    expect(session.state.companyFunds, 920);
+    expect(session.state.companyCompetition.lastDecisionChoiceId, 'people');
+    expect(choice, findsNothing);
+    session.dispose();
+  });
+
   testWidgets('company branches page renders city opening options', (
     tester,
   ) async {

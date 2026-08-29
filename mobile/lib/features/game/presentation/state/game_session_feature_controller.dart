@@ -49,6 +49,14 @@ extension GameSessionFeatureController on GameSessionController {
         '${category.label} bütçesi ${level.label.toLowerCase()} oldu.',
   );
 
+  Future<String?> resolveCompanyDecision(CompanyDecisionChoice choice) =>
+      _execute(
+        action: (state) =>
+            _applicationService.resolveCompanyDecision(state, choice),
+        stateOf: (result) => result,
+        message: (_) => '${choice.title} kararı uygulandı.',
+      );
+
   Future<String?> recruitEmployee(CompanyEmployee employee) => _execute(
     action: (state) =>
         _applicationService.recruitEmployee(state, employee: employee),

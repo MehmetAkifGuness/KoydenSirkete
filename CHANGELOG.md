@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.30.0
+
+- Her yedi günlük piyasa dönemine hızlı büyüme, ekip desteği ve temkinli yönetim seçenekleri sunan şirket karar olayı eklendi.
+- Kararların şirket kasası, proje ilerlemesi, itibar, moral ve tükenmişlik sonuçları seçimden önce açıkça gösterilir.
+- Her olay yalnızca bir kez çözülebilir; seçim geçmişi ve kalıcı itibar etkisi mevcut şirket rekabet kaydında saklanır.
+
 ## 2.29.0
 
 - Şirket bütçelerinin gelir, itibar, moral ve proje riski sonuçları aynı karar kartında açıkça gösterilir.

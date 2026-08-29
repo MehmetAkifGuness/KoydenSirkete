@@ -71,6 +71,7 @@ class CompanyGrowthService {
               _expansionService.reputationGain(state) +
               _seasonRewardService.reputationBonus(state) +
               const CompanyBudgetService().reputationBonus(state) +
+              state.companyCompetition.decisionReputation +
               totalEmployees(state))
           .clamp(0, 100)
           .toInt();
