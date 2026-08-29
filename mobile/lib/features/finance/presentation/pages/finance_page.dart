@@ -398,6 +398,7 @@ extension on FinanceCategory {
     FinanceCategory.companyMarketingBudget => 'Pazarlama bütçesi',
     FinanceCategory.companyResearchBudget => 'Ar-Ge bütçesi',
     FinanceCategory.companyMaintenanceBudget => 'Bakım bütçesi',
+    FinanceCategory.personalEvent => 'Kişisel olay',
   };
 
   IconData get icon => switch (this) {
@@ -431,5 +432,6 @@ extension on FinanceCategory {
     FinanceCategory.companyMarketingBudget => Icons.campaign_outlined,
     FinanceCategory.companyResearchBudget => Icons.science_outlined,
     FinanceCategory.companyMaintenanceBudget => Icons.build_outlined,
+    FinanceCategory.personalEvent => Icons.bolt_outlined,
   };
 }

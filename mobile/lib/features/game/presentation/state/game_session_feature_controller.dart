@@ -1,6 +1,14 @@
 part of 'game_session_controller.dart';
 
 extension GameSessionFeatureController on GameSessionController {
+  PersonalEvent? get personalEvent => _applicationService.personalEvent(_state);
+
+  Future<String?> resolvePersonalEvent(PersonalEventChoice choice) => _execute(
+    action: (state) => _applicationService.resolvePersonalEvent(state, choice),
+    stateOf: (result) => result,
+    message: (_) => choice.outcome,
+  );
+
   DailyGoalStatus get dailyGoalStatus =>
       _applicationService.dailyGoalStatus(_state);
 

@@ -63,6 +63,8 @@ class PlayerStateMapper {
       companyCompetition: model.companyCompetition,
       companyExpansion: model.companyExpansion,
       companyStageIndex: model.companyStageIndex,
+      pendingPersonalEventId: model.pendingPersonalEventId,
+      lastPersonalEventDay: model.lastPersonalEventDay,
       isOnboarded: model.isOnboarded,
     );
   }

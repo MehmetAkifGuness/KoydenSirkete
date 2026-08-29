@@ -85,6 +85,8 @@ class PlayerStateModel {
     this.companyCompetition = const CompanyCompetitionState(),
     this.companyExpansion = const CompanyExpansionState(),
     this.companyStageIndex = 0,
+    this.pendingPersonalEventId,
+    this.lastPersonalEventDay = 0,
     this.isOnboarded = false,
   });
 
@@ -169,6 +171,8 @@ class PlayerStateModel {
         record.companyExpansionJson,
       ),
       companyStageIndex: record.companyStageIndex,
+      pendingPersonalEventId: record.pendingPersonalEventId,
+      lastPersonalEventDay: record.lastPersonalEventDay,
       isOnboarded: record.isOnboarded,
     );
   }
@@ -232,6 +236,8 @@ class PlayerStateModel {
   final CompanyCompetitionState companyCompetition;
   final CompanyExpansionState companyExpansion;
   final int companyStageIndex;
+  final int? pendingPersonalEventId;
+  final int lastPersonalEventDay;
   final bool isOnboarded;
 
   factory PlayerStateModel.fromEntity(PlayerState entity) {
@@ -295,6 +301,8 @@ class PlayerStateModel {
       companyCompetition: entity.companyCompetition,
       companyExpansion: entity.companyExpansion,
       companyStageIndex: entity.companyStageIndex,
+      pendingPersonalEventId: entity.pendingPersonalEventId,
+      lastPersonalEventDay: entity.lastPersonalEventDay,
       isOnboarded: entity.isOnboarded,
     );
   }

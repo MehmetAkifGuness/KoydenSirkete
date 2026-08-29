@@ -52,6 +52,8 @@ import '../../employment/domain/entities/employment.dart';
 import '../../employment/domain/services/employment_service.dart';
 import '../../work/domain/services/employer_task_generator.dart';
 import '../../wheel/domain/services/esnaf_wheel_service.dart';
+import '../../personal_life/domain/entities/personal_event.dart';
+import '../../personal_life/domain/services/personal_event_service.dart';
 
 part 'game_session_feature_application.dart';
 
@@ -85,6 +87,7 @@ class GameSessionApplicationService {
     EmployerTaskGenerator? employerTaskGenerator,
     EsnafWheelService? esnafWheelService,
     CitySalaryService? citySalaryService,
+    PersonalEventService? personalEventService,
   }) : _repository = repository,
        _jobApplicationService =
            jobApplicationService ?? JobApplicationService(),
@@ -122,7 +125,9 @@ class GameSessionApplicationService {
        _employerTaskGenerator =
            employerTaskGenerator ?? EmployerTaskGenerator(),
        _esnafWheelService = esnafWheelService ?? EsnafWheelService(),
-       _citySalaryService = citySalaryService ?? CitySalaryService();
+       _citySalaryService = citySalaryService ?? CitySalaryService(),
+       _personalEventService =
+           personalEventService ?? const PersonalEventService();
 
   final PlayerStateRepository _repository;
   final JobApplicationService _jobApplicationService;
@@ -152,6 +157,15 @@ class GameSessionApplicationService {
   final EmployerTaskGenerator _employerTaskGenerator;
   final EsnafWheelService _esnafWheelService;
   final CitySalaryService _citySalaryService;
+  final PersonalEventService _personalEventService;
+
+  PersonalEvent? personalEvent(PlayerState state) =>
+      _personalEventService.currentEvent(state);
+
+  Future<PlayerState> resolvePersonalEvent(
+    PlayerState state,
+    PersonalEventChoice choice,
+  ) => _persist(_personalEventService.resolve(state, choice));
 
   Future<PlayerState> load() async {
     final loaded = await _repository.load() ?? PlayerState.initial;
@@ -316,6 +330,12 @@ class GameSessionApplicationService {
           nextState.lastJobEvent != null) {
         messages.add(nextState.lastJobEvent!);
       }
+      final scheduled = _personalEventService.schedule(nextState);
+      if (scheduled.pendingPersonalEventId !=
+          nextState.pendingPersonalEventId) {
+        messages.add('Beklenmedik bir kişisel olay kararını bekliyor.');
+      }
+      nextState = scheduled;
     }
     final saved = await _persist(nextState);
     final settlementDelta = saved.money - nextState.money;

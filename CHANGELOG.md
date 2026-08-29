@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.34.0
+
+- Değişken oyun günü aralıklarında sunulan dört dengeli kişisel olay eklendi.
+- Her olayda etkileri önceden görünen iki karar seçeneği sunulur; karşılanamayan ücretli seçenekler engellenir.
+- Olay ilerlemesi ve bekleyen karar SQLite v32 ile saklanır; kişisel para hareketleri finans geçmişine kaydedilir.
+
 ## 2.33.0
 
 - Kullanımdaki evin konfor seviyesine göre enerji yenilenme bonusu eklendi.

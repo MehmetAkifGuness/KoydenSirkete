@@ -77,6 +77,8 @@ class LocalPlayerStateRepository implements PlayerStateRepository {
           model.companyExpansion,
         ),
         companyStageIndex: model.companyStageIndex,
+        pendingPersonalEventId: model.pendingPersonalEventId,
+        lastPersonalEventDay: model.lastPersonalEventDay,
         ownedCarId: model.ownedCarId,
         applicationBlockedJobId: model.applicationBlockedJobId,
         applicationBlockedUntilDay: model.applicationBlockedUntilDay,

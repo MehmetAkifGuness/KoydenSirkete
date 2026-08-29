@@ -36,7 +36,7 @@ MÜDÜR — 10/10 HEDEF PLANI
 - [TAMAMLANDI — v2.31.0] Mesleklerde kıdem, uzmanlaşma ve yönetici kariyer yollarını belirginleştir.
 - [TAMAMLANDI — v2.32.0] İşveren görevlerini sektör, pozisyon ve oyuncu yeteneklerine göre daha fazla çeşitlendir.
 - [TAMAMLANDI — v2.33.0] Ev ve araçları yalnızca gider/gelir değil; enerji, ulaşım, konfor ve fırsat avantajlarıyla ilişkilendir.
-- Beklenmeyen fakat adil kişisel olaylar ekle; her olaya en az iki oyuncu kararı sun.
+- [TAMAMLANDI — v2.34.0] Beklenmeyen fakat adil kişisel olaylar ekle; her olaya en az iki oyuncu kararı sun.
 - Borç, kredi ve yatırım sistemi eklenirse faiz, risk ve geri ödeme sınırlarını kötüye kullanılamayacak şekilde dengele.
 - Kişisel yaşam ile şirket kasasını her ekranda ve her işlemde tamamen ayrı tut.
 

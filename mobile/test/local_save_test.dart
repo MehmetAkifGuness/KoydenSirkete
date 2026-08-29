@@ -133,6 +133,8 @@ void main() {
         ],
       ),
       companyStageIndex: 2,
+      pendingPersonalEventId: 3,
+      lastPersonalEventDay: 18,
       companyExpansion: const CompanyExpansionState(
         completedDealIds: ['rota_logistics', 'mavi_software'],
       ),
@@ -193,6 +195,8 @@ void main() {
     expect(actual?.companyCompetition.seasonHistory.last.rank, 2);
     expect(actual?.companyCompetition.seasonHistory.last.cashReward, 3000);
     expect(actual?.companyStageIndex, 2);
+    expect(actual?.pendingPersonalEventId, 3);
+    expect(actual?.lastPersonalEventDay, 18);
     expect(actual?.companyExpansion.completedDealIds, [
       'rota_logistics',
       'mavi_software',

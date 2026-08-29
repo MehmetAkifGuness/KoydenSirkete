@@ -10,6 +10,7 @@ import '../../../../core/widgets/section_title.dart';
 import '../../../daily_goals/domain/entities/daily_goal.dart';
 import '../../../game/domain/entities/active_activity.dart';
 import '../../../game/presentation/state/game_session_controller.dart';
+import '../../../personal_life/presentation/widgets/personal_event_panel.dart';
 import '../models/dashboard_models.dart';
 
 class DashboardPage extends StatelessWidget {
@@ -29,6 +30,7 @@ class DashboardPage extends StatelessWidget {
       builder: (context, _) {
         final design = DashboardDesignState.fromPlayer(session.state);
         final activities = session.state.activities;
+        final personalEvent = session.personalEvent;
         return AppPage(
           title: 'Kontrol',
           subtitle: 'Bugünün kararlarını yönet.',
@@ -38,6 +40,10 @@ class DashboardPage extends StatelessWidget {
               _DashboardMeta(day: session.state.day, hour: session.state.hour),
               const SizedBox(height: 18),
               _WelcomeHero(status: session.dailyGoalStatus, session: session),
+              if (personalEvent != null) ...[
+                const SizedBox(height: 18),
+                PersonalEventPanel(event: personalEvent, session: session),
+              ],
               const SizedBox(height: 28),
               const SectionTitle(title: 'Bugünün özeti'),
               const SizedBox(height: 12),

@@ -17,7 +17,7 @@ class AppDatabase extends SqlitePlayerStateStore {
     final databasePath = join(await getDatabasesPath(), _databaseName);
     return _database = await openDatabase(
       databasePath,
-      version: 31,
+      version: 32,
       onCreate: (database, _) async {
         await database.execute('''
           CREATE TABLE $_tableName (
@@ -47,6 +47,8 @@ class AppDatabase extends SqlitePlayerStateStore {
             company_competition_json TEXT,
             company_expansion_json TEXT,
             company_stage_index INTEGER NOT NULL DEFAULT 0,
+            pending_personal_event_id INTEGER,
+            last_personal_event_day INTEGER NOT NULL DEFAULT 0,
             owned_car_id INTEGER,
             application_blocked_job_id INTEGER,
             application_blocked_until_day INTEGER NOT NULL DEFAULT 0,
@@ -300,6 +302,14 @@ class AppDatabase extends SqlitePlayerStateStore {
             'ALTER TABLE $_tableName ADD COLUMN company_budget_json TEXT',
           );
         }
+        if (oldVersion < 32) {
+          await database.execute(
+            'ALTER TABLE $_tableName ADD COLUMN pending_personal_event_id INTEGER',
+          );
+          await database.execute(
+            'ALTER TABLE $_tableName ADD COLUMN last_personal_event_day INTEGER NOT NULL DEFAULT 0',
+          );
+        }
       },
     );
   }
@@ -352,6 +362,8 @@ abstract class SqlitePlayerStateStore implements PlayerStateStore {
       companyCompetitionJson: row['company_competition_json'] as String?,
       companyExpansionJson: row['company_expansion_json'] as String?,
       companyStageIndex: row['company_stage_index'] as int? ?? 0,
+      pendingPersonalEventId: row['pending_personal_event_id'] as int?,
+      lastPersonalEventDay: row['last_personal_event_day'] as int? ?? 0,
       ownedCarId: row['owned_car_id'] as int?,
       applicationBlockedJobId: row['application_blocked_job_id'] as int?,
       applicationBlockedUntilDay:
@@ -420,6 +432,8 @@ abstract class SqlitePlayerStateStore implements PlayerStateStore {
       'company_competition_json': record.companyCompetitionJson,
       'company_expansion_json': record.companyExpansionJson,
       'company_stage_index': record.companyStageIndex,
+      'pending_personal_event_id': record.pendingPersonalEventId,
+      'last_personal_event_day': record.lastPersonalEventDay,
       'owned_car_id': record.ownedCarId,
       'application_blocked_job_id': record.applicationBlockedJobId,
       'application_blocked_until_day': record.applicationBlockedUntilDay,

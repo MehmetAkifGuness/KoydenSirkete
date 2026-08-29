@@ -1,7 +1,7 @@
 name: kariyerden_sirkete
 description: Müdür - tamamen offline kariyer ve şirket simülasyonu.
 publish_to: none
-version: 2.33.0+34
+version: 2.34.0+35
 
 environment:
   sdk: ^3.9.0

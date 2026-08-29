@@ -73,10 +73,12 @@ class PlayerState {
     this.companyCompetition = const CompanyCompetitionState(),
     this.companyExpansion = const CompanyExpansionState(),
     this.companyStageIndex = 0,
+    this.pendingPersonalEventId,
+    this.lastPersonalEventDay = 0,
     this.isOnboarded = false,
   }) : _legacyActiveActivity = activeActivity;
   static const initial = PlayerState(
-    schemaVersion: 31,
+    schemaVersion: 32,
     money: 240,
     energy: 100,
     knowledge: 0,
@@ -144,6 +146,8 @@ class PlayerState {
   final CompanyCompetitionState companyCompetition;
   final CompanyExpansionState companyExpansion;
   final int companyStageIndex;
+  final int? pendingPersonalEventId;
+  final int lastPersonalEventDay;
   final bool isOnboarded;
   PlayerState copyWith({
     int? schemaVersion,
@@ -205,6 +209,8 @@ class PlayerState {
     CompanyCompetitionState? companyCompetition,
     CompanyExpansionState? companyExpansion,
     int? companyStageIndex,
+    Object? pendingPersonalEventId = _unset,
+    int? lastPersonalEventDay,
     bool? isOnboarded,
   }) {
     return PlayerState(
@@ -308,6 +314,10 @@ class PlayerState {
       companyCompetition: companyCompetition ?? this.companyCompetition,
       companyExpansion: companyExpansion ?? this.companyExpansion,
       companyStageIndex: companyStageIndex ?? this.companyStageIndex,
+      pendingPersonalEventId: identical(pendingPersonalEventId, _unset)
+          ? this.pendingPersonalEventId
+          : pendingPersonalEventId as int?,
+      lastPersonalEventDay: lastPersonalEventDay ?? this.lastPersonalEventDay,
       isOnboarded: isOnboarded ?? this.isOnboarded,
     );
   }
