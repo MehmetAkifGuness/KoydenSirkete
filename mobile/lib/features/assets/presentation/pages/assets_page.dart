@@ -104,7 +104,7 @@ class AssetsPage extends StatelessWidget {
                 const AppSectionHeader(
                   title: 'Evler',
                   caption:
-                      'Evinde otur veya fiyatının aylık %1’iyle kiraya ver.',
+                      'Evinde otur veya kiraya ver. Toplam kira geliri aktif iş kazancı seviyesinde sınırlanır.',
                 ),
                 const SizedBox(height: 12),
                 if (ownedHomes.isNotEmpty) ...[

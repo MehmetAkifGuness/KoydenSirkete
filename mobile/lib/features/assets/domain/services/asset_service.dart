@@ -19,6 +19,7 @@ class AssetService {
   static const monthlyRentPercent = 1;
   static const rentalMaintenancePercent = 8;
   static const daysPerMonth = 30;
+  static const minimumDailyRentalIncomeLimit = 100;
 
   AssetCheck checkHome(PlayerState state, HomeAsset home, City city) {
     if (home.cityId != city.id || state.currentCityId != city.id) {
@@ -91,11 +92,24 @@ class AssetService {
 
   int dailyRent(HomeAsset home) => (monthlyRent(home) / daysPerMonth).round();
 
-  int monthlyRentalIncome(PlayerState state) =>
-      _rentedHomes(state).fold(0, (total, home) => total + monthlyRent(home));
+  int monthlyRentalIncomeLimit(PlayerState state) =>
+      dailyRentalIncomeLimit(state) * daysPerMonth;
 
-  int dailyRentalIncome(PlayerState state) =>
-      _rentedHomes(state).fold(0, (total, home) => total + dailyRent(home));
+  int dailyRentalIncomeLimit(PlayerState state) =>
+      (state.employment?.salary ?? minimumDailyRentalIncomeLimit).clamp(
+        minimumDailyRentalIncomeLimit,
+        1 << 62,
+      ).toInt();
+
+  int monthlyRentalIncome(PlayerState state) => _rentedHomes(state)
+      .fold(0, (total, home) => total + monthlyRent(home))
+      .clamp(0, monthlyRentalIncomeLimit(state))
+      .toInt();
+
+  int dailyRentalIncome(PlayerState state) => _rentedHomes(state)
+      .fold(0, (total, home) => total + dailyRent(home))
+      .clamp(0, dailyRentalIncomeLimit(state))
+      .toInt();
 
   int monthlyRentalMaintenance(PlayerState state) =>
       (monthlyRentalIncome(state) * rentalMaintenancePercent / 100).round();

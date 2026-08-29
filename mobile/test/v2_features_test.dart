@@ -698,6 +698,31 @@ void main() {
     );
   });
 
+  test('rental portfolio cannot outpace active daily earning capacity', () {
+    final homes = HomeCatalog.forCity(CityCatalog.cities.first);
+    final service = AssetService();
+    final state = PlayerState.initial.copyWith(
+      ownedHomeIds: homes.map((home) => home.id).toList(),
+      rentedHomeIds: homes.map((home) => home.id).toList(),
+    );
+
+    expect(service.dailyRentalIncome(state), 100);
+    expect(service.monthlyRentalIncome(state), 3000);
+    expect(service.dailyRentalMaintenance(state), 8);
+    expect(service.monthlyNetRentalIncome(state), 2760);
+
+    final employed = state.copyWith(
+      employment: const Employment(
+        jobId: 1,
+        cityId: 1,
+        salary: 220,
+        company: 'Test',
+        startedDay: 1,
+      ),
+    );
+    expect(service.dailyRentalIncome(employed), 220);
+  });
+
   test('finance ledger aggregates categories and retains thirty days', () {
     var ledger = const FinanceLedger();
     ledger = ledger.record(

@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.41.0
+
+- Toplam kira geliri, oyuncunun tek bir aktif işten kazanabileceği günlük tutarla sınırlandı.
+- Kira tavanı iş maaşıyla büyür; işsiz oyuncu için güvenli bir taban uygulanır ve bakım giderleri gerçek tahsilata göre hesaplanır.
+
 ## 2.40.0
 
 - Maaş, yaşam gideri, şirket geliri ve çalışan maliyetleri aynı aylık, üst sınırı olan ekonomi endeksine bağlandı.
