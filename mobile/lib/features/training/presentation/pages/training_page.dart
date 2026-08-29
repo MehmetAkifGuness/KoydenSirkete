@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../app/theme/app_palette.dart';
 import '../../../../core/widgets/app_feedback.dart';
 import '../../../../core/widgets/app_page.dart';
+import '../../../economy/domain/services/investment_return_service.dart';
 import '../../../game/presentation/state/game_session_controller.dart';
 import '../../../skills/domain/entities/skill_id.dart';
 import '../../domain/entities/course.dart';
@@ -233,6 +234,15 @@ class _CourseCard extends StatelessWidget {
                 color: AppPalette.textSecondary,
                 icon: Icons.trending_up_rounded,
               ),
+              if (course.cost > 0)
+                AppPill(
+                  label: InvestmentReturnService.summary(
+                    InvestmentType.training,
+                    InvestmentReturnService.trainingDays(course),
+                  ),
+                  color: AppPalette.success,
+                  icon: Icons.savings_outlined,
+                ),
             ],
           ),
           if (course.skillDeltas.isNotEmpty) ...[

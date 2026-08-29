@@ -6,6 +6,7 @@ import '../../../../core/widgets/app_page.dart';
 import '../../../../core/widgets/feature_error_view.dart';
 import '../../../cities/domain/entities/city.dart';
 import '../../../cities/domain/services/city_catalog.dart';
+import '../../../economy/domain/services/investment_return_service.dart';
 import '../../../game/presentation/state/game_session_controller.dart';
 import '../../domain/entities/car_asset.dart';
 import '../../domain/entities/home_asset.dart';
@@ -36,8 +37,9 @@ class AssetsPage extends StatelessWidget {
             final ownedCar = CarCatalog.findById(state.ownedCarId);
             final assetService = AssetService();
             final monthlyRentalIncome = assetService.monthlyRentalIncome(state);
-            final monthlyNetRentalIncome = assetService
-                .monthlyNetRentalIncome(state);
+            final monthlyNetRentalIncome = assetService.monthlyNetRentalIncome(
+              state,
+            );
             return ListView(
               padding: const EdgeInsets.fromLTRB(18, 8, 18, 28),
               children: [
@@ -190,7 +192,8 @@ class _HomeCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Konfor ${home.comfort}/100 · Enerji +${home.energyRecoveryBonus}/dk · ₺${home.price} · Aylık brüt kira ₺${AssetService().monthlyRent(home)}',
+                  'Konfor ${home.comfort}/100 · Enerji +${home.energyRecoveryBonus}/dk · ₺${home.price} · Aylık brüt kira ₺${AssetService().monthlyRent(home)}\n'
+                  '${InvestmentReturnService.summary(InvestmentType.home, InvestmentReturnService.homeDays(home))}',
                   style: const TextStyle(
                     color: AppPalette.textMuted,
                     fontSize: 11,
@@ -397,7 +400,8 @@ class _CarCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 7),
                 Text(
-                  'Ulaşım %${car.moveDiscountPercent} indirim · +${car.opportunityBonus} iş fırsatı · ₺${car.price}',
+                  'Ulaşım %${car.moveDiscountPercent} indirim · +${car.opportunityBonus} iş fırsatı · ₺${car.price}\n'
+                  '${InvestmentReturnService.summary(InvestmentType.car, InvestmentReturnService.carDays(car))}',
                   style: const TextStyle(
                     color: AppPalette.textMuted,
                     fontSize: 11,

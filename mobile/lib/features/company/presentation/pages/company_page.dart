@@ -5,6 +5,7 @@ import '../../../../core/widgets/app_feedback.dart';
 import '../../../../core/widgets/app_page.dart';
 import '../../../../core/widgets/game_account_bar.dart';
 import '../../../game/presentation/state/game_session_controller.dart';
+import '../../../economy/domain/services/investment_return_service.dart';
 import '../../domain/entities/company_employee.dart';
 import '../../domain/entities/company_project.dart';
 import '../../domain/entities/company_specialty.dart';
@@ -410,6 +411,20 @@ class _CompanyViewState extends State<_CompanyView> {
         const SizedBox(height: 25),
         CompanyProjectTeamPanel(session: session, project: project),
         const SizedBox(height: 12),
+        if (state.companyLevel < CompanyService.maxCompanyLevel) ...[
+          Align(
+            alignment: Alignment.centerLeft,
+            child: AppPill(
+              label: InvestmentReturnService.summary(
+                InvestmentType.companyUpgrade,
+                InvestmentReturnService.companyUpgradeDays(state.companyLevel),
+              ),
+              color: AppPalette.success,
+              icon: Icons.savings_outlined,
+            ),
+          ),
+          const SizedBox(height: 9),
+        ],
         Row(
           children: [
             if (state.companyLevel < CompanyService.maxCompanyLevel) ...[

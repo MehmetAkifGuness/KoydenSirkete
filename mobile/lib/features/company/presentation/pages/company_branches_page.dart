@@ -7,6 +7,7 @@ import '../../../../core/widgets/feature_error_view.dart';
 import '../../../cities/domain/entities/city.dart';
 import '../../../cities/domain/services/city_catalog.dart';
 import '../../../game/presentation/state/game_session_controller.dart';
+import '../../../economy/domain/services/investment_return_service.dart';
 import '../../domain/entities/company_branch.dart';
 import '../../domain/entities/company_employee.dart';
 import '../../domain/entities/company_specialty.dart';
@@ -210,7 +211,8 @@ class _CityBranchCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Nüfus ${city.population} · Pazar ${city.marketLevel} · Şirket kasası ₺$cost',
+                  'Nüfus ${city.population} · Pazar ${city.marketLevel} · Şirket kasası ₺$cost\n'
+                  'Hedef geri dönüş · ${InvestmentReturnService.target(InvestmentType.branch).label}',
                   style: const TextStyle(
                     color: AppPalette.textMuted,
                     fontSize: 11,
@@ -334,6 +336,13 @@ class _BranchCardState extends State<_BranchCard> {
                       : null,
                   icon: const Icon(Icons.upgrade_rounded, size: 17),
                   label: Text('Yükselt · Kasa ₺$upgradeCost'),
+                ),
+              if (branch.level < CompanyBranchService.maxBranchLevel)
+                AppPill(
+                  label:
+                      'Hedef ${InvestmentReturnService.target(InvestmentType.branch).label}',
+                  color: AppPalette.success,
+                  icon: Icons.savings_outlined,
                 ),
             ],
           ),

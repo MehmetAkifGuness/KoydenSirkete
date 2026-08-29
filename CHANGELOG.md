@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.39.0
+
+- Ev, araç, eğitim, bayi ve şirket yükseltmeleri için merkezi hedef geri dönüş aralıkları tanımlandı.
+- Tahmini geri dönüş süreleri yatırım ekranlarında gösterildi ve katalog dengeleri otomatik testlerle koruma altına alındı.
+
 ## 2.38.0
 
 - Hızlı kazanç mini oyununa günlük dört ücretli tur sınırı eklendi.

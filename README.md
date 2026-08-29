@@ -320,6 +320,11 @@ Android-first, tamamen offline kariyer ve şirket simülasyonu.
 - Hızlı kazanç mini oyunu günde dört ücretli turla sınırlandırılır; azalan getiri korunur.
 - Zorunlu yaşam giderlerinin eksik kalan kısmı geçim desteği olarak finans geçmişine kaydedilir ve kişisel cüzdanı sıfırın altına düşürmez.
 
+## v2.39.0 yatırım geri dönüş hedefleri
+
+- Ev, araç, eğitim, bayi ve şirket yükseltmeleri için merkezi hedef geri dönüş aralıkları tanımlanır.
+- Yatırım kartları tahmini süreyi veya hedef aralığı gösterir; katalog değerleri bu aralıklara karşı otomatik test edilir.
+
 ## Çalıştırma
 
 ```powershell
