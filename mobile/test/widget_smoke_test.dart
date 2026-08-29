@@ -317,6 +317,8 @@ void main() {
     expect(session.state.money, 5000);
     expect(session.state.companyFunds, 2000);
     expect(find.text('Günlük ₺40 / ₺75'), findsOneWidget);
+    expect(find.text('Gelir +6%'), findsOneWidget);
+    expect(find.text('İtibar +2'), findsOneWidget);
 
     final research = find.byKey(
       const ValueKey('company-budget-research-medium'),

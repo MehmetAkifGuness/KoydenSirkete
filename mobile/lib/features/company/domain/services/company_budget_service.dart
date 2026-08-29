@@ -28,6 +28,20 @@ class CompanyBudgetBreakdown {
   };
 }
 
+class CompanyBudgetImpact {
+  const CompanyBudgetImpact({
+    this.revenueBonusPercent = 0,
+    this.reputationBonus = 0,
+    this.moraleDelta = 0,
+    this.riskReduction = 0,
+  });
+
+  final int revenueBonusPercent;
+  final int reputationBonus;
+  final int moraleDelta;
+  final int riskReduction;
+}
+
 class CompanyBudgetService {
   const CompanyBudgetService();
 
@@ -85,6 +99,36 @@ class CompanyBudgetService {
   int researchProgressBonus(PlayerState state) =>
       state.companyBudget.research.factor;
 
+  int reputationBonus(PlayerState state) =>
+      state.companyBudget.marketing.factor;
+
+  int projectRiskReduction(PlayerState state) =>
+      state.companyBudget.research.factor * 2 +
+      state.companyBudget.maintenance.factor;
+
+  CompanyBudgetImpact impactFor(
+    CompanyBudgetCategory category,
+    CompanyBudgetLevel level,
+  ) {
+    final factor = level.factor;
+    return switch (category) {
+      CompanyBudgetCategory.office => CompanyBudgetImpact(
+        moraleDelta: factor,
+      ),
+      CompanyBudgetCategory.marketing => CompanyBudgetImpact(
+        revenueBonusPercent: factor * 3,
+        reputationBonus: factor,
+      ),
+      CompanyBudgetCategory.research => CompanyBudgetImpact(
+        riskReduction: factor * 2,
+      ),
+      CompanyBudgetCategory.maintenance => CompanyBudgetImpact(
+        revenueBonusPercent: factor * 2,
+        riskReduction: factor,
+      ),
+    };
+  }
+
   PlayerState applyDailyHeadquartersOfficeEffect(PlayerState state) {
     final factor = state.companyBudget.office.factor;
     if (factor == 0) return state;
@@ -113,11 +157,11 @@ class CompanyBudgetService {
       CompanyBudgetCategory.office =>
         'Günlük çalışan morali +$factor, tükenmişlik -$factor',
       CompanyBudgetCategory.marketing =>
-        'Merkez ve bayi geliri +%${factor * 3}',
+        'Merkez ve bayi geliri +%${factor * 3}, itibar +$factor',
       CompanyBudgetCategory.research =>
-        'Aktif proje ilerlemesi günlük +$factor',
+        'Aktif proje ilerlemesi günlük +$factor, proje riski -${factor * 2} puan',
       CompanyBudgetCategory.maintenance =>
-        'Merkez ve bayi geliri +%${factor * 2}',
+        'Merkez ve bayi geliri +%${factor * 2}, proje riski -$factor puan',
     };
   }
 

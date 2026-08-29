@@ -65,6 +65,10 @@ class CompanyBudgetPanel extends StatelessWidget {
                 category,
                 state.companyBudget.levelFor(category),
               ),
+              impact: service.impactFor(
+                category,
+                state.companyBudget.levelFor(category),
+              ),
               enabled: !session.isBusy,
               onSelected: (level) => _setLevel(context, category, level),
             ),
@@ -93,6 +97,7 @@ class _BudgetRow extends StatelessWidget {
     required this.selected,
     required this.dailyCost,
     required this.effect,
+    required this.impact,
     required this.enabled,
     required this.onSelected,
   });
@@ -101,6 +106,7 @@ class _BudgetRow extends StatelessWidget {
   final CompanyBudgetLevel selected;
   final int dailyCost;
   final String effect;
+  final CompanyBudgetImpact impact;
   final bool enabled;
   final ValueChanged<CompanyBudgetLevel> onSelected;
 
@@ -133,6 +139,17 @@ class _BudgetRow extends StatelessWidget {
         effect,
         style: const TextStyle(color: AppPalette.textMuted, fontSize: 11),
       ),
+      const SizedBox(height: 7),
+      Wrap(
+        spacing: 6,
+        runSpacing: 6,
+        children: [
+          AppPill(label: _gain('Gelir', impact.revenueBonusPercent, '%')),
+          AppPill(label: _gain('İtibar', impact.reputationBonus, '')),
+          AppPill(label: _gain('Moral', impact.moraleDelta, '/gün')),
+          AppPill(label: _reduction('Risk', impact.riskReduction)),
+        ],
+      ),
       const SizedBox(height: 9),
       Wrap(
         spacing: 6,
@@ -157,6 +174,12 @@ class _BudgetRow extends StatelessWidget {
       ),
     ],
   );
+
+  String _gain(String label, int value, String suffix) =>
+      value == 0 ? '$label etkisi yok' : '$label +$value$suffix';
+
+  String _reduction(String label, int value) =>
+      value == 0 ? '$label etkisi yok' : '$label -$value puan';
 }
 
 extension on CompanyBudgetCategory {

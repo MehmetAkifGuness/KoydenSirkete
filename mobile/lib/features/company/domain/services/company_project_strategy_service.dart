@@ -194,7 +194,8 @@ class CompanyProjectStrategyService {
                 levelGap * 10 -
                 levelAdvantage * 4 -
                 specialists * specialistRiskReductionPercent -
-                performanceReduction)
+                performanceReduction -
+                _budgetService.projectRiskReduction(state))
             .clamp(5, 75);
     return (100 -
             effectiveRisk +
@@ -235,7 +236,8 @@ class CompanyProjectStrategyService {
             scheduleOverrun * 10 -
             specialists * 4 -
             performanceReduction +
-            fitPenalty)
+            fitPenalty -
+            _budgetService.projectRiskReduction(state))
         .clamp(5, 90)
         .toInt();
   }

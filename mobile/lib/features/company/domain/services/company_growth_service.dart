@@ -1,5 +1,6 @@
 import '../../../game/domain/entities/player_state.dart';
 import 'company_branch_service.dart';
+import 'company_budget_service.dart';
 import 'company_service.dart';
 import 'company_region_service.dart';
 import 'company_season_reward_service.dart';
@@ -69,6 +70,7 @@ class CompanyGrowthService {
               state.companyCompetition.championships * 10 +
               _expansionService.reputationGain(state) +
               _seasonRewardService.reputationBonus(state) +
+              const CompanyBudgetService().reputationBonus(state) +
               totalEmployees(state))
           .clamp(0, 100)
           .toInt();

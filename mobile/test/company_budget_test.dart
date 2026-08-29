@@ -7,6 +7,7 @@ import 'package:kariyerden_sirkete/features/company/domain/entities/company_budg
 import 'package:kariyerden_sirkete/features/company/domain/services/company_branch_service.dart';
 import 'package:kariyerden_sirkete/features/company/domain/services/company_budget_service.dart';
 import 'package:kariyerden_sirkete/features/company/domain/services/company_employee_catalog.dart';
+import 'package:kariyerden_sirkete/features/company/domain/services/company_growth_service.dart';
 import 'package:kariyerden_sirkete/features/company/domain/services/company_project_catalog.dart';
 import 'package:kariyerden_sirkete/features/company/domain/services/company_service.dart';
 import 'package:kariyerden_sirkete/features/finance/domain/entities/finance_ledger.dart';
@@ -140,7 +141,7 @@ void main() {
     );
     final companyService = CompanyService();
     final branchService = CompanyBranchService();
-    final project = CompanyProjectCatalog.byId(base.activeProjectId);
+    final project = CompanyProjectCatalog.projects.last;
 
     expect(
       companyService.dailyRevenue(funded),
@@ -154,6 +155,38 @@ void main() {
       companyService.projectForecast(funded, project).dailyProgress,
       companyService.projectForecast(base, project).dailyProgress + 3,
     );
+    expect(
+      companyService.projectForecast(funded, project).successChance,
+      companyService.projectForecast(base, project).successChance + 9,
+    );
+    expect(
+      companyService.projectForecast(funded, project).delayChance,
+      lessThan(companyService.projectForecast(base, project).delayChance),
+    );
+    expect(
+      CompanyGrowthService().reputation(funded),
+      CompanyGrowthService().reputation(base) + 3,
+    );
+  });
+
+  test('budget impacts expose income, reputation, morale and risk', () {
+    final marketing = budgetService.impactFor(
+      CompanyBudgetCategory.marketing,
+      CompanyBudgetLevel.medium,
+    );
+    final office = budgetService.impactFor(
+      CompanyBudgetCategory.office,
+      CompanyBudgetLevel.medium,
+    );
+    final research = budgetService.impactFor(
+      CompanyBudgetCategory.research,
+      CompanyBudgetLevel.medium,
+    );
+
+    expect(marketing.revenueBonusPercent, 6);
+    expect(marketing.reputationBonus, 2);
+    expect(office.moraleDelta, 2);
+    expect(research.riskReduction, 4);
   });
 
   test('legacy default budget has no expense or gameplay effect', () {

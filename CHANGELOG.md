@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.29.0
+
+- Şirket bütçelerinin gelir, itibar, moral ve proje riski sonuçları aynı karar kartında açıkça gösterilir.
+- Pazarlama bütçesi itibarı; Ar-Ge ve bakım bütçeleri proje başarı ve gecikme riskini dengeli biçimde etkiler.
+- Kapalı bütçe düzeylerinde etkilenmeyen göstergeler de açıkça belirtilerek kararların karşılaştırılması kolaylaştırıldı.
+
 ## 2.28.0
 
 - Ofis, pazarlama, Ar-Ge ve bakım için kapalı, düşük, orta ve yüksek günlük bütçe seviyeleri eklendi.
