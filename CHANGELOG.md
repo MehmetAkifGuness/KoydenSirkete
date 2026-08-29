@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.32.0
+
+- Günlük işveren görevlerine sektör ve kariyer aşamasına özgü görevler eklendi.
+- Oyuncunun en güçlü yeteneğine uygun ek görev ve görünür görev bağlamı eklendi.
+- Bağlamsal görevler deterministik kimliklerle güvenli biçimde tamamlanabilir hâle getirildi.
+
 ## 2.31.0
 
 - Meslekler başlangıç, uzmanlaşma, kıdemli, yönetim ve üst yönetim aşamalarına ayrıldı.

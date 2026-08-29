@@ -321,6 +321,7 @@ void main() {
           schedules.addAll(
             generator
                 .generate(job: job, cityId: cityId, day: day)
+                .where((task) => task.contextLabel == null)
                 .map(
                   (task) =>
                       '${task.energyCost}/${task.durationHours}/${task.experienceGain}',
@@ -331,6 +332,70 @@ void main() {
     }
     expect(schedules, containsAll(expected));
     expect(schedules.difference(expected), isEmpty);
+  });
+
+  test('employer tasks vary by sector, position, and strongest skill', () {
+    final generator = EmployerTaskGenerator();
+    final retailEntry = generator.generate(
+      job: JobCatalog.findById(1)!,
+      cityId: 1,
+      day: 3,
+      skills: const SkillProfile({SkillId.sales: 500}),
+    );
+    final financeManager = generator.generate(
+      job: JobCatalog.findById(10)!,
+      cityId: 1,
+      day: 3,
+      skills: const SkillProfile({SkillId.analysis: 500}),
+    );
+
+    expect(
+      retailEntry.map((task) => task.contextLabel),
+      contains('Sektör · Perakende'),
+    );
+    expect(
+      retailEntry.map((task) => task.contextLabel),
+      contains('Pozisyon · Başlangıç'),
+    );
+    expect(
+      retailEntry.map((task) => task.contextLabel),
+      contains('Yetenek · Satış'),
+    );
+    expect(
+      financeManager.map((task) => task.contextLabel),
+      contains('Sektör · Finans'),
+    );
+    expect(
+      financeManager.map((task) => task.contextLabel),
+      contains('Pozisyon · Yönetim'),
+    );
+    expect(
+      financeManager.map((task) => task.contextLabel),
+      contains('Yetenek · Analiz'),
+    );
+  });
+
+  test('contextual employer tasks remain resolvable after starting', () {
+    final generator = EmployerTaskGenerator();
+    final job = JobCatalog.findById(6)!;
+    final task = generator
+        .generate(
+          job: job,
+          cityId: 2,
+          day: 8,
+          skills: const SkillProfile({SkillId.logistics: 600}),
+        )
+        .first;
+
+    final resolved = generator.find(
+      job: job,
+      cityId: 2,
+      day: 8,
+      taskId: task.id,
+    );
+
+    expect(resolved?.title, task.title);
+    expect(resolved?.skillRequirements, task.skillRequirements);
   });
 
   test('city branch recruits employees and produces daily company income', () {

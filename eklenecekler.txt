@@ -34,7 +34,7 @@ MÜDÜR — 10/10 HEDEF PLANI
 4. ÖNCELİK — KARİYER VE KİŞİSEL YAŞAM
 
 - [TAMAMLANDI — v2.31.0] Mesleklerde kıdem, uzmanlaşma ve yönetici kariyer yollarını belirginleştir.
-- İşveren görevlerini sektör, pozisyon ve oyuncu yeteneklerine göre daha fazla çeşitlendir.
+- [TAMAMLANDI — v2.32.0] İşveren görevlerini sektör, pozisyon ve oyuncu yeteneklerine göre daha fazla çeşitlendir.
 - Ev ve araçları yalnızca gider/gelir değil; enerji, ulaşım, konfor ve fırsat avantajlarıyla ilişkilendir.
 - Beklenmeyen fakat adil kişisel olaylar ekle; her olaya en az iki oyuncu kararı sun.
 - Borç, kredi ve yatırım sistemi eklenirse faiz, risk ve geri ödeme sınırlarını kötüye kullanılamayacak şekilde dengele.

@@ -12,6 +12,7 @@ class WorkTask {
     required this.performanceGain,
     required this.experienceGain,
     this.skillRequirements = const {},
+    this.contextLabel,
   });
 
   final int id;
@@ -24,4 +25,5 @@ class WorkTask {
   final int performanceGain;
   final int experienceGain;
   final Map<SkillId, int> skillRequirements;
+  final String? contextLabel;
 }

@@ -229,6 +229,7 @@ class GameSessionApplicationService {
       job: job,
       cityId: state.currentCityId,
       day: state.day,
+      skills: state.skills,
     );
   }
 

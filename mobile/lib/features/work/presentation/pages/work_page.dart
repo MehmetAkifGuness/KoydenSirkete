@@ -138,6 +138,12 @@ class _WorkTaskCard extends StatelessWidget {
             spacing: 7,
             runSpacing: 7,
             children: [
+              if (task.contextLabel != null)
+                AppPill(
+                  label: task.contextLabel!,
+                  color: AppPalette.primary,
+                  icon: Icons.tune_rounded,
+                ),
               AppPill(
                 label: '-${efficiency.energyCost} enerji',
                 color: AppPalette.tertiary,
