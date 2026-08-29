@@ -325,6 +325,10 @@ Android-first, tamamen offline kariyer ve şirket simülasyonu.
 - Ev, araç, eğitim, bayi ve şirket yükseltmeleri için merkezi hedef geri dönüş aralıkları tanımlanır.
 - Yatırım kartları tahmini süreyi veya hedef aralığı gösterir; katalog değerleri bu aralıklara karşı otomatik test edilir.
 
+## v2.40.0 ortak ekonomi endeksi
+
+- Maaş, yaşam gideri, şirket geliri ve çalışan maliyetleri aylık `%1`, en fazla `%25` ortak endeksle birlikte büyür.
+
 ## Çalıştırma
 
 ```powershell

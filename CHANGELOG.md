@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.40.0
+
+- Maaş, yaşam gideri, şirket geliri ve çalışan maliyetleri aynı aylık, üst sınırı olan ekonomi endeksine bağlandı.
+- Gün değişimlerinde kayıtlı maaşlar güncellenir; merkez ve bayi operasyonları geçmiş günleri kendi endeksleriyle işler.
+
 ## 2.39.0
 
 - Ev, araç, eğitim, bayi ve şirket yükseltmeleri için merkezi hedef geri dönüş aralıkları tanımlandı.

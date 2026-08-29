@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import '../../../assets/domain/services/asset_service.dart';
 import '../../../assets/domain/services/car_catalog.dart';
+import '../../../economy/domain/services/economy_index_service.dart';
 import '../../../game/domain/entities/player_state.dart';
 import '../../../finance/domain/entities/finance_ledger.dart';
 import 'city_catalog.dart';
@@ -44,22 +45,23 @@ class LivingCostBreakdown {
 }
 
 class LivingCostService {
-  LivingCostService({AssetService? assetService})
-    : _assetService = assetService ?? AssetService();
+  LivingCostService({
+    AssetService? assetService,
+    EconomyIndexService? economyIndexService,
+  }) : _assetService = assetService ?? AssetService(),
+       _economyIndexService =
+           economyIndexService ?? const EconomyIndexService();
 
   final AssetService _assetService;
+  final EconomyIndexService _economyIndexService;
 
   static const housingPercent = 55;
   static const foodPercent = 20;
   static const utilitiesPercent = 15;
-  static const inflationPeriodDays = 30;
-  static const inflationPercentPerPeriod = 1;
-  static const maximumInflationPercent = 25;
-
   LivingCostBreakdown breakdown(PlayerState state, int cityId) {
     final city = CityCatalog.findById(cityId);
     if (city == null) return LivingCostBreakdown.empty;
-    final inflation = _inflationMultiplier(state.day);
+    final inflation = _economyIndexService.multiplierForDay(state.day);
     final cityBase = (city.dailyCost * inflation).round();
     final housingBase = cityBase * housingPercent ~/ 100;
     final foodBase = cityBase * foodPercent ~/ 100;
@@ -117,15 +119,6 @@ class LivingCostService {
     final income = math.max(averageIncome, state.employment?.salary ?? 0);
     if (income <= 0) return 1;
     return 1 + math.min(.5, math.sqrt(income / 6000) * .35);
-  }
-
-  double _inflationMultiplier(int day) {
-    final periods = math.max(0, day - 1) ~/ inflationPeriodDays;
-    final percent = math.min(
-      maximumInflationPercent,
-      periods * inflationPercentPerPeriod,
-    );
-    return 1 + percent / 100;
   }
 
   FinanceLedger _recordDay(

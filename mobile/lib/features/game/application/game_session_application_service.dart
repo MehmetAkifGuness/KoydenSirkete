@@ -183,7 +183,11 @@ class GameSessionApplicationService {
             employment: Employment(
               jobId: job.id,
               cityId: loaded.currentCityId,
-              salary: _citySalaryService.calculate(job, loaded.currentCityId),
+              salary: _citySalaryService.calculate(
+                job,
+                loaded.currentCityId,
+                day: loaded.day,
+              ),
               company: job.company,
               startedDay: loaded.day,
             ),
@@ -198,6 +202,7 @@ class GameSessionApplicationService {
         final salary = _citySalaryService.calculate(
           employmentJob,
           loaded.currentCityId,
+          day: loaded.day,
         );
         if (loaded.currentJobId != employmentJob.id ||
             loaded.careerLevel != employmentJob.level ||
@@ -299,6 +304,19 @@ class GameSessionApplicationService {
     }
     final elapsedDays = clock.state.day - state.day;
     if (elapsedDays > 0) {
+      final employment = nextState.employment;
+      final job = JobCatalog.findById(employment?.jobId);
+      if (employment != null && job != null) {
+        nextState = nextState.copyWith(
+          employment: employment.copyWith(
+            salary: _citySalaryService.calculate(
+              job,
+              nextState.currentCityId,
+              day: nextState.day,
+            ),
+          ),
+        );
+      }
       nextState = _personalFinanceService.processDays(nextState, elapsedDays);
       final operations = _companyService.processDailyOperations(
         nextState,

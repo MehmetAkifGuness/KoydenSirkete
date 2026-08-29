@@ -64,7 +64,11 @@ class CityService {
           ? employment
           : employment.copyWith(
               cityId: city.id,
-              salary: _salaryService.calculateForCity(job, city),
+              salary: _salaryService.calculateForCity(
+                job,
+                city,
+                day: state.day,
+              ),
             ),
     );
   }

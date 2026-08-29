@@ -35,7 +35,11 @@ class CityOpportunityService {
         JobListing(
           job: selected[index].job,
           cityId: city.id,
-          salary: _salaryService.calculateForCity(selected[index].job, city),
+          salary: _salaryService.calculateForCity(
+            selected[index].job,
+            city,
+            day: day,
+          ),
           opportunityIndex: index,
           employer: JobEmployerCatalog.select(
             job: selected[index].job,

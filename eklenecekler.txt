@@ -45,7 +45,7 @@ MÜDÜR — 10/10 HEDEF PLANI
 - [TAMAMLANDI — v2.37.0] 30, 100, 365 ve 1.000 oyun günlük otomatik ekonomi simülasyonları oluştur.
 - [TAMAMLANDI — v2.38.0] Oyuncunun çok hızlı zenginleşmesini ve geri dönemeyecek şekilde fakirleşmesini engelleyen sınırlar belirle.
 - [TAMAMLANDI — v2.39.0] Her yatırım için hedef geri dönüş süresi tanımla; ev, araç, eğitim, şube ve şirket yükseltmelerini buna göre dengele.
-- Enflasyon, maaş, yaşam gideri ve şirket gelirinin birbirinden kopuk büyümesini engelle.
+- [TAMAMLANDI — v2.40.0] Enflasyon, maaş, yaşam gideri ve şirket gelirinin birbirinden kopuk büyümesini engelle.
 - Pasif gelirlerin aktif oynanışı gereksiz hâle getirmemesini sağla.
 - Rastgele sonuçlarda olasılıkları oyuncuya anlaşılır biçimde göster ve sonuçları kaydedilebilir tohumla üret.
 - Kolay, normal ve zor ekonomi seçenekleri ekle; varsayılan denge normal mod olmalı.

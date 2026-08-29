@@ -77,7 +77,11 @@ class CareerService {
       employment: state.employment?.copyWith(
         jobId: nextJob.id,
         cityId: state.currentCityId,
-        salary: _salaryService.calculate(nextJob, state.currentCityId),
+        salary: _salaryService.calculate(
+          nextJob,
+          state.currentCityId,
+          day: state.day,
+        ),
         company: state.employment!.company,
       ),
     );

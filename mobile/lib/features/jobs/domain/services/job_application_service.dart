@@ -81,7 +81,11 @@ class JobApplicationService {
       JobListing(
         job: job,
         cityId: state.currentCityId,
-        salary: _salaryService.calculate(job, state.currentCityId),
+        salary: _salaryService.calculate(
+          job,
+          state.currentCityId,
+          day: state.day,
+        ),
         opportunityIndex: 0,
       ),
     );

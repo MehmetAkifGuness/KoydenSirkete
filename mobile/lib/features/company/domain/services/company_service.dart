@@ -1,4 +1,5 @@
 import '../../../../core/errors/game_rule_exception.dart';
+import '../../../economy/domain/services/economy_index_service.dart';
 import '../../../game/domain/entities/player_state.dart';
 import '../entities/company_employee.dart';
 import '../entities/company_project.dart';
@@ -48,6 +49,7 @@ class CompanyService {
     CompanyProjectTeamService? projectTeamService,
     CompanySeasonRewardService? seasonRewardService,
     CompanyBudgetService? budgetService,
+    EconomyIndexService? economyIndexService,
   }) : _budgetService = budgetService ?? const CompanyBudgetService(),
        _projectStrategy =
            projectStrategy ??
@@ -55,7 +57,9 @@ class CompanyService {
        _projectTeamService =
            projectTeamService ?? const CompanyProjectTeamService(),
        _seasonRewardService =
-           seasonRewardService ?? const CompanySeasonRewardService();
+           seasonRewardService ?? const CompanySeasonRewardService(),
+       _economyIndexService =
+           economyIndexService ?? const EconomyIndexService();
   static const establishmentCost = 15000;
   static const maxCompanyLevel = 3;
   static const dailyBaseRevenue = 50;
@@ -64,6 +68,7 @@ class CompanyService {
   final CompanyProjectTeamService _projectTeamService;
   final CompanySeasonRewardService _seasonRewardService;
   final CompanyBudgetService _budgetService;
+  final EconomyIndexService _economyIndexService;
   static int upgradeCost(int level) => switch (level) {
     1 => 25000,
     2 => 75000,
@@ -82,9 +87,12 @@ class CompanyService {
     );
   }
 
-  int dailyPayroll(PlayerState state) => employeesFor(
-    state,
-  ).fold(0, (total, employee) => total + employee.dailySalary);
+  int dailyPayroll(PlayerState state, {int? day}) => _economyIndexService.apply(
+    employeesFor(
+      state,
+    ).fold(0, (total, employee) => total + employee.dailySalary),
+    day ?? state.day,
+  );
 
   int dailyEmployeeContribution(CompanyEmployee employee) =>
       dailyEmployeeRevenue + employee.effectivePerformance ~/ 20;
@@ -92,7 +100,7 @@ class CompanyService {
   int dailyEmployeeNetContribution(CompanyEmployee employee) =>
       dailyEmployeeContribution(employee) - employee.dailySalary;
 
-  int dailyRevenue(PlayerState state) {
+  int dailyRevenue(PlayerState state, {int? day}) {
     final employees = employeesFor(state);
     if (state.companyLevel == 0 || employees.isEmpty) return 0;
     final gross =
@@ -105,7 +113,10 @@ class CompanyService {
         _seasonRewardService.sponsorshipRevenueBonus(state) +
         _budgetService.marketingRevenueBonusPercent(state) +
         _budgetService.maintenanceRevenueBonusPercent(state);
-    return (gross * (100 + bonus) / 100).round();
+    return _economyIndexService.apply(
+      (gross * (100 + bonus) / 100).round(),
+      day ?? state.day,
+    );
   }
 
   PlayerState collectDailyRevenue(PlayerState state, {int days = 1}) =>
@@ -121,15 +132,16 @@ class CompanyService {
     var current = state;
     final messages = <String>[];
     for (var day = 0; day < days; day++) {
+      final operationDay = (state.day - days + day + 1).clamp(1, state.day);
       current = _budgetService.applyDailyHeadquartersOfficeEffect(current);
-      final revenue = dailyRevenue(current);
-      final payroll = dailyPayroll(current);
+      final revenue = dailyRevenue(current, day: operationDay);
+      final payroll = dailyPayroll(current, day: operationDay);
       final budget = _budgetService.dailyBreakdown(current);
       current = current.copyWith(
         companyFunds: current.companyFunds + revenue - payroll - budget.total,
         financeLedger: CompanyFinanceRecorder.recordDailyOperations(
           current,
-          day: (state.day - days + day + 1).clamp(1, state.day),
+          day: operationDay,
           revenue: revenue,
           payroll: payroll,
           officeBudget: budget.office,

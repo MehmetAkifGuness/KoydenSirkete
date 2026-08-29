@@ -67,6 +67,51 @@ void main() {
     }
   });
 
+  test('salary, living costs and company operations share one index', () {
+    final city = CityCatalog.cities.first;
+    final job = JobCatalog.jobs.first;
+    final salaries = CitySalaryService();
+    final livingCosts = LivingCostService();
+    final companyService = CompanyService();
+    final branchService = CompanyBranchService();
+    final employee = CompanyEmployeeCatalog.candidates.first;
+    final branch = CompanyBranch(
+      id: city.id,
+      cityId: city.id,
+      employees: [employee],
+    );
+    final initial = PlayerState.initial.copyWith(
+      companyLevel: 1,
+      employeeCount: 1,
+      employees: [employee],
+    );
+    final indexed = initial.copyWith(day: 365);
+
+    expect(
+      salaries.calculateForCity(job, city, day: indexed.day),
+      (salaries.calculateForCity(job, city) * 1.12).round(),
+    );
+    final initialCosts = livingCosts.breakdown(initial, city.id);
+    final indexedCosts = livingCosts.breakdown(indexed, city.id);
+    expect(indexedCosts.inflationMultiplier, 1.12);
+    expect(
+      indexedCosts.totalExpenses,
+      (initialCosts.totalExpenses * 1.12).round(),
+    );
+    expect(
+      companyService.dailyRevenue(indexed),
+      (companyService.dailyRevenue(initial) * 1.12).round(),
+    );
+    expect(
+      companyService.dailyPayroll(indexed),
+      (companyService.dailyPayroll(initial) * 1.12).round(),
+    );
+    expect(
+      branchService.dailyRevenueFor(indexed, branch),
+      (branchService.dailyRevenueFor(initial, branch) * 1.12).round(),
+    );
+  });
+
   test('mandatory living costs cannot create irreversible debt', () {
     final state = PlayerState.initial.copyWith(day: 2, money: 10);
     final settled = LivingCostService().settle(state);

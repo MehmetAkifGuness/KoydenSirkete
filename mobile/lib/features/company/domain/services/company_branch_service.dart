@@ -1,6 +1,7 @@
 import '../../../../core/errors/game_rule_exception.dart';
 import '../../../cities/domain/entities/city.dart';
 import '../../../cities/domain/services/city_catalog.dart';
+import '../../../economy/domain/services/economy_index_service.dart';
 import '../../../game/domain/entities/player_state.dart';
 import '../entities/company_branch.dart';
 import '../entities/company_employee.dart';
@@ -31,12 +32,15 @@ class CompanyBranchService {
     CompanySeasonRewardService? seasonRewardService,
     CompanyBranchManagementService? managementService,
     CompanyBudgetService? budgetService,
+    EconomyIndexService? economyIndexService,
   }) : _regionService = regionService ?? CompanyRegionService(),
        _seasonRewardService =
            seasonRewardService ?? const CompanySeasonRewardService(),
        _managementService =
            managementService ?? const CompanyBranchManagementService(),
-       _budgetService = budgetService ?? const CompanyBudgetService();
+       _budgetService = budgetService ?? const CompanyBudgetService(),
+       _economyIndexService =
+           economyIndexService ?? const EconomyIndexService();
 
   static const maxBranchLevel = 3;
   static const levelRevenueBonusPercent = 25;
@@ -45,6 +49,7 @@ class CompanyBranchService {
   final CompanySeasonRewardService _seasonRewardService;
   final CompanyBranchManagementService _managementService;
   final CompanyBudgetService _budgetService;
+  final EconomyIndexService _economyIndexService;
 
   static int openingCost(City city) =>
       (city.dailyCost * 12 + city.marketLevel * 2000).clamp(30000, 200000);
@@ -261,14 +266,17 @@ class CompanyBranchService {
     return (gross * multiplier / 100).round();
   }
 
-  int dailyRevenueFor(PlayerState state, CompanyBranch branch) {
+  int dailyRevenueFor(PlayerState state, CompanyBranch branch, {int? day}) {
     final bonus =
         _regionService.revenueBonus(state) +
         CompanyTrophyService.branchRevenueBonus(state) +
         _seasonRewardService.sponsorshipRevenueBonus(state) +
         _budgetService.marketingRevenueBonusPercent(state) +
         _budgetService.maintenanceRevenueBonusPercent(state);
-    return (dailyRevenue(branch) * (100 + bonus) / 100).round();
+    return _economyIndexService.apply(
+      (dailyRevenue(branch) * (100 + bonus) / 100).round(),
+      day ?? state.day,
+    );
   }
 
   int dailyPayroll(CompanyBranch branch) => branch.employees.fold(
@@ -276,14 +284,17 @@ class CompanyBranchService {
     (total, employee) => total + employee.dailySalary,
   );
 
-  int dailyPayrollFor(PlayerState state, CompanyBranch branch) {
+  int dailyPayrollFor(PlayerState state, CompanyBranch branch, {int? day}) {
     final discount =
         _regionService.payrollDiscount(state) +
         CompanyTrophyService.branchPayrollDiscount(state);
     final multiplier = (100 + branch.localGoal.payrollPercent - discount)
         .clamp(0, 200)
         .toInt();
-    return (dailyPayroll(branch) * multiplier / 100).round();
+    return _economyIndexService.apply(
+      (dailyPayroll(branch) * multiplier / 100).round(),
+      day ?? state.day,
+    );
   }
 
   CompanyBranch? _find(PlayerState state, int cityId) {
@@ -315,6 +326,7 @@ class CompanyBranchService {
     var current = state;
     final messages = <String>[];
     for (var day = 0; day < days; day++) {
+      final operationDay = (state.day - days + day + 1).clamp(1, state.day);
       current = current.copyWith(
         branches: [
           for (final branch in current.branches)
@@ -324,7 +336,8 @@ class CompanyBranchService {
       var net = 0;
       for (final branch in current.branches) {
         net +=
-            dailyRevenueFor(current, branch) - dailyPayrollFor(current, branch);
+            dailyRevenueFor(current, branch, day: operationDay) -
+            dailyPayrollFor(current, branch, day: operationDay);
       }
       final updatedBranches = [
         for (final branch in current.branches)
