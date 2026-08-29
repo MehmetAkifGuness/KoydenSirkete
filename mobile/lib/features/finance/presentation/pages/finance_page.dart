@@ -5,6 +5,8 @@ import '../../../../core/widgets/app_page.dart';
 import '../../../cities/domain/services/living_cost_service.dart';
 import '../../../game/presentation/state/game_session_controller.dart';
 import '../../domain/entities/finance_ledger.dart';
+import '../../domain/entities/personal_finance_state.dart';
+import '../../domain/services/personal_finance_service.dart';
 
 class FinancePage extends StatelessWidget {
   const FinancePage({required this.session, super.key});
@@ -56,9 +58,12 @@ class FinancePage extends StatelessWidget {
             const SizedBox(height: 22),
             _AccountHistory(
               title: 'Şirket hareketleri',
-              caption: 'Projeler, maaşlar, bütçeler, bayiler ve piyasa etkileri',
+              caption:
+                  'Projeler, maaşlar, bütçeler, bayiler ve piyasa etkileri',
               entries: companyToday,
             ),
+            const SizedBox(height: 22),
+            _PersonalFinancePanel(session: session),
             const SizedBox(height: 22),
             AppSectionHeader(
               title: 'Son 7 gün',
@@ -91,6 +96,115 @@ class FinancePage extends StatelessWidget {
       },
     ),
   );
+}
+
+class _PersonalFinancePanel extends StatelessWidget {
+  const _PersonalFinancePanel({required this.session});
+
+  final GameSessionController session;
+
+  @override
+  Widget build(BuildContext context) {
+    final state = session.state;
+    final finance = state.personalFinance;
+    final creditLimit = session.creditLimit;
+    final investmentAmount = (state.money - 500).clamp(0, 5000).toInt();
+    return AppInfoCard(
+      accent: AppPalette.secondary,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'KREDİ VE YATIRIM',
+            style: TextStyle(
+              color: AppPalette.textMuted,
+              fontSize: 10,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 1.2,
+            ),
+          ),
+          const SizedBox(height: 10),
+          if (finance.hasDebt) ...[
+            Text(
+              'Kalan borç ₺${finance.debtRemaining} · Günlük ₺${finance.dailyPayment} · Son gün ${finance.loanDueDay}',
+              style: const TextStyle(fontWeight: FontWeight.w700),
+            ),
+            const SizedBox(height: 8),
+            FilledButton.tonal(
+              onPressed: session.isBusy
+                  ? null
+                  : () =>
+                        _run(context, session.repayLoan(finance.debtRemaining)),
+              child: const Text('Borcu erken kapat'),
+            ),
+          ] else ...[
+            Text(
+              '₺$creditLimit kredi · 30 gün · toplam %${PersonalFinanceService.loanInterestPercent} faiz',
+              style: const TextStyle(
+                color: AppPalette.textSecondary,
+                fontSize: 12,
+              ),
+            ),
+            const SizedBox(height: 8),
+            FilledButton.tonal(
+              onPressed: session.isBusy
+                  ? null
+                  : () => _run(context, session.borrow(creditLimit)),
+              child: const Text('Kredi kullan'),
+            ),
+          ],
+          const Divider(height: 24),
+          if (finance.hasInvestment)
+            Text(
+              '${finance.investmentPlan!.label}: ₺${finance.investmentPrincipal} · vade günü ${finance.investmentMaturityDay}',
+              style: const TextStyle(fontWeight: FontWeight.w700),
+            )
+          else ...[
+            Text(
+              investmentAmount >= PersonalFinanceService.minimumInvestment
+                  ? 'Yatırım tutarı ₺$investmentAmount · en az ₺500 nakit korunur'
+                  : 'Yatırım için en az ₺1.000 kişisel bakiye gerekir.',
+              style: const TextStyle(
+                color: AppPalette.textSecondary,
+                fontSize: 12,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 7,
+              runSpacing: 7,
+              children: [
+                for (final plan in InvestmentPlan.values)
+                  OutlinedButton(
+                    onPressed:
+                        session.isBusy ||
+                            investmentAmount <
+                                PersonalFinanceService.minimumInvestment
+                        ? null
+                        : () => _run(
+                            context,
+                            session.invest(investmentAmount, plan),
+                          ),
+                    child: Text(
+                      '${plan.label} · ${plan.durationDays}g · ${plan.riskLabel}',
+                    ),
+                  ),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Future<void> _run(BuildContext context, Future<String?> action) async {
+    final message = await action;
+    if (message != null && context.mounted) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(message)));
+    }
+  }
 }
 
 class _AccountBalances extends StatelessWidget {
@@ -399,6 +513,10 @@ extension on FinanceCategory {
     FinanceCategory.companyResearchBudget => 'Ar-Ge bütçesi',
     FinanceCategory.companyMaintenanceBudget => 'Bakım bütçesi',
     FinanceCategory.personalEvent => 'Kişisel olay',
+    FinanceCategory.loan => 'Kredi kullanımı',
+    FinanceCategory.loanPayment => 'Kredi geri ödemesi',
+    FinanceCategory.investment => 'Yatırım alımı',
+    FinanceCategory.investmentReturn => 'Yatırım vade getirisi',
   };
 
   IconData get icon => switch (this) {
@@ -433,5 +551,17 @@ extension on FinanceCategory {
     FinanceCategory.companyResearchBudget => Icons.science_outlined,
     FinanceCategory.companyMaintenanceBudget => Icons.build_outlined,
     FinanceCategory.personalEvent => Icons.bolt_outlined,
+    FinanceCategory.loan => Icons.account_balance_outlined,
+    FinanceCategory.loanPayment => Icons.payments_outlined,
+    FinanceCategory.investment => Icons.trending_up_outlined,
+    FinanceCategory.investmentReturn => Icons.savings_outlined,
+  };
+}
+
+extension on InvestmentPlan {
+  String get riskLabel => switch (this) {
+    InvestmentPlan.protected => 'risksiz %4',
+    InvestmentPlan.balanced => 'orta risk -%5/+%18',
+    InvestmentPlan.growth => 'yüksek risk -%20/+%35',
   };
 }

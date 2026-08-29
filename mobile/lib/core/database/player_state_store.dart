@@ -36,6 +36,7 @@ class PlayerStateRecord {
     this.ownedHomeIdsJson,
     this.rentedHomeIdsJson,
     this.financeLedgerJson,
+    this.personalFinanceJson,
     this.companyCompetitionJson,
     this.companyExpansionJson,
     this.companyStageIndex = 0,
@@ -101,6 +102,7 @@ class PlayerStateRecord {
   final String? ownedHomeIdsJson;
   final String? rentedHomeIdsJson;
   final String? financeLedgerJson;
+  final String? personalFinanceJson;
   final String? companyCompetitionJson;
   final String? companyExpansionJson;
   final int companyStageIndex;

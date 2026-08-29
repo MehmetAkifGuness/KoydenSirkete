@@ -48,6 +48,7 @@ class PlayerStateMapper {
       ownedHomeIds: model.ownedHomeIds,
       rentedHomeIds: model.rentedHomeIds,
       financeLedger: model.financeLedger,
+      personalFinance: model.personalFinance,
       ownedCarId: model.ownedCarId,
       projectProgress: model.projectProgress,
       projectElapsedDays: model.projectElapsedDays,

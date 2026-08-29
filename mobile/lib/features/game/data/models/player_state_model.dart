@@ -23,6 +23,8 @@ import '../../../company/domain/entities/company_project_outcome.dart';
 import '../../../company/domain/entities/company_project_team_state.dart';
 import '../../../company/domain/entities/company_budget_state.dart';
 import '../../../finance/domain/entities/finance_ledger.dart';
+import '../../../finance/domain/entities/personal_finance_state.dart';
+import '../mappers/personal_finance_codec.dart';
 
 class PlayerStateModel {
   const PlayerStateModel({
@@ -53,6 +55,7 @@ class PlayerStateModel {
     this.ownedHomeIds = const <int>[],
     this.rentedHomeIds = const <int>[],
     this.financeLedger = const FinanceLedger(),
+    this.personalFinance = const PersonalFinanceState(),
     this.ownedCarId,
     this.applicationBlockedJobId,
     this.applicationBlockedUntilDay = 0,
@@ -128,6 +131,9 @@ class PlayerStateModel {
       ownedHomeIds: OwnedAssetIdsCodec().decode(record.ownedHomeIdsJson),
       rentedHomeIds: OwnedAssetIdsCodec().decode(record.rentedHomeIdsJson),
       financeLedger: FinanceLedgerCodec().decode(record.financeLedgerJson),
+      personalFinance: const PersonalFinanceCodec().decode(
+        record.personalFinanceJson,
+      ),
       ownedCarId: record.ownedCarId,
       applicationBlockedJobId: record.applicationBlockedJobId,
       applicationBlockedUntilDay: record.applicationBlockedUntilDay,
@@ -204,6 +210,7 @@ class PlayerStateModel {
   final List<int> ownedHomeIds;
   final List<int> rentedHomeIds;
   final FinanceLedger financeLedger;
+  final PersonalFinanceState personalFinance;
   final int? ownedCarId;
   final int? applicationBlockedJobId;
   final int applicationBlockedUntilDay;
@@ -269,6 +276,7 @@ class PlayerStateModel {
       ownedHomeIds: entity.ownedHomeIds,
       rentedHomeIds: entity.rentedHomeIds,
       financeLedger: entity.financeLedger,
+      personalFinance: entity.personalFinance,
       ownedCarId: entity.ownedCarId,
       applicationBlockedJobId: entity.applicationBlockedJobId,
       applicationBlockedUntilDay: entity.applicationBlockedUntilDay,

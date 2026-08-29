@@ -1,6 +1,26 @@
 part of 'game_session_controller.dart';
 
 extension GameSessionFeatureController on GameSessionController {
+  int get creditLimit => _applicationService.creditLimit(_state);
+
+  Future<String?> borrow(int amount) => _execute(
+    action: (state) => _applicationService.borrow(state, amount),
+    stateOf: (result) => result,
+    message: (_) => 'Kişisel cüzdana ₺$amount kredi aktarıldı.',
+  );
+
+  Future<String?> repayLoan(int amount) => _execute(
+    action: (state) => _applicationService.repayLoan(state, amount),
+    stateOf: (result) => result,
+    message: (_) => 'Kredi borcuna ₺$amount ödeme yapıldı.',
+  );
+
+  Future<String?> invest(int amount, InvestmentPlan plan) => _execute(
+    action: (state) => _applicationService.invest(state, amount, plan),
+    stateOf: (result) => result,
+    message: (_) => '${plan.label} yatırımına ₺$amount aktarıldı.',
+  );
+
   PersonalEvent? get personalEvent => _applicationService.personalEvent(_state);
 
   Future<String?> resolvePersonalEvent(PersonalEventChoice choice) => _execute(

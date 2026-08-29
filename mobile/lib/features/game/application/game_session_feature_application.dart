@@ -1,6 +1,21 @@
 part of 'game_session_application_service.dart';
 
 extension GameSessionFeatureApplication on GameSessionApplicationService {
+  int creditLimit(PlayerState state) =>
+      _personalFinanceService.creditLimit(state);
+
+  Future<PlayerState> borrow(PlayerState state, int amount) =>
+      _persist(_personalFinanceService.borrow(state, amount));
+
+  Future<PlayerState> repayLoan(PlayerState state, int amount) =>
+      _persist(_personalFinanceService.repay(state, amount));
+
+  Future<PlayerState> invest(
+    PlayerState state,
+    int amount,
+    InvestmentPlan plan,
+  ) => _persist(_personalFinanceService.invest(state, amount, plan));
+
   JobApplicationCheck checkJob(PlayerState state, Job job) =>
       _jobApplicationService.check(state, job);
 

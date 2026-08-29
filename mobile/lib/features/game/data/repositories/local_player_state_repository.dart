@@ -15,6 +15,7 @@ import '../mappers/company_expansion_codec.dart';
 import '../mappers/company_project_outcome_codec.dart';
 import '../mappers/company_project_team_codec.dart';
 import '../mappers/company_budget_codec.dart';
+import '../mappers/personal_finance_codec.dart';
 
 class LocalPlayerStateRepository implements PlayerStateRepository {
   LocalPlayerStateRepository({
@@ -70,6 +71,9 @@ class LocalPlayerStateRepository implements PlayerStateRepository {
         ownedHomeIdsJson: OwnedAssetIdsCodec().encode(model.ownedHomeIds),
         rentedHomeIdsJson: OwnedAssetIdsCodec().encode(model.rentedHomeIds),
         financeLedgerJson: FinanceLedgerCodec().encode(model.financeLedger),
+        personalFinanceJson: const PersonalFinanceCodec().encode(
+          model.personalFinance,
+        ),
         companyCompetitionJson: CompanyCompetitionCodec().encode(
           model.companyCompetition,
         ),

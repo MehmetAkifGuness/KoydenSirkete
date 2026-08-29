@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.35.0
+
+- Kişisel finans ekranına limitli kredi, sabit faiz, günlük geri ödeme ve erken kapatma eklendi.
+- Korunan, dengeli ve büyüme yatırım seçenekleri vade ve görünür risk sınırlarıyla eklendi.
+- Tek aktif kredi/yatırım, kredi bekleme süresi ve nakit yedek sınırıyla kötüye kullanım engellendi; durum SQLite v33 ile saklanır.
+
 ## 2.34.0
 
 - Değişken oyun günü aralıklarında sunulan dört dengeli kişisel olay eklendi.

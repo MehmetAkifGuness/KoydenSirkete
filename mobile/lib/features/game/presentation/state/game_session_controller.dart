@@ -33,6 +33,7 @@ import '../../../assets/domain/services/asset_service.dart';
 import '../../../jobs/domain/entities/job_listing.dart';
 import '../../../wheel/domain/services/esnaf_wheel_service.dart';
 import '../../../personal_life/domain/entities/personal_event.dart';
+import '../../../finance/domain/entities/personal_finance_state.dart';
 
 part 'game_session_feature_controller.dart';
 

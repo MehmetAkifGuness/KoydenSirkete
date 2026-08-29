@@ -17,7 +17,7 @@ class AppDatabase extends SqlitePlayerStateStore {
     final databasePath = join(await getDatabasesPath(), _databaseName);
     return _database = await openDatabase(
       databasePath,
-      version: 32,
+      version: 33,
       onCreate: (database, _) async {
         await database.execute('''
           CREATE TABLE $_tableName (
@@ -44,6 +44,7 @@ class AppDatabase extends SqlitePlayerStateStore {
             owned_home_ids_json TEXT,
             rented_home_ids_json TEXT,
             finance_ledger_json TEXT,
+            personal_finance_json TEXT,
             company_competition_json TEXT,
             company_expansion_json TEXT,
             company_stage_index INTEGER NOT NULL DEFAULT 0,
@@ -310,6 +311,11 @@ class AppDatabase extends SqlitePlayerStateStore {
             'ALTER TABLE $_tableName ADD COLUMN last_personal_event_day INTEGER NOT NULL DEFAULT 0',
           );
         }
+        if (oldVersion < 33) {
+          await database.execute(
+            'ALTER TABLE $_tableName ADD COLUMN personal_finance_json TEXT',
+          );
+        }
       },
     );
   }
@@ -359,6 +365,7 @@ abstract class SqlitePlayerStateStore implements PlayerStateStore {
       ownedHomeIdsJson: row['owned_home_ids_json'] as String?,
       rentedHomeIdsJson: row['rented_home_ids_json'] as String?,
       financeLedgerJson: row['finance_ledger_json'] as String?,
+      personalFinanceJson: row['personal_finance_json'] as String?,
       companyCompetitionJson: row['company_competition_json'] as String?,
       companyExpansionJson: row['company_expansion_json'] as String?,
       companyStageIndex: row['company_stage_index'] as int? ?? 0,
@@ -429,6 +436,7 @@ abstract class SqlitePlayerStateStore implements PlayerStateStore {
       'owned_home_ids_json': record.ownedHomeIdsJson,
       'rented_home_ids_json': record.rentedHomeIdsJson,
       'finance_ledger_json': record.financeLedgerJson,
+      'personal_finance_json': record.personalFinanceJson,
       'company_competition_json': record.companyCompetitionJson,
       'company_expansion_json': record.companyExpansionJson,
       'company_stage_index': record.companyStageIndex,

@@ -20,6 +20,7 @@ import 'package:kariyerden_sirkete/features/company/domain/entities/company_proj
 import 'package:kariyerden_sirkete/features/company/domain/entities/company_project_team_state.dart';
 import 'package:kariyerden_sirkete/features/company/domain/entities/company_budget_state.dart';
 import 'package:kariyerden_sirkete/features/finance/domain/entities/finance_ledger.dart';
+import 'package:kariyerden_sirkete/features/finance/domain/entities/personal_finance_state.dart';
 
 void main() {
   test('player state repository persists the latest state', () async {
@@ -63,6 +64,16 @@ void main() {
         marketing: CompanyBudgetLevel.high,
         research: CompanyBudgetLevel.medium,
         maintenance: CompanyBudgetLevel.low,
+      ),
+      personalFinance: const PersonalFinanceState(
+        debtPrincipal: 2000,
+        debtRemaining: 1800,
+        dailyPayment: 75,
+        loanDueDay: 31,
+        investmentPrincipal: 1000,
+        investmentOpenedDay: 1,
+        investmentMaturityDay: 31,
+        investmentPlan: InvestmentPlan.balanced,
       ),
       negativeMoneyHours: 12,
       wheelMajorRewardsToday: 2,
@@ -167,6 +178,8 @@ void main() {
     expect(actual?.companyBudget.marketing, CompanyBudgetLevel.high);
     expect(actual?.companyBudget.research, CompanyBudgetLevel.medium);
     expect(actual?.companyBudget.maintenance, CompanyBudgetLevel.low);
+    expect(actual?.personalFinance.debtRemaining, 1800);
+    expect(actual?.personalFinance.investmentPlan, InvestmentPlan.balanced);
     expect(actual?.negativeMoneyHours, expected.negativeMoneyHours);
     expect(actual?.wheelMajorRewardsToday, expected.wheelMajorRewardsToday);
     expect(actual?.wheelDurationBuffPercent, expected.wheelDurationBuffPercent);

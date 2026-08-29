@@ -299,6 +299,12 @@ Android-first, tamamen offline kariyer ve şirket simülasyonu.
 - Kasa, proje, itibar, moral ve tükenmişlik sonuçları seçimden önce birlikte gösterilir.
 - Tamamlanan olaylar tekrar uygulanamaz; karar geçmişi mevcut SQLite şirket kaydında kalıcı tutulur.
 
+## v2.35.0 kişisel kredi ve yatırım
+
+- Kredi limiti kariyer ve toplam kazanca göre büyür; tek aktif kredi, %12 sabit faiz, 30 günlük otomatik ödeme ve 15 günlük bekleme süresi uygulanır.
+- Üç yatırım planı farklı vade ve risk aralıkları sunar; sonuç kaydedilebilir biçimde deterministiktir.
+- Tek aktif yatırım ve en az ₺500 nakit yedek sınırı korunur; finans durumu SQLite v33 ile saklanır.
+
 ## Çalıştırma
 
 ```powershell

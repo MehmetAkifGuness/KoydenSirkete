@@ -9,6 +9,7 @@ import '../../../company/domain/entities/company_project_outcome.dart';
 import '../../../company/domain/entities/company_project_team_state.dart';
 import '../../../company/domain/entities/company_budget_state.dart';
 import '../../../finance/domain/entities/finance_ledger.dart';
+import '../../../finance/domain/entities/personal_finance_state.dart';
 
 class PlayerState {
   static const _unset = Object();
@@ -58,6 +59,7 @@ class PlayerState {
     this.ownedHomeIds = const <int>[],
     this.rentedHomeIds = const <int>[],
     this.financeLedger = const FinanceLedger(),
+    this.personalFinance = const PersonalFinanceState(),
     this.ownedCarId,
     this.projectProgress = 0,
     this.projectElapsedDays = 0,
@@ -78,7 +80,7 @@ class PlayerState {
     this.isOnboarded = false,
   }) : _legacyActiveActivity = activeActivity;
   static const initial = PlayerState(
-    schemaVersion: 32,
+    schemaVersion: 33,
     money: 240,
     energy: 100,
     knowledge: 0,
@@ -131,6 +133,7 @@ class PlayerState {
   final List<int> ownedHomeIds;
   final List<int> rentedHomeIds;
   final FinanceLedger financeLedger;
+  final PersonalFinanceState personalFinance;
   final int? ownedCarId;
   final int projectProgress;
   final int projectElapsedDays;
@@ -194,6 +197,7 @@ class PlayerState {
     Object? ownedHomeIds = _unset,
     Object? rentedHomeIds = _unset,
     FinanceLedger? financeLedger,
+    PersonalFinanceState? personalFinance,
     Object? ownedCarId = _unset,
     int? projectProgress,
     int? projectElapsedDays,
@@ -293,6 +297,7 @@ class PlayerState {
           ? this.rentedHomeIds
           : List<int>.unmodifiable(rentedHomeIds as List<int>),
       financeLedger: financeLedger ?? this.financeLedger,
+      personalFinance: personalFinance ?? this.personalFinance,
       ownedCarId: identical(ownedCarId, _unset)
           ? this.ownedCarId
           : ownedCarId as int?,

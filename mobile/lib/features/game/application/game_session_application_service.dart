@@ -54,6 +54,8 @@ import '../../work/domain/services/employer_task_generator.dart';
 import '../../wheel/domain/services/esnaf_wheel_service.dart';
 import '../../personal_life/domain/entities/personal_event.dart';
 import '../../personal_life/domain/services/personal_event_service.dart';
+import '../../finance/domain/services/personal_finance_service.dart';
+import '../../finance/domain/entities/personal_finance_state.dart';
 
 part 'game_session_feature_application.dart';
 
@@ -88,6 +90,7 @@ class GameSessionApplicationService {
     EsnafWheelService? esnafWheelService,
     CitySalaryService? citySalaryService,
     PersonalEventService? personalEventService,
+    PersonalFinanceService? personalFinanceService,
   }) : _repository = repository,
        _jobApplicationService =
            jobApplicationService ?? JobApplicationService(),
@@ -127,7 +130,9 @@ class GameSessionApplicationService {
        _esnafWheelService = esnafWheelService ?? EsnafWheelService(),
        _citySalaryService = citySalaryService ?? CitySalaryService(),
        _personalEventService =
-           personalEventService ?? const PersonalEventService();
+           personalEventService ?? const PersonalEventService(),
+       _personalFinanceService =
+           personalFinanceService ?? PersonalFinanceService();
 
   final PlayerStateRepository _repository;
   final JobApplicationService _jobApplicationService;
@@ -158,6 +163,7 @@ class GameSessionApplicationService {
   final EsnafWheelService _esnafWheelService;
   final CitySalaryService _citySalaryService;
   final PersonalEventService _personalEventService;
+  final PersonalFinanceService _personalFinanceService;
 
   PersonalEvent? personalEvent(PlayerState state) =>
       _personalEventService.currentEvent(state);
@@ -293,6 +299,7 @@ class GameSessionApplicationService {
     }
     final elapsedDays = clock.state.day - state.day;
     if (elapsedDays > 0) {
+      nextState = _personalFinanceService.processDays(nextState, elapsedDays);
       final operations = _companyService.processDailyOperations(
         nextState,
         days: elapsedDays,
