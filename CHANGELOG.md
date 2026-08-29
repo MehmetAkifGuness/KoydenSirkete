@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.31.0
+
+- Meslekler başlangıç, uzmanlaşma, kıdemli, yönetim ve üst yönetim aşamalarına ayrıldı.
+- Kariyer ekranında mevcut kıdem, uzmanlık alanı ve uzmanlık/yönetici yönü görünür hâle getirildi.
+- Oyuncunun tamamladığı, mevcut ve kilitli meslek basamaklarını birlikte gösteren kariyer rotası eklendi.
+
 ## 2.30.0
 
 - Her yedi günlük piyasa dönemine hızlı büyüme, ekip desteği ve temkinli yönetim seçenekleri sunan şirket karar olayı eklendi.

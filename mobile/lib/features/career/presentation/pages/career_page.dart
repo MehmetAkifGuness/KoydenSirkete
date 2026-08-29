@@ -114,6 +114,44 @@ class CareerPage extends StatelessWidget {
                       valueText: '${state.experience}',
                       color: AppPalette.tertiary,
                     ),
+                    const SizedBox(height: 16),
+                    Wrap(
+                      spacing: 7,
+                      runSpacing: 7,
+                      children: [
+                        AppPill(
+                          label: 'Kıdem: ${currentJob.careerStage.label}',
+                          color: AppPalette.primary,
+                        ),
+                        AppPill(
+                          label: 'Uzmanlık: ${currentJob.careerTrack}',
+                          color: AppPalette.secondary,
+                        ),
+                        AppPill(
+                          label: currentJob.careerDirection,
+                          color: AppPalette.tertiary,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 26),
+              const AppSectionHeader(
+                title: 'Kariyer rotası',
+                caption:
+                    'Uzmanlaşmadan yöneticiliğe uzanan meslek basamakların.',
+              ),
+              const SizedBox(height: 12),
+              AppInfoCard(
+                child: Column(
+                  children: [
+                    for (final job in JobCatalog.careerPathFor(currentJob))
+                      _CareerStep(
+                        job: job,
+                        isCurrent: job.id == currentJob.id,
+                        isCompleted: job.level < currentJob.level,
+                      ),
                   ],
                 ),
               ),
@@ -172,6 +210,10 @@ class CareerPage extends StatelessWidget {
                             label: 'Tecrübe ${nextJob.minimumExperience}',
                             color: AppPalette.primary,
                           ),
+                          AppPill(
+                            label: nextJob.careerStage.label,
+                            color: AppPalette.tertiary,
+                          ),
                         ],
                       ),
                       const SizedBox(height: 12),
@@ -220,6 +262,62 @@ class CareerPage extends StatelessWidget {
     final message = await session.promote(currentJob, nextJob);
     if (context.mounted && message != null) AppFeedback.show(context, message);
   }
+}
+
+class _CareerStep extends StatelessWidget {
+  const _CareerStep({
+    required this.job,
+    required this.isCurrent,
+    required this.isCompleted,
+  });
+
+  final Job job;
+  final bool isCurrent;
+  final bool isCompleted;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.symmetric(vertical: 7),
+    child: Row(
+      children: [
+        Icon(
+          isCompleted
+              ? Icons.check_circle_rounded
+              : isCurrent
+              ? Icons.radio_button_checked_rounded
+              : Icons.lock_outline_rounded,
+          color: isCompleted || isCurrent
+              ? AppPalette.primary
+              : AppPalette.textMuted,
+          size: 20,
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                job.title,
+                style: TextStyle(
+                  fontWeight: isCurrent ? FontWeight.w900 : FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                '${job.careerStage.label} · ${job.careerDirection}',
+                style: const TextStyle(
+                  color: AppPalette.textSecondary,
+                  fontSize: 11,
+                ),
+              ),
+            ],
+          ),
+        ),
+        if (isCurrent)
+          const AppPill(label: 'Mevcut', color: AppPalette.primary),
+      ],
+    ),
+  );
 }
 
 class _ProgressLine extends StatelessWidget {

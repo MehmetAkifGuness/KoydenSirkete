@@ -14,6 +14,7 @@ import 'package:kariyerden_sirkete/features/training/domain/services/training_ca
 import 'package:kariyerden_sirkete/features/training/domain/services/training_service.dart';
 import 'package:kariyerden_sirkete/features/jobs/domain/services/job_application_service.dart';
 import 'package:kariyerden_sirkete/features/jobs/domain/services/job_catalog.dart';
+import 'package:kariyerden_sirkete/features/jobs/domain/entities/job.dart';
 import 'package:kariyerden_sirkete/features/jobs/domain/entities/job_listing.dart';
 import 'package:kariyerden_sirkete/features/work/domain/services/work_service.dart';
 import 'package:kariyerden_sirkete/features/work/domain/services/work_task_catalog.dart';
@@ -234,6 +235,17 @@ void main() {
   });
 
   group('work and career rules', () {
+    test('catalog exposes ordered specialization and management stages', () {
+      final path = JobCatalog.careerPathFor(JobCatalog.jobs.first);
+
+      expect(path.map((job) => job.level), [1, 2, 3, 4, 5]);
+      expect(path[1].careerStage, CareerStage.specialist);
+      expect(path[2].careerStage, CareerStage.senior);
+      expect(path[2].careerDirection, 'Yönetici yolu');
+      expect(path[3].careerStage, CareerStage.manager);
+      expect(path[3].careerDirection, 'Yönetici yolu');
+    });
+
     test('work task pays salary and increases performance', () {
       final job = JobCatalog.jobs.first;
       final state = PlayerState.initial.copyWith(currentJobId: job.id);

@@ -13,6 +13,11 @@ abstract final class JobCatalog {
     }
     return null;
   }
+
+  static List<Job> careerPathFor(Job job) => List.unmodifiable(
+    jobs.where((candidate) => candidate.careerTrack == job.careerTrack).toList()
+      ..sort((left, right) => left.level.compareTo(right.level)),
+  );
 }
 
 const _jobs = <Job>[
@@ -53,6 +58,7 @@ const _jobs = <Job>[
     careerTrack: 'satış ve perakende',
     level: 3,
     nextJobId: 7,
+    managementRole: true,
     skillRequirements: {
       SkillId.sales: 30,
       SkillId.leadership: 25,
@@ -129,6 +135,7 @@ const _jobs = <Job>[
     careerTrack: 'finans',
     level: 3,
     nextJobId: 10,
+    managementRole: true,
     skillRequirements: {
       SkillId.accounting: 38,
       SkillId.analysis: 32,
@@ -205,6 +212,7 @@ const _jobs = <Job>[
     careerTrack: 'lojistik',
     level: 3,
     nextJobId: 14,
+    managementRole: true,
     skillRequirements: {
       SkillId.operations: 38,
       SkillId.logistics: 35,

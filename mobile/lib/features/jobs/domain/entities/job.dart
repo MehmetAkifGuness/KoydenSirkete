@@ -1,6 +1,18 @@
 import '../../../skills/domain/entities/skill_id.dart';
 import '../../../skills/domain/entities/skill_profile.dart';
 
+enum CareerStage {
+  entry('Başlangıç'),
+  specialist('Uzmanlaşma'),
+  senior('Kıdemli'),
+  manager('Yönetim'),
+  executive('Üst yönetim');
+
+  const CareerStage(this.label);
+
+  final String label;
+}
+
 class Job {
   const Job({
     required this.id,
@@ -13,6 +25,7 @@ class Job {
     this.careerTrack = 'genel',
     this.level = 1,
     this.nextJobId,
+    this.managementRole = false,
     this.skillRequirements = const {},
   });
 
@@ -26,7 +39,19 @@ class Job {
   final String careerTrack;
   final int level;
   final int? nextJobId;
+  final bool managementRole;
   final Map<SkillId, int> skillRequirements;
+
+  CareerStage get careerStage => switch (level) {
+    1 => CareerStage.entry,
+    2 => CareerStage.specialist,
+    3 => CareerStage.senior,
+    4 => CareerStage.manager,
+    _ => CareerStage.executive,
+  };
+
+  String get careerDirection =>
+      managementRole || level >= 4 ? 'Yönetici yolu' : 'Uzmanlık yolu';
 
   Map<SkillId, int> get scaledSkillRequirements => {
     for (final entry in skillRequirements.entries)
