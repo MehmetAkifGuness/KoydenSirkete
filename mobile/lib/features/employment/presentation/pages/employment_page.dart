@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../app/theme/app_palette.dart';
 import '../../../../core/widgets/app_feedback.dart';
 import '../../../../core/widgets/app_page.dart';
+import '../../../../core/widgets/game_account_bar.dart';
 import '../../../game/presentation/state/game_session_controller.dart';
 import '../../../jobs/domain/services/job_catalog.dart';
 import '../../../cities/domain/services/city_catalog.dart';
@@ -140,8 +141,10 @@ class EmploymentPage extends StatelessWidget {
                       ? null
                       : () => Navigator.of(context).push(
                           MaterialPageRoute<void>(
-                            builder: (_) =>
-                                WorkPage(session: session, job: job),
+                            builder: (_) => GameAccountRoute(
+                              session: session,
+                              child: WorkPage(session: session, job: job),
+                            ),
                           ),
                         ),
                   icon: const Icon(Icons.assignment_rounded),

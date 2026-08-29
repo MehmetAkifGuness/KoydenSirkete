@@ -305,6 +305,11 @@ Android-first, tamamen offline kariyer ve şirket simülasyonu.
 - Üç yatırım planı farklı vade ve risk aralıkları sunar; sonuç kaydedilebilir biçimde deterministiktir.
 - Tek aktif yatırım ve en az ₺500 nakit yedek sınırı korunur; finans durumu SQLite v33 ile saklanır.
 
+## v2.36.0 hesap ayrımı
+
+- Kişisel cüzdan ve şirket kasası ana ve alt oyun ekranlarında ayrı gösterilir.
+- Şirkete özel finans hareketleri yalnızca şirket hesabına, kişisel hareketler yalnızca kişisel hesaba kaydedilir; sermaye ve kâr payı transferlerinde iki taraf ayrı izlenir.
+
 ## Çalıştırma
 
 ```powershell

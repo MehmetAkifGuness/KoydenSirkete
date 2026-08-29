@@ -75,6 +75,13 @@ class FinanceLedger {
     FinanceAccount account = FinanceAccount.personal,
   }) {
     if (amount == 0) return this;
+    if (!category.supports(account)) {
+      throw ArgumentError.value(
+        account,
+        'account',
+        '${category.name} işlemi bu hesaba kaydedilemez.',
+      );
+    }
     final firstRetainedDay = day - retainedDays + 1;
     final next = <FinanceEntry>[];
     var merged = false;
@@ -145,4 +152,35 @@ class FinanceLedger {
     }
     return FinanceTotals(income: income, expense: expense);
   }
+}
+
+extension FinanceCategoryAccount on FinanceCategory {
+  bool supports(FinanceAccount account) {
+    if (_transferCategories.contains(this)) return true;
+    return account ==
+        (_companyCategories.contains(this)
+            ? FinanceAccount.company
+            : FinanceAccount.personal);
+  }
+
+  static const _transferCategories = {
+    FinanceCategory.companyInvestment,
+    FinanceCategory.companyCapital,
+    FinanceCategory.companyDividend,
+  };
+
+  static const _companyCategories = {
+    FinanceCategory.companyRevenue,
+    FinanceCategory.companyPayroll,
+    FinanceCategory.companyProject,
+    FinanceCategory.companyBranch,
+    FinanceCategory.companyMarket,
+    FinanceCategory.companySeason,
+    FinanceCategory.companyDevelopment,
+    FinanceCategory.companyExpansion,
+    FinanceCategory.companyOfficeBudget,
+    FinanceCategory.companyMarketingBudget,
+    FinanceCategory.companyResearchBudget,
+    FinanceCategory.companyMaintenanceBudget,
+  };
 }

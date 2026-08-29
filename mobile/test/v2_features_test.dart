@@ -736,6 +736,40 @@ void main() {
     expect(ledger.totals(fromDay: 2, toDay: 31).expense, 20);
   });
 
+  test('finance ledger rejects transactions recorded to the wrong account', () {
+    const ledger = FinanceLedger();
+
+    expect(
+      () => ledger.record(
+        day: 1,
+        category: FinanceCategory.food,
+        amount: -20,
+        account: FinanceAccount.company,
+      ),
+      throwsArgumentError,
+    );
+    expect(
+      () => ledger.record(
+        day: 1,
+        category: FinanceCategory.companyPayroll,
+        amount: -20,
+      ),
+      throwsArgumentError,
+    );
+    expect(
+      ledger
+          .record(
+            day: 1,
+            category: FinanceCategory.companyCapital,
+            amount: -100,
+          )
+          .entries
+          .single
+          .account,
+      FinanceAccount.personal,
+    );
+  });
+
   test('treasury transfers preserve both accounts and apply dividend tax', () {
     final service = CompanyTreasuryService();
     final initial = PlayerState.initial.copyWith(

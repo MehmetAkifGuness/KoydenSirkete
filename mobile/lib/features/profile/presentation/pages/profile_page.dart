@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../app/theme/app_palette.dart';
 import '../../../../core/widgets/app_page.dart';
+import '../../../../core/widgets/game_account_bar.dart';
 import '../../../assets/presentation/pages/assets_page.dart';
 import '../../../game/presentation/pages/developer_data_page.dart';
 import '../../../game/presentation/state/game_session_controller.dart';
@@ -80,7 +81,10 @@ class ProfilePage extends StatelessWidget {
                 subtitle: 'Ev ve araba koleksiyonunu yönet.',
                 onTap: () => Navigator.of(context).push(
                   MaterialPageRoute<void>(
-                    builder: (_) => AssetsPage(session: session),
+                    builder: (_) => GameAccountRoute(
+                      session: session,
+                      child: AssetsPage(session: session),
+                    ),
                   ),
                 ),
               ),
@@ -91,7 +95,10 @@ class ProfilePage extends StatelessWidget {
                 subtitle: 'Prestij hedeflerini, puanını ve başarılarını gör.',
                 onTap: () => Navigator.of(context).push(
                   MaterialPageRoute<void>(
-                    builder: (_) => ProgressPage(session: session),
+                    builder: (_) => GameAccountRoute(
+                      session: session,
+                      child: ProgressPage(session: session),
+                    ),
                   ),
                 ),
               ),
@@ -106,7 +113,10 @@ class ProfilePage extends StatelessWidget {
                       ? null
                       : () => Navigator.of(context).push(
                           MaterialPageRoute<void>(
-                            builder: (_) => DeveloperDataPage(session: session),
+                            builder: (_) => GameAccountRoute(
+                              session: session,
+                              child: DeveloperDataPage(session: session),
+                            ),
                           ),
                         ),
                 ),

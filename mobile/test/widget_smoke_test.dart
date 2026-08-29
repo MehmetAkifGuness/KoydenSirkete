@@ -495,87 +495,83 @@ void main() {
 
     await tester.pump(const Duration(seconds: 4));
     final specialtyChip = find.byKey(
-      ValueKey(
-        'branch-specialty-${city.id}-${CompanySpecialty.finance.name}',
-      ),
+      ValueKey('branch-specialty-${city.id}-${CompanySpecialty.finance.name}'),
     );
     await tester.drag(scrollable, const Offset(0, -300));
     await tester.pumpAndSettle();
     await tester.tap(specialtyChip);
     await tester.pumpAndSettle();
-    expect(
-      session.state.branches.single.specialty,
-      CompanySpecialty.finance,
-    );
+    expect(session.state.branches.single.specialty, CompanySpecialty.finance);
     session.dispose();
   });
 
-  testWidgets('standard projects stay open while invited project stays locked', (
-    tester,
-  ) async {
-    final session = await _readySession(
-      PlayerState.initial.copyWith(
-        companyLevel: 1,
-        companyFunds: 500,
-        activeProjectId: 1,
-      ),
-    );
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: AppTheme.dark(),
-        home: AppGradientBackground(child: CompanyPage(session: session)),
-      ),
-    );
-    await tester.pumpAndSettle();
+  testWidgets(
+    'standard projects stay open while invited project stays locked',
+    (tester) async {
+      final session = await _readySession(
+        PlayerState.initial.copyWith(
+          companyLevel: 1,
+          companyFunds: 500,
+          activeProjectId: 1,
+        ),
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.dark(),
+          home: AppGradientBackground(child: CompanyPage(session: session)),
+        ),
+      );
+      await tester.pumpAndSettle();
 
-    await tester.scrollUntilVisible(
-      find.text('Şirket yol haritası'),
-      300,
-      scrollable: find.byType(Scrollable).first,
-    );
-    expect(find.text('Yerel girişim'), findsWidgets);
-    expect(find.text('Bölgesel şirket'), findsOneWidget);
-    expect(find.text('Ulusal marka'), findsOneWidget);
-    expect(find.text('Holding'), findsOneWidget);
-    await tester.scrollUntilVisible(
-      find.text('Kurumsal çözüm'),
-      300,
-      scrollable: find.byType(Scrollable).first,
-    );
-    expect(find.text('Orta sözleşme'), findsWidgets);
-    expect(find.text('Kurumsal şirket'), findsWidgets);
-    expect(find.textContaining('gün teslim'), findsWidgets);
-    expect(find.textContaining('gecikme riski'), findsWidgets);
-    expect(find.textContaining('kalite'), findsWidgets);
-    expect(find.textContaining('başarı'), findsWidgets);
-    expect(find.textContaining('uzmanlığı'), findsWidgets);
-    await tester.ensureVisible(find.text('Kurumsal çözüm'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Kurumsal çözüm'));
-    await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(
+        find.text('Şirket yol haritası'),
+        300,
+        scrollable: find.byType(Scrollable).first,
+      );
+      expect(find.text('Yerel girişim'), findsWidgets);
+      expect(find.text('Bölgesel şirket'), findsOneWidget);
+      expect(find.text('Ulusal marka'), findsOneWidget);
+      expect(find.text('Holding'), findsOneWidget);
+      await tester.scrollUntilVisible(
+        find.text('Kurumsal çözüm'),
+        300,
+        scrollable: find.byType(Scrollable).first,
+      );
+      expect(find.text('Orta sözleşme'), findsWidgets);
+      expect(find.text('Kurumsal şirket'), findsWidgets);
+      expect(find.textContaining('gün teslim'), findsWidgets);
+      expect(find.textContaining('gecikme riski'), findsWidgets);
+      expect(find.textContaining('kalite'), findsWidgets);
+      expect(find.textContaining('başarı'), findsWidgets);
+      expect(find.textContaining('uzmanlığı'), findsWidgets);
+      await tester.ensureVisible(find.text('Kurumsal çözüm'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Kurumsal çözüm'));
+      await tester.pumpAndSettle();
 
-    expect(session.state.activeProjectId, 3);
-    await tester.scrollUntilVisible(
-      find.text('Özel dönüşüm ortaklığı'),
-      400,
-      scrollable: find.byType(Scrollable).first,
-    );
-    expect(find.text('Sezon daveti gerekli'), findsOneWidget);
-    await tester.scrollUntilVisible(
-      find.text('Piyasa ve rekabet'),
-      500,
-      scrollable: find.byType(Scrollable).first,
-    );
-    expect(find.text('Piyasa ve rekabet'), findsOneWidget);
-    await tester.scrollUntilVisible(
-      find.text('30 günlük rekabet sezonu'),
-      400,
-      scrollable: find.byType(Scrollable).first,
-    );
-    expect(find.text('Senin şirketin'), findsOneWidget);
-    expect(find.text('Atlas Global'), findsWidgets);
-    session.dispose();
-  });
+      expect(session.state.activeProjectId, 3);
+      await tester.scrollUntilVisible(
+        find.text('Özel dönüşüm ortaklığı'),
+        400,
+        scrollable: find.byType(Scrollable).first,
+      );
+      expect(find.text('Sezon daveti gerekli'), findsOneWidget);
+      await tester.scrollUntilVisible(
+        find.text('Piyasa ve rekabet'),
+        500,
+        scrollable: find.byType(Scrollable).first,
+      );
+      expect(find.text('Piyasa ve rekabet'), findsOneWidget);
+      await tester.scrollUntilVisible(
+        find.text('30 günlük rekabet sezonu'),
+        400,
+        scrollable: find.byType(Scrollable).first,
+      );
+      expect(find.text('Senin şirketin'), findsOneWidget);
+      expect(find.text('Atlas Global'), findsWidgets);
+      session.dispose();
+    },
+  );
 
   testWidgets('company project team assignment updates the active project', (
     tester,
@@ -892,6 +888,8 @@ void main() {
   });
 
   testWidgets('clock speed controls expose 2x, 4x and pause', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(360, 800));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
     var selectedSpeed = 1;
     var running = true;
     await tester.pumpWidget(
@@ -914,6 +912,8 @@ void main() {
 
     expect(find.text('2x'), findsOneWidget);
     expect(find.text('4x'), findsOneWidget);
+    expect(find.text('Kişisel cüzdan · ₺240'), findsOneWidget);
+    expect(find.text('Şirket kasası · ₺0'), findsOneWidget);
     expect(find.byTooltip('Durdur'), findsOneWidget);
     await tester.tap(find.text('4x'));
     expect(selectedSpeed, 4);

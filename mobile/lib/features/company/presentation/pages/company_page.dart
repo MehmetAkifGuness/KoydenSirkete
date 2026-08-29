@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../app/theme/app_palette.dart';
 import '../../../../core/widgets/app_feedback.dart';
 import '../../../../core/widgets/app_page.dart';
+import '../../../../core/widgets/game_account_bar.dart';
 import '../../../game/presentation/state/game_session_controller.dart';
 import '../../domain/entities/company_employee.dart';
 import '../../domain/entities/company_project.dart';
@@ -433,7 +434,10 @@ class _CompanyViewState extends State<_CompanyView> {
                     ? null
                     : () => Navigator.of(context).push(
                         MaterialPageRoute<void>(
-                          builder: (_) => CompanyBranchesPage(session: session),
+                          builder: (_) => GameAccountRoute(
+                            session: session,
+                            child: CompanyBranchesPage(session: session),
+                          ),
                         ),
                       ),
                 icon: const Icon(Icons.storefront_rounded, size: 18),

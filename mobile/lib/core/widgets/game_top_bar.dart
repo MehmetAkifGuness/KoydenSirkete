@@ -4,6 +4,7 @@ import '../../app/theme/app_palette.dart';
 import '../../features/cities/domain/services/city_catalog.dart';
 import '../../features/game/domain/entities/player_state.dart';
 import '../../features/game/domain/services/game_clock_service.dart';
+import 'game_account_bar.dart';
 
 class GameTopBar extends StatelessWidget {
   const GameTopBar({
@@ -112,36 +113,6 @@ class GameTopBar extends StatelessWidget {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 9,
-                        vertical: 5,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppPalette.primary.withValues(alpha: .10),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(
-                            Icons.account_balance_wallet_outlined,
-                            size: 13,
-                            color: AppPalette.primary,
-                          ),
-                          const SizedBox(width: 5),
-                          Text(
-                            '₺${state.money}',
-                            style: const TextStyle(
-                              color: AppPalette.primary,
-                              fontSize: 13,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 5),
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -178,6 +149,11 @@ class GameTopBar extends StatelessWidget {
                 ),
               ],
             ),
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              child: GameAccountSummary(state: state),
+            ),
             if (onSpeedChanged != null && onToggleRunning != null) ...[
               const SizedBox(height: 9),
               Row(
@@ -190,7 +166,7 @@ class GameTopBar extends StatelessWidget {
                       fontWeight: FontWeight.w700,
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 3),
                   for (final value in [1, 2, 4]) ...[
                     ChoiceChip(
                       label: Text('${value}x'),
@@ -206,12 +182,16 @@ class GameTopBar extends StatelessWidget {
                       visualDensity: VisualDensity.compact,
                       padding: const EdgeInsets.symmetric(horizontal: 4),
                     ),
-                    if (value != 4) const SizedBox(width: 5),
+                    if (value != 4) const SizedBox(width: 2),
                   ],
                   const Spacer(),
                   IconButton(
                     tooltip: isRunning ? 'Durdur' : 'Devam et',
                     visualDensity: VisualDensity.compact,
+                    constraints: const BoxConstraints.tightFor(
+                      width: 40,
+                      height: 40,
+                    ),
                     onPressed: onToggleRunning,
                     icon: Icon(
                       isRunning

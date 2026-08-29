@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.36.0
+
+- Kişisel cüzdan ve şirket kasası tüm oyun ekranlarında ayrı etiketlerle görünür hâle getirildi.
+- Açılan alt ekranlarda bakiyeleri canlı tutan ortak hesap çubuğu eklendi.
+- Finans kayıtlarında kişisel ve şirkete özel işlem türlerinin yanlış hesaba yazılması engellendi.
+
 ## 2.35.0
 
 - Kişisel finans ekranına limitli kredi, sabit faiz, günlük geri ödeme ve erken kapatma eklendi.

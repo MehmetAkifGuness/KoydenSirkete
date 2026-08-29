@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../app/theme/app_palette.dart';
 import '../../../../core/widgets/app_page.dart';
+import '../../../../core/widgets/game_account_bar.dart';
 import '../../../game/domain/entities/player_state.dart';
 import '../../domain/entities/company_competition_state.dart';
 import '../../domain/entities/company_season_rule.dart';
@@ -116,7 +117,14 @@ class CompanyCompetitionPanel extends StatelessWidget {
                   key: const ValueKey('open-season-history'),
                   onPressed: () => Navigator.of(context).push(
                     MaterialPageRoute<void>(
-                      builder: (_) => CompanySeasonHistoryPage(state: state),
+                      builder: (_) => Column(
+                        children: [
+                          GameAccountBar(state: state),
+                          Expanded(
+                            child: CompanySeasonHistoryPage(state: state),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                   icon: const Icon(Icons.history_rounded, size: 18),

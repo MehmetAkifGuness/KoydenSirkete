@@ -8,6 +8,7 @@ import '../core/database/player_state_store.dart';
 import '../core/widgets/app_feedback.dart';
 import '../core/widgets/app_gradient_background.dart';
 import '../core/widgets/game_bottom_nav.dart';
+import '../core/widgets/game_account_bar.dart';
 import '../core/widgets/game_top_bar.dart';
 import '../core/widgets/storage_error_page.dart';
 import '../features/career/presentation/pages/career_page.dart';
@@ -277,27 +278,36 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
 
   void _openFeature(AppFeature feature) {
     final route = switch (feature.title) {
-      _ when feature.title == AppFeatures.earning.title =>
-        MaterialPageRoute<void>(builder: (_) => EarningPage(session: _session)),
-      _ when feature.title == AppFeatures.training.title =>
-        MaterialPageRoute<void>(
-          builder: (_) => TrainingPage(session: _session),
-        ),
-      _ when feature.title == AppFeatures.finance.title =>
-        MaterialPageRoute<void>(builder: (_) => FinancePage(session: _session)),
-      _ when feature.title == AppFeatures.assets.title =>
-        MaterialPageRoute<void>(builder: (_) => AssetsPage(session: _session)),
-      _ when feature.title == AppFeatures.skills.title =>
-        MaterialPageRoute<void>(builder: (_) => SkillsPage(session: _session)),
-      _ when feature.title == AppFeatures.sport.title =>
-        MaterialPageRoute<void>(builder: (_) => SportPage(session: _session)),
-      _ when feature.title == AppFeatures.jobs.title => MaterialPageRoute<void>(
-        builder: (_) => JobsPage(session: _session),
+      _ when feature.title == AppFeatures.earning.title => _gameRoute(
+        EarningPage(session: _session),
       ),
-      _ when feature.title == AppFeatures.cities.title =>
-        MaterialPageRoute<void>(builder: (_) => CitiesPage(session: _session)),
-      _ => AppRouter.placeholderRoute(feature),
+      _ when feature.title == AppFeatures.training.title => _gameRoute(
+        TrainingPage(session: _session),
+      ),
+      _ when feature.title == AppFeatures.finance.title => _gameRoute(
+        FinancePage(session: _session),
+      ),
+      _ when feature.title == AppFeatures.assets.title => _gameRoute(
+        AssetsPage(session: _session),
+      ),
+      _ when feature.title == AppFeatures.skills.title => _gameRoute(
+        SkillsPage(session: _session),
+      ),
+      _ when feature.title == AppFeatures.sport.title => _gameRoute(
+        SportPage(session: _session),
+      ),
+      _ when feature.title == AppFeatures.jobs.title => _gameRoute(
+        JobsPage(session: _session),
+      ),
+      _ when feature.title == AppFeatures.cities.title => _gameRoute(
+        CitiesPage(session: _session),
+      ),
+      _ => _gameRoute(AppRouter.placeholder(feature)),
     };
     Navigator.of(context).push(route);
   }
+
+  MaterialPageRoute<void> _gameRoute(Widget page) => MaterialPageRoute<void>(
+    builder: (_) => GameAccountRoute(session: _session, child: page),
+  );
 }
