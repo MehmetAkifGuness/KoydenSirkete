@@ -42,7 +42,7 @@ MÜDÜR — 10/10 HEDEF PLANI
 
 5. ÖNCELİK — EKONOMİ VE DENGE
 
-- 30, 100, 365 ve 1.000 oyun günlük otomatik ekonomi simülasyonları oluştur.
+- [TAMAMLANDI — v2.37.0] 30, 100, 365 ve 1.000 oyun günlük otomatik ekonomi simülasyonları oluştur.
 - Oyuncunun çok hızlı zenginleşmesini ve geri dönemeyecek şekilde fakirleşmesini engelleyen sınırlar belirle.
 - Her yatırım için hedef geri dönüş süresi tanımla; ev, araç, eğitim, şube ve şirket yükseltmelerini buna göre dengele.
 - Enflasyon, maaş, yaşam gideri ve şirket gelirinin birbirinden kopuk büyümesini engelle.

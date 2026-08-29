@@ -310,6 +310,11 @@ Android-first, tamamen offline kariyer ve şirket simülasyonu.
 - Kişisel cüzdan ve şirket kasası ana ve alt oyun ekranlarında ayrı gösterilir.
 - Şirkete özel finans hareketleri yalnızca şirket hesabına, kişisel hareketler yalnızca kişisel hesaba kaydedilir; sermaye ve kâr payı transferlerinde iki taraf ayrı izlenir.
 
+## v2.37.0 ekonomi simülasyonları
+
+- 30, 100, 365 ve 1.000 oyun günlük kariyer ekonomisi otomatik ve deterministik olarak simüle edilir.
+- Oynanabilir nakit dengesi, gün ilerlemesi, iş sayısı ve 30 günlük finans kaydı sınırı test edilir.
+
 ## Çalıştırma
 
 ```powershell

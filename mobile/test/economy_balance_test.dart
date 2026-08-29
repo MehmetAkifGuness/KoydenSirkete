@@ -18,6 +18,31 @@ import 'package:kariyerden_sirkete/features/work/domain/services/employer_task_g
 import 'package:kariyerden_sirkete/features/work/domain/services/work_service.dart';
 
 void main() {
+  group('automated economy simulations', () {
+    for (final days in const [30, 100, 365, 1000]) {
+      test('$days game days stay deterministic and playable', () {
+        final city = CityCatalog.cities.first;
+        final job = JobCatalog.jobs.first;
+        final initial = _employedState(job, city);
+        final first = _playCareerDays(state: initial, job: job, days: days);
+        final replay = _playCareerDays(state: initial, job: job, days: days);
+
+        expect(first.day, initial.day + days);
+        expect(first.lastLivingCostDay, first.day);
+        expect(first.money, greaterThan(0));
+        expect(first.money, replay.money);
+        expect(first.totalEarned, replay.totalEarned);
+        expect(first.totalWorkSessions, days * 2);
+        expect(
+          first.financeLedger.entries.every(
+            (entry) => entry.day >= first.day - 29,
+          ),
+          isTrue,
+        );
+      });
+    }
+  });
+
   test('city economy stays within the playable salary curve', () {
     final salaries = CitySalaryService();
     final dailyCosts = CityCatalog.cities.map((city) => city.dailyCost);

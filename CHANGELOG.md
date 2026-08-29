@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.37.0
+
+- 30, 100, 365 ve 1.000 oyun günlük deterministik ekonomi simülasyonları eklendi.
+- Uzun vadeli simülasyonlarda nakit, gün ilerlemesi, iş sayısı ve finans kaydı saklama sınırları otomatik doğrulanır.
+
 ## 2.36.0
 
 - Kişisel cüzdan ve şirket kasası tüm oyun ekranlarında ayrı etiketlerle görünür hâle getirildi.
