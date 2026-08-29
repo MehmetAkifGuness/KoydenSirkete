@@ -1,10 +1,16 @@
 import 'dart:math' as math;
 
+import '../../../assets/domain/services/asset_service.dart';
 import '../entities/player_state.dart';
 
 class EnergyRecoveryService {
+  EnergyRecoveryService({AssetService? assetService})
+    : _assetService = assetService ?? AssetService();
+
   static const recoveryInterval = Duration(minutes: 1);
   static const recoveryAmount = 10;
+
+  final AssetService _assetService;
 
   PlayerState recover(PlayerState state, {DateTime? now}) {
     final currentTime = now ?? DateTime.now();
@@ -22,7 +28,9 @@ class EnergyRecoveryService {
     final remainder = elapsed.inSeconds % recoveryInterval.inSeconds;
     final recoveredEnergy = math.min(
       state.maxEnergy,
-      state.energy + completedIntervals * recoveryAmount,
+      state.energy +
+          completedIntervals *
+              (recoveryAmount + _assetService.energyRecoveryBonus(state)),
     );
     return state.copyWith(
       energy: recoveredEnergy,

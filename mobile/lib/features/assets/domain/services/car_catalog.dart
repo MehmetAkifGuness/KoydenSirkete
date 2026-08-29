@@ -8,6 +8,7 @@ abstract final class CarCatalog {
       description: 'Ekonomik ve güvenilir ulaşım.',
       price: 15000,
       moveDiscountPercent: 20,
+      opportunityBonus: 1,
     ),
     CarAsset(
       id: 2,
@@ -15,6 +16,7 @@ abstract final class CarCatalog {
       description: 'Taşınma masraflarını ciddi ölçüde azaltır.',
       price: 45000,
       moveDiscountPercent: 45,
+      opportunityBonus: 2,
     ),
     CarAsset(
       id: 3,
@@ -22,6 +24,7 @@ abstract final class CarCatalog {
       description: 'En yüksek taşınma avantajını sağlar.',
       price: 120000,
       moveDiscountPercent: 70,
+      opportunityBonus: 3,
     ),
   ];
 

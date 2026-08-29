@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.33.0
+
+- Kullanımdaki evin konfor seviyesine göre enerji yenilenme bonusu eklendi.
+- Araçlar ulaşım indirimine ek olarak günlük iş fırsatı sayısını artırır.
+- Varlık avantajları satın alma ve sahip olunan varlık kartlarında gösterilir.
+
 ## 2.32.0
 
 - Günlük işveren görevlerine sektör ve kariyer aşamasına özgü görevler eklendi.

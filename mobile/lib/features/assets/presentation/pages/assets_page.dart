@@ -190,7 +190,7 @@ class _HomeCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Konfor ${home.comfort}/100 · ₺${home.price} · Aylık brüt kira ₺${AssetService().monthlyRent(home)}',
+                  'Konfor ${home.comfort}/100 · Enerji +${home.energyRecoveryBonus}/dk · ₺${home.price} · Aylık brüt kira ₺${AssetService().monthlyRent(home)}',
                   style: const TextStyle(
                     color: AppPalette.textMuted,
                     fontSize: 11,
@@ -291,7 +291,7 @@ class _OwnedHomeCard extends StatelessWidget {
                     Text(
                       isRented
                           ? 'Bakım ₺$monthlyMaintenance/ay · Satış değeri ₺$saleValue'
-                          : 'Konfor ${home.comfort}/100 · Satış değeri ₺$saleValue',
+                          : 'Konfor ${home.comfort}/100 · Enerji +${home.energyRecoveryBonus}/dk · Satış değeri ₺$saleValue',
                       style: const TextStyle(
                         color: AppPalette.textMuted,
                         fontSize: 11,
@@ -397,7 +397,7 @@ class _CarCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 7),
                 Text(
-                  'Taşınma avantajı %${car.moveDiscountPercent} · ₺${car.price}',
+                  'Ulaşım %${car.moveDiscountPercent} indirim · +${car.opportunityBonus} iş fırsatı · ₺${car.price}',
                   style: const TextStyle(
                     color: AppPalette.textMuted,
                     fontSize: 11,
@@ -471,7 +471,7 @@ class _OwnedCarCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 3),
                 Text(
-                  'Taşınma maliyeti %${car.moveDiscountPercent} azalır.',
+                  'Ulaşım %${car.moveDiscountPercent} indirim · Günde +${car.opportunityBonus} iş fırsatı',
                   style: const TextStyle(
                     color: AppPalette.textSecondary,
                     fontSize: 12,

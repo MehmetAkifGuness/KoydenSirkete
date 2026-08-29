@@ -11,7 +11,11 @@ class CityOpportunityService {
 
   final CitySalaryService _salaryService;
 
-  List<JobListing> listings({required int cityId, required int day}) {
+  List<JobListing> listings({
+    required int cityId,
+    required int day,
+    int opportunityBonus = 0,
+  }) {
     final city = CityCatalog.findById(cityId) ?? CityCatalog.cities.first;
     final ranked =
         JobCatalog.jobs
@@ -21,7 +25,10 @@ class CityOpportunityService {
             )
             .toList()
           ..sort((left, right) => right.score.compareTo(left.score));
-    final count = city.opportunityCount.clamp(1, ranked.length);
+    final count = (city.opportunityCount + opportunityBonus).clamp(
+      1,
+      ranked.length,
+    );
     final selected = _diversify(ranked, count);
     return [
       for (var index = 0; index < selected.length; index++)

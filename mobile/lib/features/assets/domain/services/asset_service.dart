@@ -196,6 +196,29 @@ class AssetService {
     return (baseCost * (100 - car.moveDiscountPercent) / 100).ceil();
   }
 
+  int energyRecoveryBonus(PlayerState state) {
+    final homes = _availableHomes(state)
+        .where((home) => home.cityId == state.currentCityId);
+    return homes.fold(
+      0,
+      (best, home) => home.energyRecoveryBonus > best
+          ? home.energyRecoveryBonus
+          : best,
+    );
+  }
+
+  int opportunityBonus(PlayerState state) =>
+      CarCatalog.findById(state.ownedCarId)?.opportunityBonus ?? 0;
+
+  Iterable<HomeAsset> _availableHomes(PlayerState state) sync* {
+    final rentedIds = state.rentedHomeIds.toSet();
+    for (final id in state.ownedHomeIds) {
+      if (rentedIds.contains(id)) continue;
+      final home = HomeCatalog.findById(id);
+      if (home != null) yield home;
+    }
+  }
+
   Iterable<HomeAsset> _rentedHomes(PlayerState state) sync* {
     final ownedIds = state.ownedHomeIds.toSet();
     for (final id in state.rentedHomeIds) {

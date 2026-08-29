@@ -5,6 +5,7 @@ class CarAsset {
     required this.description,
     required this.price,
     required this.moveDiscountPercent,
+    required this.opportunityBonus,
   });
 
   final int id;
@@ -12,4 +13,5 @@ class CarAsset {
   final String description;
   final int price;
   final int moveDiscountPercent;
+  final int opportunityBonus;
 }

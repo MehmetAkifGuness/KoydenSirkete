@@ -15,6 +15,7 @@ abstract final class HomeCatalog {
             'Yaşadığın şehirde konut kirasını kaldıran güvenli bir ev.',
         price: _prices[0],
         comfort: 40,
+        energyRecoveryBonus: 2,
         requiredCareerLevel: 1,
       ),
       HomeAsset(
@@ -24,6 +25,7 @@ abstract final class HomeCatalog {
         description: 'Daha konforlu ve prestijli bir şehir evi.',
         price: _prices[1],
         comfort: 70,
+        energyRecoveryBonus: 5,
         requiredCareerLevel: 2,
       ),
       HomeAsset(
@@ -33,6 +35,7 @@ abstract final class HomeCatalog {
         description: 'Şehirdeki en yüksek konfor seviyesine sahip ev.',
         price: _prices[2],
         comfort: 100,
+        energyRecoveryBonus: 8,
         requiredCareerLevel: 3,
       ),
     ];
