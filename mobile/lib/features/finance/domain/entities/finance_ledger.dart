@@ -27,6 +27,10 @@ enum FinanceCategory {
   companySeason,
   companyDevelopment,
   companyExpansion,
+  companyOfficeBudget,
+  companyMarketingBudget,
+  companyResearchBudget,
+  companyMaintenanceBudget,
 }
 
 class FinanceEntry {

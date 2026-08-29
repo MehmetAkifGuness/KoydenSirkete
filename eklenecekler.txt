@@ -27,7 +27,7 @@ MÜDÜR — 10/10 HEDEF PLANI
 - [TAMAMLANDI — v2.25.0] Çalışanlara deneyim, kıdem, terfi, zam talebi, tükenmişlik ve görev uyumu ekle.
 - [TAMAMLANDI — v2.26.0] Çalışanların uzmanlıklarına göre ekip kurma ve projeye çalışan atama sistemi ekle.
 - [TAMAMLANDI — v2.27.0] Şube ekranına yönetici atama, yerel hedef ve şube uzmanlığı seçenekleri ekle.
-- Şirket giderlerine kontrollü ofis, pazarlama, Ar-Ge ve bakım bütçeleri ekle.
+- [TAMAMLANDI — v2.28.0] Şirket giderlerine kontrollü ofis, pazarlama, Ar-Ge ve bakım bütçeleri ekle.
 - Finansal kararların gelir, itibar, moral ve risk üzerinde açıkça görünen sonuçları olmalı.
 - Tekrarlayan tıklamalar yerine anlamlı seçimler ve farklı sonuçlar üreten karar olayları ekle.
 

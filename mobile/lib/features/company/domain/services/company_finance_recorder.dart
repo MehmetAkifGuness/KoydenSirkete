@@ -15,14 +15,49 @@ abstract final class CompanyFinanceRecorder {
 
   static FinanceLedger recordDailyOperations(
     PlayerState state, {
+    int? day,
     required int revenue,
     required int payroll,
+    int officeBudget = 0,
+    int marketingBudget = 0,
+    int researchBudget = 0,
+    int maintenanceBudget = 0,
   }) {
-    var ledger = record(state, FinanceCategory.companyRevenue, revenue);
+    final operationDay = day ?? state.day;
+    var ledger = state.financeLedger.record(
+      day: operationDay,
+      category: FinanceCategory.companyRevenue,
+      amount: revenue,
+      account: FinanceAccount.company,
+    );
     ledger = ledger.record(
-      day: state.day,
+      day: operationDay,
       category: FinanceCategory.companyPayroll,
       amount: -payroll,
+      account: FinanceAccount.company,
+    );
+    ledger = ledger.record(
+      day: operationDay,
+      category: FinanceCategory.companyOfficeBudget,
+      amount: -officeBudget,
+      account: FinanceAccount.company,
+    );
+    ledger = ledger.record(
+      day: operationDay,
+      category: FinanceCategory.companyMarketingBudget,
+      amount: -marketingBudget,
+      account: FinanceAccount.company,
+    );
+    ledger = ledger.record(
+      day: operationDay,
+      category: FinanceCategory.companyResearchBudget,
+      amount: -researchBudget,
+      account: FinanceAccount.company,
+    );
+    ledger = ledger.record(
+      day: operationDay,
+      category: FinanceCategory.companyMaintenanceBudget,
+      amount: -maintenanceBudget,
       account: FinanceAccount.company,
     );
     return ledger;

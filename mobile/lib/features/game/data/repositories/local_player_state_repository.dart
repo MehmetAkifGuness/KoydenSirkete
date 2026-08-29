@@ -14,6 +14,7 @@ import '../mappers/company_competition_codec.dart';
 import '../mappers/company_expansion_codec.dart';
 import '../mappers/company_project_outcome_codec.dart';
 import '../mappers/company_project_team_codec.dart';
+import '../mappers/company_budget_codec.dart';
 
 class LocalPlayerStateRepository implements PlayerStateRepository {
   LocalPlayerStateRepository({
@@ -101,6 +102,9 @@ class LocalPlayerStateRepository implements PlayerStateRepository {
         ),
         companyProjectTeamsJson: const CompanyProjectTeamCodec().encode(
           model.companyProjectTeams,
+        ),
+        companyBudgetJson: const CompanyBudgetCodec().encode(
+          model.companyBudget,
         ),
         totalEarned: model.totalEarned,
         totalWorkSessions: model.totalWorkSessions,

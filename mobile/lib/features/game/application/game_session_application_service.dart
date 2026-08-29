@@ -18,6 +18,8 @@ import '../../company/domain/services/company_market_service.dart';
 import '../../company/domain/services/company_competition_service.dart';
 import '../../company/domain/services/company_stage_service.dart';
 import '../../company/domain/services/company_treasury_service.dart';
+import '../../company/domain/services/company_budget_service.dart';
+import '../../company/domain/entities/company_budget_state.dart';
 import '../../company/domain/entities/company_deal.dart';
 import '../../company/domain/entities/company_competition_strategy.dart';
 import '../../company/domain/services/company_expansion_service.dart';
@@ -68,6 +70,7 @@ class GameSessionApplicationService {
     CompanyCompetitionService? companyCompetitionService,
     CompanyStageService? companyStageService,
     CompanyTreasuryService? companyTreasuryService,
+    CompanyBudgetService? companyBudgetService,
     CompanyBranchService? companyBranchService,
     AssetService? assetService,
     DailyGoalService? dailyGoalService,
@@ -102,6 +105,8 @@ class GameSessionApplicationService {
        _companyStageService = companyStageService ?? CompanyStageService(),
        _companyTreasuryService =
            companyTreasuryService ?? CompanyTreasuryService(),
+       _companyBudgetService =
+           companyBudgetService ?? const CompanyBudgetService(),
        _companyBranchService = companyBranchService ?? CompanyBranchService(),
        _assetService = assetService ?? AssetService(),
        _dailyGoalService = dailyGoalService ?? DailyGoalService(),
@@ -132,6 +137,7 @@ class GameSessionApplicationService {
   final CompanyCompetitionService _companyCompetitionService;
   final CompanyStageService _companyStageService;
   final CompanyTreasuryService _companyTreasuryService;
+  final CompanyBudgetService _companyBudgetService;
   final CompanyBranchService _companyBranchService;
   final AssetService _assetService;
   final DailyGoalService _dailyGoalService;

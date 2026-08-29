@@ -56,7 +56,7 @@ class FinancePage extends StatelessWidget {
             const SizedBox(height: 22),
             _AccountHistory(
               title: 'Şirket hareketleri',
-              caption: 'Projeler, maaşlar, bayiler ve piyasa etkileri',
+              caption: 'Projeler, maaşlar, bütçeler, bayiler ve piyasa etkileri',
               entries: companyToday,
             ),
             const SizedBox(height: 22),
@@ -394,6 +394,10 @@ extension on FinanceCategory {
     FinanceCategory.companySeason => 'Rekabet sezonu ödülü',
     FinanceCategory.companyDevelopment => 'Çalışan gelişimi',
     FinanceCategory.companyExpansion => 'Satın alma ve birleşme',
+    FinanceCategory.companyOfficeBudget => 'Ofis bütçesi',
+    FinanceCategory.companyMarketingBudget => 'Pazarlama bütçesi',
+    FinanceCategory.companyResearchBudget => 'Ar-Ge bütçesi',
+    FinanceCategory.companyMaintenanceBudget => 'Bakım bütçesi',
   };
 
   IconData get icon => switch (this) {
@@ -423,5 +427,9 @@ extension on FinanceCategory {
     FinanceCategory.companySeason => Icons.emoji_events_outlined,
     FinanceCategory.companyDevelopment => Icons.school_outlined,
     FinanceCategory.companyExpansion => Icons.handshake_outlined,
+    FinanceCategory.companyOfficeBudget => Icons.apartment_outlined,
+    FinanceCategory.companyMarketingBudget => Icons.campaign_outlined,
+    FinanceCategory.companyResearchBudget => Icons.science_outlined,
+    FinanceCategory.companyMaintenanceBudget => Icons.build_outlined,
   };
 }

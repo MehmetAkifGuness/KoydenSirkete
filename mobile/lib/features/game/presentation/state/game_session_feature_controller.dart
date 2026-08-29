@@ -38,6 +38,17 @@ extension GameSessionFeatureController on GameSessionController {
     },
   );
 
+  Future<String?> setCompanyBudgetLevel(
+    CompanyBudgetCategory category,
+    CompanyBudgetLevel level,
+  ) => _execute(
+    action: (state) =>
+        _applicationService.setCompanyBudgetLevel(state, category, level),
+    stateOf: (result) => result,
+    message: (_) =>
+        '${category.label} bütçesi ${level.label.toLowerCase()} oldu.',
+  );
+
   Future<String?> recruitEmployee(CompanyEmployee employee) => _execute(
     action: (state) =>
         _applicationService.recruitEmployee(state, employee: employee),

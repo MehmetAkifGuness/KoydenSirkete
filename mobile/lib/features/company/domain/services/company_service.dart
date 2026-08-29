@@ -3,6 +3,7 @@ import '../../../game/domain/entities/player_state.dart';
 import '../entities/company_employee.dart';
 import '../entities/company_project.dart';
 import '../entities/company_project_outcome.dart';
+import 'company_budget_service.dart';
 import 'company_employee_catalog.dart';
 import 'company_finance_recorder.dart';
 import 'company_project_catalog.dart';
@@ -46,7 +47,11 @@ class CompanyService {
     CompanyProjectStrategyService? projectStrategy,
     CompanyProjectTeamService? projectTeamService,
     CompanySeasonRewardService? seasonRewardService,
-  }) : _projectStrategy = projectStrategy ?? CompanyProjectStrategyService(),
+    CompanyBudgetService? budgetService,
+  }) : _budgetService = budgetService ?? const CompanyBudgetService(),
+       _projectStrategy =
+           projectStrategy ??
+           CompanyProjectStrategyService(budgetService: budgetService),
        _projectTeamService =
            projectTeamService ?? const CompanyProjectTeamService(),
        _seasonRewardService =
@@ -58,6 +63,7 @@ class CompanyService {
   final CompanyProjectStrategyService _projectStrategy;
   final CompanyProjectTeamService _projectTeamService;
   final CompanySeasonRewardService _seasonRewardService;
+  final CompanyBudgetService _budgetService;
   static int upgradeCost(int level) => switch (level) {
     1 => 25000,
     2 => 75000,
@@ -95,7 +101,10 @@ class CompanyService {
           0,
           (total, employee) => total + dailyEmployeeContribution(employee),
         );
-    final bonus = _seasonRewardService.sponsorshipRevenueBonus(state);
+    final bonus =
+        _seasonRewardService.sponsorshipRevenueBonus(state) +
+        _budgetService.marketingRevenueBonusPercent(state) +
+        _budgetService.maintenanceRevenueBonusPercent(state);
     return (gross * (100 + bonus) / 100).round();
   }
 
@@ -112,26 +121,32 @@ class CompanyService {
     var current = state;
     final messages = <String>[];
     for (var day = 0; day < days; day++) {
+      current = _budgetService.applyDailyHeadquartersOfficeEffect(current);
       final revenue = dailyRevenue(current);
       final payroll = dailyPayroll(current);
+      final budget = _budgetService.dailyBreakdown(current);
       current = current.copyWith(
-        companyFunds: current.companyFunds + revenue - payroll,
+        companyFunds: current.companyFunds + revenue - payroll - budget.total,
         financeLedger: CompanyFinanceRecorder.recordDailyOperations(
           current,
+          day: (state.day - days + day + 1).clamp(1, state.day),
           revenue: revenue,
           payroll: payroll,
+          officeBudget: budget.office,
+          marketingBudget: budget.marketing,
+          researchBudget: budget.research,
+          maintenanceBudget: budget.maintenance,
         ),
       );
       final project = CompanyProjectCatalog.byId(current.activeProjectId);
-      if (_projectTeamService.teamFor(current, project).isEmpty) {
-        continue;
-      }
-      final projectResult = CompanyProjectOperations(
-        this,
-      ).advanceProject(current);
-      current = projectResult.state;
-      if (projectResult.resolved) {
-        messages.add(projectResult.message);
+      if (_projectTeamService.teamFor(current, project).isNotEmpty) {
+        final projectResult = CompanyProjectOperations(
+          this,
+        ).advanceProject(current);
+        current = projectResult.state;
+        if (projectResult.resolved) {
+          messages.add(projectResult.message);
+        }
       }
     }
     return CompanyOperationResult(state: current, messages: messages);

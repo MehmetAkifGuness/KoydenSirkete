@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.28.0
+
+- Ofis, pazarlama, Ar-Ge ve bakım için kapalı, düşük, orta ve yüksek günlük bütçe seviyeleri eklendi.
+- Şirket seviyesi ve şube sayısına göre büyüyen günlük üst sınır, erken oyunda bütçe kalemleri arasında seçim yapmayı zorunlu kılar.
+- Ofis bütçesi çalışan moralini ve tükenmişliğini; pazarlama ile bakım merkez ve bayi gelirini; Ar-Ge aktif proje hızını etkiler.
+- Bütçe değişiklikleri anında para kesmez; günlük giderler yalnızca şirket kasasından tahsil edilir.
+- Dört bütçe gideri finans ekranında ayrı şirket hareketleri olarak gösterilir ve kişisel cüzdana dokunmaz.
+- Bütçe planı SQLite v31 ile saklanır; eski, eksik veya bozuk kayıtlarda tüm kalemler güvenle kapalı açılır.
+
 ## 2.27.0
 
 - Bayi çalışanlarından yönetici atama eklendi; yönetici performansı, kıdemi ve liderlik uzmanlığı günlük geliri artırır.

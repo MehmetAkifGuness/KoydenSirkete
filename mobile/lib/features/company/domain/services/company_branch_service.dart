@@ -7,6 +7,7 @@ import '../entities/company_employee.dart';
 import '../entities/company_specialty.dart';
 import 'company_employee_catalog.dart';
 import 'company_branch_management_service.dart';
+import 'company_budget_service.dart';
 import 'company_finance_recorder.dart';
 import 'company_region_service.dart';
 import 'company_service.dart';
@@ -29,11 +30,13 @@ class CompanyBranchService {
     CompanyRegionService? regionService,
     CompanySeasonRewardService? seasonRewardService,
     CompanyBranchManagementService? managementService,
+    CompanyBudgetService? budgetService,
   }) : _regionService = regionService ?? CompanyRegionService(),
        _seasonRewardService =
            seasonRewardService ?? const CompanySeasonRewardService(),
        _managementService =
-           managementService ?? const CompanyBranchManagementService();
+           managementService ?? const CompanyBranchManagementService(),
+       _budgetService = budgetService ?? const CompanyBudgetService();
 
   static const maxBranchLevel = 3;
   static const levelRevenueBonusPercent = 25;
@@ -41,6 +44,7 @@ class CompanyBranchService {
   final CompanyRegionService _regionService;
   final CompanySeasonRewardService _seasonRewardService;
   final CompanyBranchManagementService _managementService;
+  final CompanyBudgetService _budgetService;
 
   static int openingCost(City city) =>
       (city.dailyCost * 12 + city.marketLevel * 2000).clamp(30000, 200000);
@@ -261,7 +265,9 @@ class CompanyBranchService {
     final bonus =
         _regionService.revenueBonus(state) +
         CompanyTrophyService.branchRevenueBonus(state) +
-        _seasonRewardService.sponsorshipRevenueBonus(state);
+        _seasonRewardService.sponsorshipRevenueBonus(state) +
+        _budgetService.marketingRevenueBonusPercent(state) +
+        _budgetService.maintenanceRevenueBonusPercent(state);
     return (dailyRevenue(branch) * (100 + bonus) / 100).round();
   }
 
@@ -309,6 +315,12 @@ class CompanyBranchService {
     var current = state;
     final messages = <String>[];
     for (var day = 0; day < days; day++) {
+      current = current.copyWith(
+        branches: [
+          for (final branch in current.branches)
+            _budgetService.applyDailyBranchOfficeEffect(current, branch),
+        ],
+      );
       var net = 0;
       for (final branch in current.branches) {
         net +=

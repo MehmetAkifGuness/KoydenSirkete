@@ -4,6 +4,7 @@ import 'package:kariyerden_sirkete/core/database/player_state_store.dart';
 import 'package:kariyerden_sirkete/features/game/data/mappers/player_state_mapper.dart';
 import 'package:kariyerden_sirkete/features/game/data/mappers/company_employee_codec.dart';
 import 'package:kariyerden_sirkete/features/game/data/mappers/finance_ledger_codec.dart';
+import 'package:kariyerden_sirkete/features/game/data/mappers/company_budget_codec.dart';
 import 'package:kariyerden_sirkete/features/game/data/repositories/local_player_state_repository.dart';
 import 'package:kariyerden_sirkete/features/game/domain/entities/player_state.dart';
 import 'package:kariyerden_sirkete/features/game/domain/entities/active_activity.dart';
@@ -17,6 +18,7 @@ import 'package:kariyerden_sirkete/features/company/domain/entities/company_seas
 import 'package:kariyerden_sirkete/features/company/domain/entities/company_season_result.dart';
 import 'package:kariyerden_sirkete/features/company/domain/entities/company_project_outcome.dart';
 import 'package:kariyerden_sirkete/features/company/domain/entities/company_project_team_state.dart';
+import 'package:kariyerden_sirkete/features/company/domain/entities/company_budget_state.dart';
 import 'package:kariyerden_sirkete/features/finance/domain/entities/finance_ledger.dart';
 
 void main() {
@@ -55,6 +57,12 @@ void main() {
           1: [1, 3],
           2: [],
         },
+      ),
+      companyBudget: const CompanyBudgetState(
+        office: CompanyBudgetLevel.low,
+        marketing: CompanyBudgetLevel.high,
+        research: CompanyBudgetLevel.medium,
+        maintenance: CompanyBudgetLevel.low,
       ),
       negativeMoneyHours: 12,
       wheelMajorRewardsToday: 2,
@@ -153,6 +161,10 @@ void main() {
     expect(actual?.companyProjectTeams.employeeIdsFor(1), [1, 3]);
     expect(actual?.companyProjectTeams.isConfigured(2), isTrue);
     expect(actual?.companyProjectTeams.employeeIdsFor(2), isEmpty);
+    expect(actual?.companyBudget.office, CompanyBudgetLevel.low);
+    expect(actual?.companyBudget.marketing, CompanyBudgetLevel.high);
+    expect(actual?.companyBudget.research, CompanyBudgetLevel.medium);
+    expect(actual?.companyBudget.maintenance, CompanyBudgetLevel.low);
     expect(actual?.negativeMoneyHours, expected.negativeMoneyHours);
     expect(actual?.wheelMajorRewardsToday, expected.wheelMajorRewardsToday);
     expect(actual?.wheelDurationBuffPercent, expected.wheelDurationBuffPercent);
@@ -288,6 +300,21 @@ void main() {
     final entry = FinanceLedgerCodec().decode(legacy).entries.single;
 
     expect(entry.account, FinanceAccount.personal);
+  });
+
+  test('company budget codec safely defaults legacy allocations', () {
+    const codec = CompanyBudgetCodec();
+
+    expect(codec.decode(null).isDisabled, isTrue);
+    expect(codec.decode('invalid json').isDisabled, isTrue);
+
+    final legacy = codec.decode(
+      '{"office":"medium","marketing":"unknown","research":2}',
+    );
+    expect(legacy.office, CompanyBudgetLevel.medium);
+    expect(legacy.marketing, CompanyBudgetLevel.off);
+    expect(legacy.research, CompanyBudgetLevel.off);
+    expect(legacy.maintenance, CompanyBudgetLevel.off);
   });
 
   test('finance codec persists company account movements', () {

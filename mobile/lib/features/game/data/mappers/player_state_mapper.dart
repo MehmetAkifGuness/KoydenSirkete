@@ -53,6 +53,7 @@ class PlayerStateMapper {
       projectElapsedDays: model.projectElapsedDays,
       lastProjectOutcome: model.lastProjectOutcome,
       companyProjectTeams: model.companyProjectTeams,
+      companyBudget: model.companyBudget,
       totalEarned: model.totalEarned,
       totalWorkSessions: model.totalWorkSessions,
       totalTrainingSessions: model.totalTrainingSessions,

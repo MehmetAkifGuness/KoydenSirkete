@@ -95,6 +95,12 @@ extension GameSessionFeatureApplication on GameSessionApplicationService {
     int grossAmount,
   ) => _persist(_companyTreasuryService.withdrawDividend(state, grossAmount));
 
+  Future<PlayerState> setCompanyBudgetLevel(
+    PlayerState state,
+    CompanyBudgetCategory category,
+    CompanyBudgetLevel level,
+  ) => _persist(_companyBudgetService.setLevel(state, category, level));
+
   Future<PlayerState> recruitEmployee(
     PlayerState state, {
     CompanyEmployee? employee,

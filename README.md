@@ -285,6 +285,14 @@ Android-first, tamamen offline kariyer ve şirket simülasyonu.
 - Yönetici, hedef ve uzmanlık seçimleri mevcut şube kaydında tutulur; eski şubeler dengeli hedefle açılır.
 - Bayi çalışanlarının tüm kariyer ve tükenmişlik alanları kayıt döngüsünde eksiksiz korunur.
 
+## v2.28.0 kontrollü şirket bütçeleri
+
+- Ofis, pazarlama, Ar-Ge ve bakım bütçeleri kapalı, düşük, orta veya yüksek seviyede yönetilebilir.
+- Günlük üst sınır şirket seviyesi ve şube sayısıyla büyür; daha erken yüksek yatırım yapmak diğer kalemlerden kısmayı gerektirir.
+- Ofis çalışan moralini ve tükenmişliğini, pazarlama ile bakım operasyon gelirini, Ar-Ge proje hızını ölçülü biçimde etkiler.
+- Giderler her oyun günü yalnızca şirket kasasından kesilir ve finans ekranında dört ayrı hareket olarak görünür.
+- SQLite v31 bütçe planını kalıcı tutar; eski kayıtlar sıfır bütçeyle ve ek gider olmadan açılır.
+
 ## Çalıştırma
 
 ```powershell

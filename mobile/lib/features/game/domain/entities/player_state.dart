@@ -7,6 +7,7 @@ import '../../../company/domain/entities/company_competition_state.dart';
 import '../../../company/domain/entities/company_expansion_state.dart';
 import '../../../company/domain/entities/company_project_outcome.dart';
 import '../../../company/domain/entities/company_project_team_state.dart';
+import '../../../company/domain/entities/company_budget_state.dart';
 import '../../../finance/domain/entities/finance_ledger.dart';
 
 class PlayerState {
@@ -62,6 +63,7 @@ class PlayerState {
     this.projectElapsedDays = 0,
     this.lastProjectOutcome,
     this.companyProjectTeams = const CompanyProjectTeamState(),
+    this.companyBudget = const CompanyBudgetState(),
     this.totalEarned = 0,
     this.totalWorkSessions = 0,
     this.totalTrainingSessions = 0,
@@ -74,7 +76,7 @@ class PlayerState {
     this.isOnboarded = false,
   }) : _legacyActiveActivity = activeActivity;
   static const initial = PlayerState(
-    schemaVersion: 30,
+    schemaVersion: 31,
     money: 240,
     energy: 100,
     knowledge: 0,
@@ -132,6 +134,7 @@ class PlayerState {
   final int projectElapsedDays;
   final CompanyProjectOutcome? lastProjectOutcome;
   final CompanyProjectTeamState companyProjectTeams;
+  final CompanyBudgetState companyBudget;
   final int totalEarned;
   final int totalWorkSessions;
   final int totalTrainingSessions;
@@ -192,6 +195,7 @@ class PlayerState {
     int? projectElapsedDays,
     Object? lastProjectOutcome = _unset,
     CompanyProjectTeamState? companyProjectTeams,
+    CompanyBudgetState? companyBudget,
     int? totalEarned,
     int? totalWorkSessions,
     int? totalTrainingSessions,
@@ -292,6 +296,7 @@ class PlayerState {
           ? this.lastProjectOutcome
           : lastProjectOutcome as CompanyProjectOutcome?,
       companyProjectTeams: companyProjectTeams ?? this.companyProjectTeams,
+      companyBudget: companyBudget ?? this.companyBudget,
       totalEarned: totalEarned ?? this.totalEarned,
       totalWorkSessions: totalWorkSessions ?? this.totalWorkSessions,
       totalTrainingSessions:

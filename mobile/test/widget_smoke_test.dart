@@ -15,6 +15,7 @@ import 'package:kariyerden_sirkete/features/career/presentation/pages/career_pag
 import 'package:kariyerden_sirkete/features/company/presentation/pages/company_branches_page.dart';
 import 'package:kariyerden_sirkete/features/company/presentation/pages/company_page.dart';
 import 'package:kariyerden_sirkete/features/company/domain/entities/company_branch.dart';
+import 'package:kariyerden_sirkete/features/company/domain/entities/company_budget_state.dart';
 import 'package:kariyerden_sirkete/features/company/domain/entities/company_specialty.dart';
 import 'package:kariyerden_sirkete/features/company/domain/entities/company_competition_state.dart';
 import 'package:kariyerden_sirkete/features/company/domain/entities/company_season_trophy.dart';
@@ -280,6 +281,53 @@ void main() {
     await tester.pumpAndSettle();
     expect(session.state.money, 4900);
     expect(session.state.companyFunds, 2000);
+    session.dispose();
+  });
+
+  testWidgets('company budget choices respect the daily limit', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(800, 800));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final session = await _readySession(
+      PlayerState.initial.copyWith(
+        money: 5000,
+        companyLevel: 1,
+        companyFunds: 2000,
+        unlockedAchievementsMask: (1 << 12) - 1,
+      ),
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.dark(),
+        home: AppGradientBackground(child: CompanyPage(session: session)),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final marketing = find.byKey(
+      const ValueKey('company-budget-marketing-medium'),
+    );
+    await tester.ensureVisible(marketing);
+    await tester.pumpAndSettle();
+    expect(find.bySemanticsLabel('Pazarlama bütçesi: Orta'), findsOneWidget);
+    expect(find.text('Günlük ₺0 / ₺75'), findsOneWidget);
+    await tester.tap(marketing);
+    await tester.pumpAndSettle();
+
+    expect(session.state.companyBudget.marketing, CompanyBudgetLevel.medium);
+    expect(session.state.money, 5000);
+    expect(session.state.companyFunds, 2000);
+    expect(find.text('Günlük ₺40 / ₺75'), findsOneWidget);
+
+    final research = find.byKey(
+      const ValueKey('company-budget-research-medium'),
+    );
+    await tester.ensureVisible(research);
+    await tester.pumpAndSettle();
+    await tester.tap(research);
+    await tester.pumpAndSettle();
+
+    expect(session.state.companyBudget.research, CompanyBudgetLevel.off);
+    expect(find.textContaining('Günlük bütçe sınırı ₺75'), findsOneWidget);
     session.dispose();
   });
 

@@ -21,6 +21,7 @@ import '../widgets/company_competition_panel.dart';
 import '../widgets/company_stage_panel.dart';
 import '../widgets/company_expansion_panel.dart';
 import '../widgets/company_treasury_panel.dart';
+import '../widgets/company_budget_panel.dart';
 import '../widgets/company_trophy_panel.dart';
 import '../widgets/company_project_team_panel.dart';
 import 'company_branches_page.dart';
@@ -400,6 +401,8 @@ class _CompanyViewState extends State<_CompanyView> {
         ),
         const SizedBox(height: 12),
         CompanyTreasuryPanel(session: session),
+        const SizedBox(height: 12),
+        CompanyBudgetPanel(session: session),
         const SizedBox(height: 25),
         CompanyProjectTeamPanel(session: session, project: project),
         const SizedBox(height: 12),

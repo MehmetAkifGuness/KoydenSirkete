@@ -5,6 +5,7 @@ import '../entities/company_employee.dart';
 import '../entities/company_project.dart';
 import '../entities/company_project_outcome.dart';
 import '../entities/company_specialty.dart';
+import 'company_budget_service.dart';
 import 'company_region_service.dart';
 import 'company_trophy_service.dart';
 
@@ -27,12 +28,16 @@ class CompanyProjectForecast {
 }
 
 class CompanyProjectStrategyService {
-  CompanyProjectStrategyService({CompanyRegionService? regionService})
-    : _regionService = regionService ?? CompanyRegionService();
+  CompanyProjectStrategyService({
+    CompanyRegionService? regionService,
+    CompanyBudgetService? budgetService,
+  }) : _regionService = regionService ?? CompanyRegionService(),
+       _budgetService = budgetService ?? const CompanyBudgetService();
 
   static const specialistProgressBonusPercent = 35;
   static const specialistRiskReductionPercent = 5;
   final CompanyRegionService _regionService;
+  final CompanyBudgetService _budgetService;
 
   CompanyProjectForecast forecast({
     required PlayerState state,
@@ -76,7 +81,8 @@ class CompanyProjectStrategyService {
     final dailyProgress = math.max(
       1,
       (employeeProgress * levelMultiplier).round() +
-          _regionService.projectProgressBonusFor(state),
+          _regionService.projectProgressBonusFor(state) +
+          _budgetService.researchProgressBonus(state),
     );
     final remaining = math.max(0, 100 - state.projectProgress);
     final estimatedDays = (remaining / dailyProgress).ceil();
