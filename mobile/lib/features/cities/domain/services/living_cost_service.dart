@@ -97,9 +97,12 @@ class LivingCostService {
         state.copyWith(day: day, money: money, totalEarned: totalEarned),
         state.currentCityId,
       );
-      money += costs.rentalIncome - costs.totalExpenses;
+      final netCost = costs.totalExpenses - costs.rentalIncome;
+      final support = math.max(0, netCost - money);
+      money += costs.rentalIncome - costs.totalExpenses + support;
       totalEarned += costs.rentalIncome;
       ledger = _recordDay(ledger, day, costs);
+      ledger = _record(ledger, day, FinanceCategory.hardshipSupport, support);
     }
     return state.copyWith(
       money: money,
@@ -146,12 +149,7 @@ class LivingCostService {
       FinanceCategory.rentalMaintenance,
       -costs.rentalMaintenance,
     );
-    return _record(
-      next,
-      day,
-      FinanceCategory.rentalIncome,
-      costs.rentalIncome,
-    );
+    return _record(next, day, FinanceCategory.rentalIncome, costs.rentalIncome);
   }
 
   FinanceLedger _record(

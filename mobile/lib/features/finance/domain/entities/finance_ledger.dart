@@ -36,6 +36,7 @@ enum FinanceCategory {
   loanPayment,
   investment,
   investmentReturn,
+  hardshipSupport,
 }
 
 class FinanceEntry {

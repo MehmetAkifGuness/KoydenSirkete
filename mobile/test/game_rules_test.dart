@@ -110,6 +110,16 @@ void main() {
         throwsA(isA<GameRuleException>()),
       );
     });
+
+    test('caps paid quick earning sessions per day', () {
+      final service = EarningService();
+      final capped = PlayerState.initial.copyWith(
+        earningSessionsToday: EarningService.maxPaidSessionsPerDay,
+      );
+
+      expect(() => service.start(capped), throwsA(isA<GameRuleException>()));
+      expect(service.complete(capped).reward, 0);
+    });
   });
 
   group('training rules', () {

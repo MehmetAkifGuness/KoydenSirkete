@@ -315,6 +315,11 @@ Android-first, tamamen offline kariyer ve şirket simülasyonu.
 - 30, 100, 365 ve 1.000 oyun günlük kariyer ekonomisi otomatik ve deterministik olarak simüle edilir.
 - Oynanabilir nakit dengesi, gün ilerlemesi, iş sayısı ve 30 günlük finans kaydı sınırı test edilir.
 
+## v2.38.0 ekonomi güvenlik sınırları
+
+- Hızlı kazanç mini oyunu günde dört ücretli turla sınırlandırılır; azalan getiri korunur.
+- Zorunlu yaşam giderlerinin eksik kalan kısmı geçim desteği olarak finans geçmişine kaydedilir ve kişisel cüzdanı sıfırın altına düşürmez.
+
 ## Çalıştırma
 
 ```powershell

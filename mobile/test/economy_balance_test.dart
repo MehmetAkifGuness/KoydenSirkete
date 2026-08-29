@@ -11,6 +11,7 @@ import 'package:kariyerden_sirkete/features/daily_goals/domain/entities/daily_go
 import 'package:kariyerden_sirkete/features/earning/domain/entities/earning_performance.dart';
 import 'package:kariyerden_sirkete/features/earning/domain/services/earning_service.dart';
 import 'package:kariyerden_sirkete/features/employment/domain/entities/employment.dart';
+import 'package:kariyerden_sirkete/features/finance/domain/entities/finance_ledger.dart';
 import 'package:kariyerden_sirkete/features/game/domain/entities/player_state.dart';
 import 'package:kariyerden_sirkete/features/jobs/domain/entities/job.dart';
 import 'package:kariyerden_sirkete/features/jobs/domain/services/job_catalog.dart';
@@ -64,6 +65,18 @@ void main() {
           .reduce((left, right) => left > right ? left : right);
       expect(city.dailyCost, lessThanOrEqualTo(bestDailySalary * 2));
     }
+  });
+
+  test('mandatory living costs cannot create irreversible debt', () {
+    final state = PlayerState.initial.copyWith(day: 2, money: 10);
+    final settled = LivingCostService().settle(state);
+    final support = settled.financeLedger.entries.singleWhere(
+      (entry) => entry.category == FinanceCategory.hardshipSupport,
+    );
+
+    expect(settled.money, 0);
+    expect(support.amount, greaterThan(0));
+    expect(settled.totalEarned, state.totalEarned);
   });
 
   test('beginner reaches company capital gradually over thirty days', () {

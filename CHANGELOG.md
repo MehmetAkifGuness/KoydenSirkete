@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.38.0
+
+- Hızlı kazanç mini oyununa günlük dört ücretli tur sınırı eklendi.
+- Zorunlu yaşam giderlerinin geri dönülemez borç oluşturmasını engelleyen ve finans geçmişinde görünen geçim desteği eklendi.
+
 ## 2.37.0
 
 - 30, 100, 365 ve 1.000 oyun günlük deterministik ekonomi simülasyonları eklendi.

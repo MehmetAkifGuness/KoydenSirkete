@@ -5,6 +5,7 @@ import '../../../../core/widgets/app_feedback.dart';
 import '../../../../core/widgets/app_page.dart';
 import '../../../game/presentation/state/game_session_controller.dart';
 import '../../domain/services/earning_mini_game_service.dart';
+import '../../domain/services/earning_service.dart';
 import '../state/earning_mini_game_controller.dart';
 
 const _targetCellCount = EarningMiniGameService.cellCount;
@@ -77,7 +78,7 @@ class _EarningMiniGamePanelState extends State<EarningMiniGamePanel> {
         ),
         const SizedBox(height: 13),
         const Text(
-          'İlk 10 doğru dokunuş kazancı %50 artırır. Sonraki seri %10 büyür; ödül en fazla 3 katına çıkar.',
+          'İlk 10 doğru dokunuş kazancı %50 artırır. Sonraki seri %10 büyür; ödül en fazla 3 katına çıkar. Günde 4 ücretli tur yapılabilir.',
           style: TextStyle(
             color: AppPalette.textSecondary,
             fontSize: 13,
@@ -90,7 +91,9 @@ class _EarningMiniGamePanelState extends State<EarningMiniGamePanel> {
           child: FilledButton.icon(
             onPressed:
                 widget.session.isBusy ||
-                    !widget.session.state.hasActivityCapacity
+                    !widget.session.state.hasActivityCapacity ||
+                    widget.session.state.earningSessionsToday >=
+                        EarningService.maxPaidSessionsPerDay
                 ? null
                 : _game.start,
             icon: const Icon(Icons.play_arrow_rounded),

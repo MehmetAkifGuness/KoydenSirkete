@@ -24,6 +24,7 @@ class EarningService {
   static const energyCost = 20;
   static const durationHours = 2;
   static const baseReward = 100;
+  static const maxPaidSessionsPerDay = 4;
 
   final EarningMiniGameService _miniGameService;
 
@@ -31,6 +32,11 @@ class EarningService {
     PlayerState state, {
     EarningPerformance performance = EarningPerformance.none,
   }) {
+    if (state.earningSessionsToday >= maxPaidSessionsPerDay) {
+      throw const GameRuleException(
+        'Günlük hızlı kazanç sınırına ulaştın. Yeni gün başlayınca tekrar deneyebilirsin.',
+      );
+    }
     if (state.energy < energyCost) {
       throw const GameRuleException(
         'Para kazanmak için en az 20 enerji gerekir.',
@@ -84,6 +90,6 @@ class EarningService {
     if (sessions == 3) {
       return .6;
     }
-    return .4;
+    return 0;
   }
 }

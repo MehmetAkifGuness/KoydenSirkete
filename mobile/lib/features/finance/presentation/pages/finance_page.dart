@@ -517,6 +517,7 @@ extension on FinanceCategory {
     FinanceCategory.loanPayment => 'Kredi geri ödemesi',
     FinanceCategory.investment => 'Yatırım alımı',
     FinanceCategory.investmentReturn => 'Yatırım vade getirisi',
+    FinanceCategory.hardshipSupport => 'Geçim desteği',
   };
 
   IconData get icon => switch (this) {
@@ -555,6 +556,7 @@ extension on FinanceCategory {
     FinanceCategory.loanPayment => Icons.payments_outlined,
     FinanceCategory.investment => Icons.trending_up_outlined,
     FinanceCategory.investmentReturn => Icons.savings_outlined,
+    FinanceCategory.hardshipSupport => Icons.health_and_safety_outlined,
   };
 }
 
