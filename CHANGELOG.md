@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.46.0
+
+- WCAG AA renk çiftleri, renk dışı ikon/metin göstergeleri ve küçük/yatay ekran ile büyük yazı kontrolleri erişilebilirlik testleriyle güvenceye alındı.
+- Sayfa, kart, ödül, sezon ve başarı açılış hareketleri ortaklaştırıldı; sistem animasyonları kapalıyken tüm oyun geçişleri anında tamamlanır.
+- Kullanılan ses efekti ve titreşim kanalları ayrı ayrı kapatılabilir yapıldı; uygulama logosu, açılış görseli ve Android adaptif/yuvarlak simgeleri tamamlandı.
+
 ## 2.45.0
 
 - İlk oyuna atlanabilir üç adımlı öğretici ve tüm ekranlara bağlamsal sonraki hamle yönlendirmesi eklendi.

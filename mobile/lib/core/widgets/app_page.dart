@@ -21,12 +21,10 @@ class AppPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final reduceMotion =
-        MediaQuery.maybeOf(context)?.disableAnimations ?? false;
     return Scaffold(
       body: TweenAnimationBuilder<double>(
         tween: Tween(begin: 0, end: 1),
-        duration: reduceMotion ? Duration.zero : AppMotion.standard,
+        duration: AppMotion.duration(context, AppMotion.standard),
         curve: AppMotion.enterCurve,
         child: SafeArea(
           child: Column(
@@ -156,16 +154,18 @@ class AppInfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: AppMotion.fast,
-      curve: AppMotion.enterCurve,
-      decoration: BoxDecoration(
-        color: AppPalette.surface,
-        border: Border.all(color: accent.withValues(alpha: .22)),
-        borderRadius: BorderRadius.circular(16),
+    return AppReveal(
+      child: AnimatedContainer(
+        duration: AppMotion.duration(context, AppMotion.fast),
+        curve: AppMotion.enterCurve,
+        decoration: BoxDecoration(
+          color: AppPalette.surface,
+          border: Border.all(color: accent.withValues(alpha: .22)),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        padding: padding,
+        child: child,
       ),
-      padding: padding,
-      child: child,
     );
   }
 }
@@ -185,7 +185,7 @@ class AppPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AnimatedContainer(
-      duration: AppMotion.fast,
+      duration: AppMotion.duration(context, AppMotion.fast),
       curve: AppMotion.enterCurve,
       padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
       decoration: BoxDecoration(
@@ -300,11 +300,9 @@ class AppProgressLine extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final target = value.clamp(0.0, 1.0);
-    final reduceMotion =
-        MediaQuery.maybeOf(context)?.disableAnimations ?? false;
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0, end: target),
-      duration: reduceMotion ? Duration.zero : AppMotion.slow,
+      duration: AppMotion.duration(context, AppMotion.slow),
       curve: AppMotion.enterCurve,
       builder: (context, animatedValue, _) => ClipRRect(
         borderRadius: BorderRadius.circular(5),

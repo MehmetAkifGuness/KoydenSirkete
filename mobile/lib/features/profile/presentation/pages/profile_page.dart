@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../../app/theme/app_palette.dart';
+import '../../../../core/accessibility/app_feedback_preferences.dart';
 import '../../../../core/widgets/app_page.dart';
 import '../../../../core/widgets/app_transaction_preview.dart';
 import '../../../../core/widgets/game_account_bar.dart';
@@ -20,8 +21,9 @@ class ProfilePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final feedbackPreferences = AppFeedbackPreferences.instance;
     return AnimatedBuilder(
-      animation: session,
+      animation: Listenable.merge([session, feedbackPreferences]),
       builder: (context, _) {
         final state = session.state;
         const metrics = PlaytestMetricsService();
@@ -42,7 +44,7 @@ class ProfilePage extends StatelessWidget {
                       color: AppPalette.secondary,
                       child: const Icon(
                         Icons.person_outline,
-                        color: Colors.white,
+                        color: AppPalette.background,
                         size: 30,
                       ),
                     ),
@@ -126,6 +128,35 @@ class ProfilePage extends StatelessWidget {
                         ),
                 ),
               ],
+              const SizedBox(height: 28),
+              const AppSectionHeader(
+                title: 'Ses ve titreşim',
+                caption: 'Geri bildirim kanallarını ayrı ayrı yönet.',
+              ),
+              const SizedBox(height: 12),
+              AppInfoCard(
+                accent: AppPalette.secondary,
+                padding: EdgeInsets.zero,
+                child: Column(
+                  children: [
+                    SwitchListTile(
+                      secondary: const Icon(Icons.volume_up_outlined),
+                      title: const Text('Ses efektleri'),
+                      subtitle: const Text('İşlem geri bildirim sesleri'),
+                      value: feedbackPreferences.soundEffectsEnabled,
+                      onChanged: feedbackPreferences.setSoundEffects,
+                    ),
+                    const Divider(height: 1),
+                    SwitchListTile(
+                      secondary: const Icon(Icons.vibration_rounded),
+                      title: const Text('Titreşim'),
+                      subtitle: const Text('Dokunsal işlem geri bildirimi'),
+                      value: feedbackPreferences.hapticsEnabled,
+                      onChanged: feedbackPreferences.setHaptics,
+                    ),
+                  ],
+                ),
+              ),
               const SizedBox(height: 28),
               const AppSectionHeader(
                 title: 'Oynanış testi ölçümleri',

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../accessibility/app_feedback_preferences.dart';
+
 class AppFeedback {
   AppFeedback._();
 
@@ -18,6 +20,7 @@ class AppFeedback {
     }
     state.message = message;
     state.shownAt = now;
+    AppFeedbackPreferences.instance.emitInteraction();
     messenger
       ..removeCurrentSnackBar()
       ..showSnackBar(

@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../../../../app/theme/app_motion.dart';
 import '../../../../app/theme/app_palette.dart';
 import '../../../../core/widgets/app_feedback.dart';
 import '../../../../core/widgets/app_page.dart';
@@ -146,7 +147,7 @@ class _EsnafWheelPanelState extends State<EsnafWheelPanel>
                   availability.isAvailable &&
                       !_isSpinning &&
                       !widget.session.isBusy
-                  ? () => _spin(context)
+                  ? _spin
                   : null,
               icon: Icon(
                 _isSpinning
@@ -198,7 +199,7 @@ class _EsnafWheelPanelState extends State<EsnafWheelPanel>
         'Şans ${chance(EsnafWheelRewardType.luckyDay)}';
   }
 
-  Future<void> _spin(BuildContext context) async {
+  Future<void> _spin() async {
     setState(() => _isSpinning = true);
     final outcome = await widget.session.spinWheel();
     if (!mounted) return;
@@ -210,8 +211,12 @@ class _EsnafWheelPanelState extends State<EsnafWheelPanel>
       _wheelStartAngle = _wheelEndAngle;
       _wheelEndAngle = _nextAngle(outcome.sectorIndex);
     });
-    await _spinController.forward(from: 0);
-    if (!context.mounted) return;
+    if (AppMotion.isReduced(context)) {
+      _spinController.value = 1;
+    } else {
+      await _spinController.forward(from: 0);
+    }
+    if (!mounted) return;
     setState(() => _isSpinning = false);
     AppFeedback.show(context, outcome.message);
   }

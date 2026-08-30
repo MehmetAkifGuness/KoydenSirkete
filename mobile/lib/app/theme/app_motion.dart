@@ -7,6 +7,12 @@ abstract final class AppMotion {
   static const enterCurve = Curves.easeOutCubic;
   static const exitCurve = Curves.easeInCubic;
 
+  static bool isReduced(BuildContext context) =>
+      MediaQuery.maybeOf(context)?.disableAnimations ?? false;
+
+  static Duration duration(BuildContext context, Duration value) =>
+      isReduced(context) ? Duration.zero : value;
+
   static Widget fadeSlide(
     Widget child,
     Animation<double> animation, {
@@ -25,4 +31,26 @@ abstract final class AppMotion {
       ),
     );
   }
+}
+
+class AppReveal extends StatelessWidget {
+  const AppReveal({required this.child, this.offset = 8, super.key});
+
+  final Widget child;
+  final double offset;
+
+  @override
+  Widget build(BuildContext context) => TweenAnimationBuilder<double>(
+    tween: Tween(begin: 0, end: 1),
+    duration: AppMotion.duration(context, AppMotion.standard),
+    curve: AppMotion.enterCurve,
+    child: child,
+    builder: (context, value, child) => Opacity(
+      opacity: value,
+      child: Transform.translate(
+        offset: Offset(0, (1 - value) * offset),
+        child: child,
+      ),
+    ),
+  );
 }

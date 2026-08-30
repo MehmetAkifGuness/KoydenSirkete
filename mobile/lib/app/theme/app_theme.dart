@@ -28,6 +28,9 @@ abstract final class AppTheme {
           onSurfaceVariant: AppPalette.textSecondary,
           outline: AppPalette.outline,
           error: AppPalette.error,
+          onError: AppPalette.background,
+          errorContainer: AppPalette.surfaceMuted,
+          onErrorContainer: AppPalette.textPrimary,
         );
 
     return ThemeData(

@@ -64,13 +64,13 @@ MÜDÜR — 10/10 HEDEF PLANI
 
 7. ÖNCELİK — GÖRSEL, SES VE ERİŞİLEBİLİRLİK
 
-- Tüm metin/yüzey birleşimlerinde en az WCAG AA kontrastını koru.
-- Küçük ekran, büyük yazı boyutu ve yatay ekran taşmalarını widget testleriyle doğrula.
-- Başlangıç ekranı, uygulama logosu, adaptif Android simgesi ve açılış görselini farklı ekranlarda kontrol et.
-- Sayfa, kart, ödül, sezon sonucu ve başarı açılışlarına kısa ve tutarlı geçiş efektleri ekle.
-- Ses efektleri, arka plan müziği ve titreşim eklenirse ayrı ayrı kapatılabilir yap.
-- Renk körlüğüne bağımlı göstergelerde renk yanında ikon ve metin kullan.
-- Sistem animasyonları kapalıyken tüm geçişleri erişilebilir biçimde devre dışı bırak.
+- [TAMAMLANDI — v2.46.0] Tüm metin/yüzey birleşimlerinde en az WCAG AA kontrastını koru.
+- [TAMAMLANDI — v2.46.0] Küçük ekran, büyük yazı boyutu ve yatay ekran taşmalarını widget testleriyle doğrula.
+- [TAMAMLANDI — v2.46.0] Başlangıç ekranı, uygulama logosu, adaptif Android simgesi ve açılış görselini farklı ekranlarda kontrol et.
+- [TAMAMLANDI — v2.46.0] Sayfa, kart, ödül, sezon sonucu ve başarı açılışlarına kısa ve tutarlı geçiş efektleri ekle.
+- [TAMAMLANDI — v2.46.0] Ses efektleri, arka plan müziği ve titreşim eklenirse ayrı ayrı kapatılabilir yap.
+- [TAMAMLANDI — v2.46.0] Renk körlüğüne bağımlı göstergelerde renk yanında ikon ve metin kullan.
+- [TAMAMLANDI — v2.46.0] Sistem animasyonları kapalıyken tüm geçişleri erişilebilir biçimde devre dışı bırak.
 
 8. ÖNCELİK — KAYIT VE GÜVENİLİRLİK
 

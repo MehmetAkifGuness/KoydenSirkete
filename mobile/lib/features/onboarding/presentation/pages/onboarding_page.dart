@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../app/theme/app_motion.dart';
 import '../../../../app/theme/app_palette.dart';
 import '../../../game/presentation/state/game_session_controller.dart';
 
@@ -52,91 +53,97 @@ class _OnboardingPageState extends State<OnboardingPage>
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: SafeArea(
-        child: FadeTransition(
-          opacity: _opacity,
-          child: SlideTransition(
-            position: _offset,
-            child: Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(22, 12, 14, 0),
-                  child: Row(
-                    children: [
-                      Text(
+        child: _entryTransition(
+          context,
+          Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(22, 12, 14, 0),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
                         'Kısa öğretici · ${_step + 1}/3',
                         style: const TextStyle(
                           color: AppPalette.textMuted,
                           fontWeight: FontWeight.w800,
                         ),
                       ),
-                      const Spacer(),
-                      TextButton(
-                        onPressed: _isStarting ? null : _start,
-                        child: const Text('Atla'),
-                      ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: PageView(
-                    controller: _pageController,
-                    onPageChanged: (value) => setState(() => _step = value),
-                    children: const [
-                      _TutorialStep(
-                        icon: Icons.bolt_rounded,
-                        title: 'Gününü yönet',
-                        description:
-                            'Enerjini kazanç, eğitim ve iş görevleri arasında paylaştır. Zaman akışını üst çubuktan durdurabilirsin.',
-                        action: 'İlk hamle: Kazanç ekranında sermaye oluştur.',
-                      ),
-                      _TutorialStep(
-                        icon: Icons.trending_up_rounded,
-                        title: 'Kariyerini büyüt',
-                        description:
-                            'Yeteneklerini geliştir, koşullarını karşıladığın işe başvur ve günlük performansını koru.',
-                        action: 'Sonraki hamle: Kariyer ekranındaki hedefi izle.',
-                      ),
-                      _TutorialStep(
-                        icon: Icons.business_rounded,
-                        title: 'Şirketini kur',
-                        description:
-                            'Kişisel cüzdanın ile şirket kasan ayrıdır. Her işlemde kullanılan hesabı ve tahmini sonucu kontrol et.',
-                        action: 'Uzun hedef: Seviye 3 ve ₺15.000 sermaye.',
-                      ),
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(22, 8, 22, 20),
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: FilledButton.icon(
-                      onPressed: _isStarting || widget.session.isBusy
-                          ? null
-                          : _step == 2
-                          ? _start
-                          : _next,
-                      icon: Icon(
-                        _step == 2
-                            ? Icons.play_arrow_rounded
-                            : Icons.arrow_forward_rounded,
-                      ),
-                      label: Text(_step == 2 ? 'Oyuna başla' : 'Devam'),
                     ),
+                    TextButton(
+                      onPressed: _isStarting ? null : _start,
+                      child: const Text('Atla'),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: PageView(
+                  controller: _pageController,
+                  onPageChanged: (value) => setState(() => _step = value),
+                  children: const [
+                    _TutorialStep(
+                      icon: Icons.bolt_rounded,
+                      title: 'Gününü yönet',
+                      description:
+                          'Enerjini kazanç, eğitim ve iş görevleri arasında paylaştır. Zaman akışını üst çubuktan durdurabilirsin.',
+                      action: 'İlk hamle: Kazanç ekranında sermaye oluştur.',
+                    ),
+                    _TutorialStep(
+                      icon: Icons.trending_up_rounded,
+                      title: 'Kariyerini büyüt',
+                      description:
+                          'Yeteneklerini geliştir, koşullarını karşıladığın işe başvur ve günlük performansını koru.',
+                      action: 'Sonraki hamle: Kariyer ekranındaki hedefi izle.',
+                    ),
+                    _TutorialStep(
+                      icon: Icons.business_rounded,
+                      title: 'Şirketini kur',
+                      description:
+                          'Kişisel cüzdanın ile şirket kasan ayrıdır. Her işlemde kullanılan hesabı ve tahmini sonucu kontrol et.',
+                      action: 'Uzun hedef: Seviye 3 ve ₺15.000 sermaye.',
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(22, 8, 22, 20),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.icon(
+                    onPressed: _isStarting || widget.session.isBusy
+                        ? null
+                        : _step == 2
+                        ? _start
+                        : _next,
+                    icon: Icon(
+                      _step == 2
+                          ? Icons.play_arrow_rounded
+                          : Icons.arrow_forward_rounded,
+                    ),
+                    label: Text(_step == 2 ? 'Oyuna başla' : 'Devam'),
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
 
+  Widget _entryTransition(BuildContext context, Widget child) {
+    if (AppMotion.isReduced(context)) return child;
+    return FadeTransition(
+      opacity: _opacity,
+      child: SlideTransition(position: _offset, child: child),
+    );
+  }
+
   void _next() {
     _pageController.nextPage(
-      duration: const Duration(milliseconds: 220),
-      curve: Curves.easeOutCubic,
+      duration: AppMotion.duration(context, AppMotion.fast),
+      curve: AppMotion.enterCurve,
     );
   }
 
@@ -169,15 +176,21 @@ class _TutorialStep extends StatelessWidget {
     child: Column(
       children: [
         const SizedBox(height: 28),
-        Container(
-          width: 104,
-          height: 104,
-          decoration: BoxDecoration(
-            color: AppPalette.primary.withValues(alpha: .12),
-            shape: BoxShape.circle,
+        Semantics(
+          image: true,
+          label: 'Müdür uygulama logosu',
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(24),
+            child: Image.asset(
+              'assets/images/mudurum_cover.png',
+              width: 112,
+              height: 112,
+              fit: BoxFit.cover,
+            ),
           ),
-          child: Icon(icon, size: 48, color: AppPalette.primary),
         ),
+        const SizedBox(height: 10),
+        Icon(icon, size: 32, color: AppPalette.primary),
         const SizedBox(height: 28),
         Text(
           title,

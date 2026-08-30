@@ -73,7 +73,7 @@ class _NavItem extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(14),
         child: AnimatedContainer(
-          duration: AppMotion.standard,
+          duration: AppMotion.duration(context, AppMotion.standard),
           curve: AppMotion.enterCurve,
           height: 60,
           decoration: BoxDecoration(
@@ -91,7 +91,7 @@ class _NavItem extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               AnimatedSwitcher(
-                duration: AppMotion.fast,
+                duration: AppMotion.duration(context, AppMotion.fast),
                 transitionBuilder: (child, animation) => FadeTransition(
                   opacity: animation,
                   child: ScaleTransition(
@@ -113,7 +113,7 @@ class _NavItem extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               AnimatedDefaultTextStyle(
-                duration: AppMotion.fast,
+                duration: AppMotion.duration(context, AppMotion.fast),
                 curve: AppMotion.enterCurve,
                 style: TextStyle(
                   color: color,

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../app/theme/app_motion.dart';
+
 import '../../../../app/theme/app_palette.dart';
 import '../../../../core/widgets/app_feedback.dart';
 import '../../../../core/widgets/app_page.dart';
@@ -226,7 +228,7 @@ class _TargetCell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 180),
+      duration: AppMotion.duration(context, AppMotion.fast),
       decoration: BoxDecoration(
         color: active
             ? AppPalette.primary.withValues(alpha: .13)
@@ -239,7 +241,7 @@ class _TargetCell extends StatelessWidget {
       ),
       child: Center(
         child: AnimatedSwitcher(
-          duration: const Duration(milliseconds: 150),
+          duration: AppMotion.duration(context, AppMotion.fast),
           child: active
               ? SizedBox(
                   key: const ValueKey('target'),
