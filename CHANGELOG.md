@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.45.0
+
+- İlk oyuna atlanabilir üç adımlı öğretici ve tüm ekranlara bağlamsal sonraki hamle yönlendirmesi eklendi.
+- Para hareketleri hesap ve neden etiketiyle standartlaştırıldı; ücretli işlemlere maliyet, getiri, süre ve risk önizlemesi eklendi.
+- Kritik işlemler ile büyük transferler açık geri alınamazlık onayına bağlandı; proje portföyüne arama, filtreleme ve sıralama eklendi.
+- Boş, yükleniyor, hata, kilitli ve tamamlandı durumları ortak erişilebilir durum bileşeninde birleştirildi.
+
 ## 2.44.0
 
 - İlk şirketin kurulduğu oyun günü ile ulusal markaya ulaşılan geç oyun günü kalıcı olarak ölçülür.

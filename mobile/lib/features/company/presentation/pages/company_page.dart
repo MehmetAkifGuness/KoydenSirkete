@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../app/theme/app_palette.dart';
 import '../../../../core/widgets/app_feedback.dart';
 import '../../../../core/widgets/app_page.dart';
+import '../../../../core/widgets/app_transaction_preview.dart';
 import '../../../../core/widgets/game_account_bar.dart';
 import '../../../game/presentation/state/game_session_controller.dart';
 import '../../../economy/domain/services/investment_return_service.dart';
@@ -154,6 +155,20 @@ class _EstablishmentView extends StatelessWidget {
   }
 
   Future<void> _establish(BuildContext context) async {
+    final confirmed = await showAppConfirmation(
+      context,
+      title: 'İlk şirket kurulsun mu?',
+      summary: const AppTransactionPreview(
+        account: 'Kişisel cüzdan',
+        cost: '-₺15000',
+        returnSummary: 'Şirket operasyonları ve ₺500 başlangıç kasası',
+        duration: 'Kalıcı',
+        risk: 'Mevcut işten ayrılırsın',
+      ),
+      confirmLabel: 'Şirketi kur',
+      irreversibleWarning: 'Bu işlem geri alınamaz.',
+    );
+    if (!confirmed || !context.mounted) return;
     final message = await session.establishCompany();
     if (context.mounted && message != null) AppFeedback.show(context, message);
   }
@@ -231,6 +246,9 @@ class _CompanyView extends StatefulWidget {
 
 class _CompanyViewState extends State<_CompanyView> {
   EmployeeCandidateFilter _candidateFilter = EmployeeCandidateFilter.all;
+  String _projectQuery = '';
+  CompanyProjectCategory? _projectCategory;
+  bool _projectRewardFirst = false;
 
   @override
   Widget build(BuildContext context) {
@@ -250,6 +268,19 @@ class _CompanyViewState extends State<_CompanyView> {
     final lastProject = lastOutcome == null
         ? null
         : CompanyProjectCatalog.byId(lastOutcome.projectId);
+    final projects = CompanyProjectCatalog.projects.where((item) {
+      final query = _projectQuery.trim().toLowerCase();
+      return (_projectCategory == null || item.category == _projectCategory) &&
+          (query.isEmpty ||
+              item.name.toLowerCase().contains(query) ||
+              item.description.toLowerCase().contains(query) ||
+              item.customerType.label.toLowerCase().contains(query));
+    }).toList()
+      ..sort(
+        (left, right) => _projectRewardFirst
+            ? right.reward.compareTo(left.reward)
+            : left.cost.compareTo(right.cost),
+      );
     return ListView(
       padding: const EdgeInsets.fromLTRB(18, 8, 18, 28),
       children: [
@@ -471,14 +502,73 @@ class _CompanyViewState extends State<_CompanyView> {
           caption: 'Şirketinin bir sonraki büyüme hamlesini seç.',
         ),
         const SizedBox(height: 12),
-        for (final category in CompanyProjectCategory.values) ...[
+        TextField(
+          key: const ValueKey('project-search'),
+          onChanged: (value) => setState(() => _projectQuery = value),
+          decoration: InputDecoration(
+            hintText: 'Proje veya müşteri ara',
+            prefixIcon: const Icon(Icons.search_rounded),
+            suffixIcon: IconButton(
+              tooltip: _projectRewardFirst
+                  ? 'Getiriye göre sıralı'
+                  : 'Maliyete göre sıralı',
+              onPressed: () => setState(
+                () => _projectRewardFirst = !_projectRewardFirst,
+              ),
+              icon: Icon(
+                _projectRewardFirst
+                    ? Icons.trending_up_rounded
+                    : Icons.payments_outlined,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 9),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: [
+              ChoiceChip(
+                label: const Text('Tümü'),
+                selected: _projectCategory == null,
+                onSelected: (_) => setState(() => _projectCategory = null),
+              ),
+              for (final category in CompanyProjectCategory.values) ...[
+                const SizedBox(width: 7),
+                ChoiceChip(
+                  label: Text(category.label),
+                  selected: _projectCategory == category,
+                  onSelected: (_) =>
+                      setState(() => _projectCategory = category),
+                ),
+              ],
+            ],
+          ),
+        ),
+        const SizedBox(height: 7),
+        Text(
+          '${projects.length}/${CompanyProjectCatalog.projects.length} proje · ${_projectRewardFirst ? "getiri" : "maliyet"} sırası',
+          style: const TextStyle(color: AppPalette.textMuted, fontSize: 11),
+        ),
+        if (projects.isEmpty) ...[
+          const SizedBox(height: 10),
+          const AppEmptyState(
+            icon: Icons.search_off_rounded,
+            title: 'Proje bulunamadı',
+            message: 'Arama metnini veya kategori filtresini değiştir.',
+          ),
+        ],
+        for (final category in CompanyProjectCategory.values.where(
+          (category) => projects.any((item) => item.category == category),
+        )) ...[
+          const SizedBox(height: 12),
           AppSectionHeader(
             title: category.label,
             caption:
-                '${CompanyProjectCatalog.projects.where((item) => item.category == category).length} proje',
+                '${projects.where((item) => item.category == category).length} proje',
           ),
           const SizedBox(height: 8),
-          for (final item in CompanyProjectCatalog.projects.where(
+          for (final item in projects.where(
             (item) => item.category == category,
           )) ...[
             _ProjectCard(project: item, session: session),
@@ -539,6 +629,24 @@ class _CompanyViewState extends State<_CompanyView> {
   }
 
   Future<void> _upgrade(BuildContext context) async {
+    final state = widget.session.state;
+    final cost = CompanyService.upgradeCost(state.companyLevel);
+    final confirmed = await showAppConfirmation(
+      context,
+      title: 'Şirket seviyesi yükseltilsin mi?',
+      summary: AppTransactionPreview(
+        account: 'Şirket kasası',
+        cost: '-₺$cost',
+        returnSummary: 'Daha yüksek çalışan kapasitesi ve günlük gelir',
+        duration: InvestmentReturnService.summary(
+          InvestmentType.companyUpgrade,
+          InvestmentReturnService.companyUpgradeDays(state.companyLevel),
+        ),
+        risk: 'Orta · günlük giderler büyüyebilir',
+      ),
+      confirmLabel: 'Yükselt',
+    );
+    if (!confirmed || !context.mounted) return;
     final message = await widget.session.upgradeCompany();
     if (context.mounted && message != null) AppFeedback.show(context, message);
   }
@@ -675,28 +783,26 @@ class _ProjectCard extends StatelessWidget {
   }
 
   Future<void> _select(BuildContext context) async {
-    if (session.state.projectProgress > 0) {
-      final confirmed = await showDialog<bool>(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Projeyi değiştir'),
-          content: const Text(
-            'Mevcut proje ilerlemesi sıfırlanacak. Devam edilsin mi?',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: const Text('Vazgeç'),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.pop(context, true),
-              child: const Text('Projeyi değiştir'),
-            ),
-          ],
-        ),
-      );
-      if (confirmed != true || !context.mounted) return;
-    }
+    final forecast = CompanyService().projectForecast(session.state, project);
+    final progressWarning = session.state.projectProgress > 0
+        ? 'Mevcut proje ilerlemesi sıfırlanır ve geri alınamaz.'
+        : null;
+    final confirmed = await showAppConfirmation(
+      context,
+      title: '${project.name} seçilsin mi?',
+      summary: AppTransactionPreview(
+        account: 'Şirket kasası',
+        cost: '-₺${project.cost}',
+        returnSummary: '+₺${project.reward} · %${forecast.successChance} başarı',
+        duration: forecast.estimatedDays == 0
+            ? 'Ekip ataması gerekli'
+            : '~${forecast.estimatedDays} gün',
+        risk: '%${forecast.delayChance} gecikme',
+      ),
+      confirmLabel: 'Projeyi seç',
+      irreversibleWarning: progressWarning,
+    );
+    if (!confirmed || !context.mounted) return;
     final message = await session.selectCompanyProject(project);
     if (context.mounted && message != null) AppFeedback.show(context, message);
   }

@@ -53,14 +53,14 @@ MÜDÜR — 10/10 HEDEF PLANI
 
 6. ÖNCELİK — KULLANICI DENEYİMİ
 
-- İlk oyun için atlanabilir, kısa ve etkileşimli bir öğretici ekle.
-- Her ekranın ana amacını ve bir sonraki mantıklı hamleyi açıkça göster.
-- Para değişimlerinde hangi hesaptan neden para çıktığını tek biçimde belirt.
-- Proje, yatırım ve satın alma işlemlerinde işlem öncesi net maliyet, tahmini getiri, süre ve risk özeti göster.
-- Kritik işlemlerde onay; tekrarlı güvenli işlemlerde hızlı kullanım dengesi kur.
-- Boş, yükleniyor, hata, kilitli ve tamamlandı durumlarının tamamı için tutarlı ekran tasarla.
-- Uzun listelere filtreleme, sıralama ve arama ekle.
-- Kayıt silme, şirket yatırımı, varlık satışı ve büyük para transferlerinde geri dönüşsüz sonuçları açıkça bildir.
+- [TAMAMLANDI — v2.45.0] İlk oyun için atlanabilir, kısa ve etkileşimli bir öğretici ekle.
+- [TAMAMLANDI — v2.45.0] Her ekranın ana amacını ve bir sonraki mantıklı hamleyi açıkça göster.
+- [TAMAMLANDI — v2.45.0] Para değişimlerinde hangi hesaptan neden para çıktığını tek biçimde belirt.
+- [TAMAMLANDI — v2.45.0] Proje, yatırım ve satın alma işlemlerinde işlem öncesi net maliyet, tahmini getiri, süre ve risk özeti göster.
+- [TAMAMLANDI — v2.45.0] Kritik işlemlerde onay; tekrarlı güvenli işlemlerde hızlı kullanım dengesi kur.
+- [TAMAMLANDI — v2.45.0] Boş, yükleniyor, hata, kilitli ve tamamlandı durumlarının tamamı için tutarlı ekran tasarla.
+- [TAMAMLANDI — v2.45.0] Uzun listelere filtreleme, sıralama ve arama ekle.
+- [TAMAMLANDI — v2.45.0] Kayıt silme, şirket yatırımı, varlık satışı ve büyük para transferlerinde geri dönüşsüz sonuçları açıkça bildir.
 
 7. ÖNCELİK — GÖRSEL, SES VE ERİŞİLEBİLİRLİK
 

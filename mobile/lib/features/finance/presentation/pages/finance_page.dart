@@ -387,9 +387,22 @@ class _FinanceEntryTile extends StatelessWidget {
           Icon(entry.category.icon, color: color, size: 20),
           const SizedBox(width: 11),
           Expanded(
-            child: Text(
-              entry.category.label,
-              style: const TextStyle(fontWeight: FontWeight.w700),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  entry.category.label,
+                  style: const TextStyle(fontWeight: FontWeight.w700),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '${entry.account == FinanceAccount.personal ? "Kişisel cüzdan" : "Şirket kasası"} · ${income ? "giriş nedeni" : "çıkış nedeni"}: ${entry.category.label}',
+                  style: const TextStyle(
+                    color: AppPalette.textMuted,
+                    fontSize: 10,
+                  ),
+                ),
+              ],
             ),
           ),
           Text(

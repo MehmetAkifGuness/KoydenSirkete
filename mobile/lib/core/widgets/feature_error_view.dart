@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'app_page.dart';
+import 'app_state_view.dart';
 
 class FeatureErrorView extends StatelessWidget {
   const FeatureErrorView({this.title = 'Ekran yüklenemedi', super.key});
@@ -11,8 +11,8 @@ class FeatureErrorView extends StatelessWidget {
   Widget build(BuildContext context) => Center(
     child: Padding(
       padding: const EdgeInsets.all(24),
-      child: AppEmptyState(
-        icon: Icons.error_outline_rounded,
+      child: AppStateView(
+        state: AppViewState.error,
         title: title,
         message: 'Bu veriyi şu anda görüntüleyemiyoruz.',
         action: FilledButton.tonalIcon(

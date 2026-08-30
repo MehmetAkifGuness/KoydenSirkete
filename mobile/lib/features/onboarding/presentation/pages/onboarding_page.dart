@@ -19,6 +19,8 @@ class _OnboardingPageState extends State<OnboardingPage>
   late final Animation<double> _opacity;
   late final Animation<Offset> _offset;
   bool _isStarting = false;
+  final PageController _pageController = PageController();
+  int _step = 0;
 
   @override
   void initState() {
@@ -41,6 +43,7 @@ class _OnboardingPageState extends State<OnboardingPage>
   @override
   void dispose() {
     _controller.dispose();
+    _pageController.dispose();
     super.dispose();
   }
 
@@ -55,10 +58,52 @@ class _OnboardingPageState extends State<OnboardingPage>
             position: _offset,
             child: Column(
               children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(22, 12, 14, 0),
+                  child: Row(
+                    children: [
+                      Text(
+                        'Kısa öğretici · ${_step + 1}/3',
+                        style: const TextStyle(
+                          color: AppPalette.textMuted,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      const Spacer(),
+                      TextButton(
+                        onPressed: _isStarting ? null : _start,
+                        child: const Text('Atla'),
+                      ),
+                    ],
+                  ),
+                ),
                 Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.fromLTRB(22, 14, 22, 16),
-                    child: _content(context),
+                  child: PageView(
+                    controller: _pageController,
+                    onPageChanged: (value) => setState(() => _step = value),
+                    children: const [
+                      _TutorialStep(
+                        icon: Icons.bolt_rounded,
+                        title: 'Gününü yönet',
+                        description:
+                            'Enerjini kazanç, eğitim ve iş görevleri arasında paylaştır. Zaman akışını üst çubuktan durdurabilirsin.',
+                        action: 'İlk hamle: Kazanç ekranında sermaye oluştur.',
+                      ),
+                      _TutorialStep(
+                        icon: Icons.trending_up_rounded,
+                        title: 'Kariyerini büyüt',
+                        description:
+                            'Yeteneklerini geliştir, koşullarını karşıladığın işe başvur ve günlük performansını koru.',
+                        action: 'Sonraki hamle: Kariyer ekranındaki hedefi izle.',
+                      ),
+                      _TutorialStep(
+                        icon: Icons.business_rounded,
+                        title: 'Şirketini kur',
+                        description:
+                            'Kişisel cüzdanın ile şirket kasan ayrıdır. Her işlemde kullanılan hesabı ve tahmini sonucu kontrol et.',
+                        action: 'Uzun hedef: Seviye 3 ve ₺15.000 sermaye.',
+                      ),
+                    ],
                   ),
                 ),
                 Padding(
@@ -68,9 +113,15 @@ class _OnboardingPageState extends State<OnboardingPage>
                     child: FilledButton.icon(
                       onPressed: _isStarting || widget.session.isBusy
                           ? null
-                          : _start,
-                      icon: const Icon(Icons.arrow_forward_rounded),
-                      label: const Text('Oyuna başla'),
+                          : _step == 2
+                          ? _start
+                          : _next,
+                      icon: Icon(
+                        _step == 2
+                            ? Icons.play_arrow_rounded
+                            : Icons.arrow_forward_rounded,
+                      ),
+                      label: Text(_step == 2 ? 'Oyuna başla' : 'Devam'),
                     ),
                   ),
                 ),
@@ -82,101 +133,10 @@ class _OnboardingPageState extends State<OnboardingPage>
     );
   }
 
-  Widget _content(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Container(width: 10, height: 10, color: AppPalette.primary),
-            const SizedBox(width: 8),
-            const Text(
-              'Müdür / Başlangıç',
-              style: TextStyle(
-                color: AppPalette.textSecondary,
-                fontSize: 10,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 1,
-              ),
-            ),
-            const Spacer(),
-            const Text(
-              '01 — 04',
-              style: TextStyle(
-                color: AppPalette.textMuted,
-                fontSize: 10,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 18),
-        Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 440),
-            child: AspectRatio(
-              aspectRatio: 1,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(28),
-                  border: Border.all(
-                    color: AppPalette.secondary.withValues(alpha: .42),
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: .28),
-                      blurRadius: 24,
-                      offset: const Offset(0, 12),
-                    ),
-                  ],
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(27),
-                  child: Semantics(
-                    image: true,
-                    label: 'Müdür uygulama logosu',
-                    child: Image.asset(
-                      'assets/images/mudurum_cover.png',
-                      cacheWidth: 1024,
-                      cacheHeight: 1024,
-                      fit: BoxFit.contain,
-                      errorBuilder: (_, _, _) => const ColoredBox(
-                        color: AppPalette.surfaceElevated,
-                        child: Icon(
-                          Icons.business_center_rounded,
-                          color: AppPalette.primary,
-                          size: 72,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 20),
-        Text(
-          'Kendi hikâyeni\nkurmaya başla.',
-          style: Theme.of(context).textTheme.displaySmall,
-        ),
-        const SizedBox(height: 10),
-        const Text(
-          'Köydeki ilk adımından kendi şirketine uzanan, kararlarınla şekillenen offline kariyer simülasyonu.',
-          style: TextStyle(
-            color: AppPalette.textSecondary,
-            fontSize: 15,
-            height: 1.5,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        const SizedBox(height: 14),
-        const Divider(height: 1),
-        const SizedBox(height: 4),
-        const _WelcomeLine(index: '01', label: 'Kariyerini planla'),
-        const _WelcomeLine(index: '02', label: 'Doğru fırsatı seç'),
-        const _WelcomeLine(index: '03', label: 'Kendi işini büyüt'),
-      ],
+  void _next() {
+    _pageController.nextPage(
+      duration: const Duration(milliseconds: 220),
+      curve: Curves.easeOutCubic,
     );
   }
 
@@ -190,43 +150,65 @@ class _OnboardingPageState extends State<OnboardingPage>
   }
 }
 
-class _WelcomeLine extends StatelessWidget {
-  const _WelcomeLine({required this.index, required this.label});
+class _TutorialStep extends StatelessWidget {
+  const _TutorialStep({
+    required this.icon,
+    required this.title,
+    required this.description,
+    required this.action,
+  });
 
-  final String index;
-  final String label;
+  final IconData icon;
+  final String title;
+  final String description;
+  final String action;
 
   @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      child: Row(
-        children: [
-          Text(
-            index,
-            style: const TextStyle(
-              color: AppPalette.primary,
-              fontSize: 11,
-              fontWeight: FontWeight.w900,
-            ),
+  Widget build(BuildContext context) => SingleChildScrollView(
+    padding: const EdgeInsets.fromLTRB(22, 24, 22, 16),
+    child: Column(
+      children: [
+        const SizedBox(height: 28),
+        Container(
+          width: 104,
+          height: 104,
+          decoration: BoxDecoration(
+            color: AppPalette.primary.withValues(alpha: .12),
+            shape: BoxShape.circle,
           ),
-          const SizedBox(width: 16),
-          Text(
-            label,
-            style: const TextStyle(
-              color: AppPalette.textPrimary,
-              fontSize: 13,
-              fontWeight: FontWeight.w800,
-            ),
+          child: Icon(icon, size: 48, color: AppPalette.primary),
+        ),
+        const SizedBox(height: 28),
+        Text(
+          title,
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.headlineMedium,
+        ),
+        const SizedBox(height: 13),
+        Text(
+          description,
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            color: AppPalette.textSecondary,
+            fontSize: 15,
+            height: 1.5,
           ),
-          const Spacer(),
-          const Icon(
-            Icons.north_east_rounded,
-            size: 16,
-            color: AppPalette.textMuted,
+        ),
+        const SizedBox(height: 20),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: AppPalette.tertiary.withValues(alpha: .1),
+            borderRadius: BorderRadius.circular(14),
           ),
-        ],
-      ),
-    );
-  }
+          child: Text(
+            action,
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontWeight: FontWeight.w800),
+          ),
+        ),
+      ],
+    ),
+  );
 }

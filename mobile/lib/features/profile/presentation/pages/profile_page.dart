@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 
 import '../../../../app/theme/app_palette.dart';
 import '../../../../core/widgets/app_page.dart';
+import '../../../../core/widgets/app_transaction_preview.dart';
 import '../../../../core/widgets/game_account_bar.dart';
 import '../../../assets/presentation/pages/assets_page.dart';
 import '../../../game/presentation/pages/developer_data_page.dart';
@@ -194,22 +195,13 @@ class ProfilePage extends StatelessWidget {
   }
 
   Future<void> _confirmReset(BuildContext context) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Yeni oyun başlatılsın mı?'),
-        content: const Text('Mevcut yerel ilerlemen silinecek.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Vazgeç'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Sıfırla'),
-          ),
-        ],
-      ),
+    final confirmed = await showAppConfirmation(
+      context,
+      title: 'Yeni oyun başlatılsın mı?',
+      summary: const Text('Tüm yerel kariyer ve şirket ilerlemesi silinecek.'),
+      confirmLabel: 'Kalıcı olarak sil',
+      irreversibleWarning:
+          'Bu işlem geri alınamaz; para, varlıklar ve başarılar kurtarılamaz.',
     );
     if (confirmed == true) await session.resetGame();
   }

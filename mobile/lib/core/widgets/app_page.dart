@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../app/theme/app_palette.dart';
 import '../../app/theme/app_motion.dart';
+import 'app_page_guidance.dart';
+import 'app_state_view.dart';
 
 class AppPage extends StatelessWidget {
   const AppPage({
@@ -72,6 +74,11 @@ class AppPage extends StatelessWidget {
                         if (actions != null) ...actions!,
                         const SizedBox(width: 8),
                       ],
+                    ),
+                    const SizedBox(height: 4),
+                    AppPageGuidance(
+                      purpose: subtitle ?? title,
+                      nextAction: appNextAction(title),
                     ),
                     const SizedBox(height: 13),
                     const Divider(height: 1),
@@ -271,30 +278,13 @@ class AppEmptyState extends StatelessWidget {
   final Widget? action;
 
   @override
-  Widget build(BuildContext context) {
-    return AppInfoCard(
-      accent: AppPalette.outlineMuted,
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, color: AppPalette.primary, size: 28),
-          const SizedBox(height: 15),
-          Text(title, style: Theme.of(context).textTheme.titleLarge),
-          const SizedBox(height: 7),
-          Text(
-            message,
-            style: const TextStyle(
-              color: AppPalette.textSecondary,
-              height: 1.45,
-              fontSize: 13,
-            ),
-          ),
-          if (action != null) ...[const SizedBox(height: 17), action!],
-        ],
-      ),
-    );
-  }
+  Widget build(BuildContext context) => AppStateView(
+    state: AppViewState.empty,
+    title: title,
+    message: message,
+    icon: icon,
+    action: action,
+  );
 }
 
 class AppProgressLine extends StatelessWidget {

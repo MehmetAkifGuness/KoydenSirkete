@@ -6,10 +6,13 @@ import 'package:flutter/services.dart';
 import '../../../../app/theme/app_palette.dart';
 import '../../../../core/widgets/app_feedback.dart';
 import '../../../../core/widgets/app_page.dart';
+import '../../../../core/widgets/app_transaction_preview.dart';
 import '../../../game/presentation/state/game_session_controller.dart';
 import '../../domain/services/company_treasury_service.dart';
 
 enum _TreasuryAction { addCapital, withdrawDividend }
+
+const _largeTransferThreshold = 10000;
 
 class CompanyTreasuryPanel extends StatelessWidget {
   const CompanyTreasuryPanel({required this.session, super.key});
@@ -106,6 +109,21 @@ class CompanyTreasuryPanel extends StatelessWidget {
       ),
     );
     if (amount == null || !context.mounted) return;
+    if (amount >= _largeTransferThreshold) {
+      final dividend = action == _TreasuryAction.withdrawDividend;
+      final confirmed = await showAppConfirmation(
+        context,
+        title: 'Büyük para transferini onayla',
+        summary: Text(
+          dividend
+              ? 'Şirket kasasından -₺$amount; kişisel cüzdana vergi sonrası +₺${CompanyTreasuryService.dividendNet(amount)}.'
+              : 'Kişisel cüzdandan -₺$amount; şirket kasasına +₺$amount sermaye.',
+        ),
+        confirmLabel: 'Transferi yap',
+        irreversibleWarning: 'Tamamlanan transfer otomatik geri alınamaz.',
+      );
+      if (!confirmed || !context.mounted) return;
+    }
     final message = action == _TreasuryAction.addCapital
         ? await session.addCompanyCapital(amount)
         : await session.withdrawCompanyDividend(amount);
@@ -197,6 +215,7 @@ class _TreasuryAmountDialogState extends State<_TreasuryAmountDialog> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
+            '${dividend ? "Şirket kasası → kişisel cüzdan" : "Kişisel cüzdan → şirket kasası"}\n'
             'Kullanılabilir bakiye: ₺${widget.available}',
             style: const TextStyle(color: AppPalette.textSecondary),
           ),
@@ -210,7 +229,7 @@ class _TreasuryAmountDialogState extends State<_TreasuryAmountDialog> {
             decoration: const InputDecoration(
               labelText: 'Tutar',
               prefixText: '₺',
-              helperText: 'En az ₺100',
+              helperText: 'En az ₺100 · ₺10.000 ve üzeri ayrıca onaylanır',
             ),
           ),
           if (dividend && _amount > 0) ...[

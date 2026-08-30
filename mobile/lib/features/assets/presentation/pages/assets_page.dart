@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../app/theme/app_palette.dart';
 import '../../../../core/widgets/app_feedback.dart';
 import '../../../../core/widgets/app_page.dart';
+import '../../../../core/widgets/app_transaction_preview.dart';
 import '../../../../core/widgets/feature_error_view.dart';
 import '../../../cities/domain/entities/city.dart';
 import '../../../cities/domain/services/city_catalog.dart';
@@ -226,6 +227,20 @@ class _HomeCard extends StatelessWidget {
   }
 
   Future<void> _buy(BuildContext context) async {
+    final monthlyRent = AssetService().monthlyRent(home);
+    final confirmed = await showAppConfirmation(
+      context,
+      title: '${home.name} satın alınsın mı?',
+      summary: AppTransactionPreview(
+        account: 'Kişisel cüzdan',
+        cost: '-₺${home.price}',
+        returnSummary: '₺$monthlyRent/ay brüt kira veya konut avantajı',
+        duration: '${InvestmentReturnService.homeDays(home)} gün hedef geri dönüş',
+        risk: 'Kira bakımı ve satış değer kaybı',
+      ),
+      confirmLabel: 'Satın al',
+    );
+    if (!confirmed || !context.mounted) return;
     final message = await session.buyHome(home, city);
     if (context.mounted && message != null) AppFeedback.show(context, message);
   }
@@ -345,8 +360,8 @@ class _OwnedHomeCard extends StatelessWidget {
       context,
       title: '${home.name} satılsın mı?',
       message: isRented
-          ? '₺$saleValue hesabına eklenecek ve kira geliri sona erecek.'
-          : '₺$saleValue hesabına eklenecek. Bu evde oturuyorsan konut kirası yeniden uygulanacak.',
+          ? 'Kişisel cüzdana ₺$saleValue eklenecek ve kira geliri sona erecek. Satış geri alınamaz.'
+          : 'Kişisel cüzdana ₺$saleValue eklenecek. Bu evde oturuyorsan konut kirası yeniden uygulanacak. Satış geri alınamaz.',
     );
     if (!confirmed || !context.mounted) return;
     final message = await session.sellHome(home);
@@ -434,6 +449,20 @@ class _CarCard extends StatelessWidget {
   }
 
   Future<void> _buy(BuildContext context) async {
+    final confirmed = await showAppConfirmation(
+      context,
+      title: '${car.name} satın alınsın mı?',
+      summary: AppTransactionPreview(
+        account: 'Kişisel cüzdan',
+        cost: '-₺${car.price}',
+        returnSummary:
+            '%${car.moveDiscountPercent} taşınma indirimi ve +${car.opportunityBonus} fırsat',
+        duration: '${InvestmentReturnService.carDays(car)} gün hedef geri dönüş',
+        risk: 'Satışta değer kaybı',
+      ),
+      confirmLabel: 'Satın al',
+    );
+    if (!confirmed || !context.mounted) return;
     final message = await session.buyCar(car);
     if (context.mounted && message != null) AppFeedback.show(context, message);
   }
@@ -506,7 +535,8 @@ class _OwnedCarCard extends StatelessWidget {
     final confirmed = await _confirmSale(
       context,
       title: '${car.name} satılsın mı?',
-      message: '₺$saleValue hesabına eklenecek ve taşınma indirimi kalkacak.',
+      message:
+          'Kişisel cüzdana ₺$saleValue eklenecek, taşınma indirimi kalkacak ve satış geri alınamayacak.',
     );
     if (!confirmed || !context.mounted) return;
     final message = await session.sellCar(car);

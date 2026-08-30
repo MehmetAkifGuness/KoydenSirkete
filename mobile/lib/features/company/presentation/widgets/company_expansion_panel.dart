@@ -4,6 +4,7 @@ import '../../../../app/theme/app_palette.dart';
 import '../../../../core/utils/app_formatters.dart';
 import '../../../../core/widgets/app_feedback.dart';
 import '../../../../core/widgets/app_page.dart';
+import '../../../../core/widgets/app_transaction_preview.dart';
 import '../../../game/presentation/state/game_session_controller.dart';
 import '../../domain/entities/company_deal.dart';
 import '../../domain/entities/company_stage.dart';
@@ -192,27 +193,21 @@ class _CompanyDealCard extends StatelessWidget {
   }
 
   Future<void> _confirm(BuildContext context) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(deal.type.label),
-        content: Text(
-          '${deal.title} için şirket kasasından ₺${deal.cost} ödenecek. '
-          'İşlem tek seferliktir ve geri alınamaz. Devam edilsin mi?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext, false),
-            child: const Text('Vazgeç'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(dialogContext, true),
-            child: const Text('İşlemi tamamla'),
-          ),
-        ],
+    final confirmed = await showAppConfirmation(
+      context,
+      title: '${deal.type.label} · ${deal.title}',
+      summary: AppTransactionPreview(
+        account: 'Şirket kasası',
+        cost: '-₺${deal.cost}',
+        returnSummary:
+            '+₺${deal.valuationGain} değer · +%${deal.marketShareGain} pazar · +${deal.reputationGain} itibar',
+        duration: 'Anında ve kalıcı',
+        risk: 'Yüksek · likidite azalması',
       ),
+      confirmLabel: 'İşlemi tamamla',
+      irreversibleWarning: 'Bu tek seferlik işlem geri alınamaz.',
     );
-    if (confirmed != true || !context.mounted) return;
+    if (!confirmed || !context.mounted) return;
     final message = await session.completeCompanyDeal(deal);
     if (context.mounted && message != null) AppFeedback.show(context, message);
   }

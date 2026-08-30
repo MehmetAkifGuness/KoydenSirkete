@@ -22,6 +22,8 @@ class CitiesPage extends StatefulWidget {
 
 class _CitiesPageState extends State<CitiesPage> {
   CityFilter _filter = CityFilter.all;
+  String _query = '';
+  bool _costFirst = false;
 
   @override
   Widget build(BuildContext context) {
@@ -36,6 +38,23 @@ class _CitiesPageState extends State<CitiesPage> {
           final livingCosts = currentCity == null
               ? LivingCostBreakdown.empty
               : LivingCostService().breakdown(session.state, currentCity.id);
+          final cityService = CityService();
+          final cities = filterCities(CityCatalog.cities, _filter)
+              .where(
+                (city) => city.name.toLowerCase().contains(
+                  _query.trim().toLowerCase(),
+                ),
+              )
+              .toList();
+          if (_costFirst) {
+            cities.sort(
+              (left, right) => cityService
+                  .moveCost(session.state, left)
+                  .compareTo(cityService.moveCost(session.state, right)),
+            );
+          } else if (_filter != CityFilter.highestTechnology) {
+            cities.sort((left, right) => left.name.compareTo(right.name));
+          }
           return ListView(
             padding: const EdgeInsets.fromLTRB(18, 8, 18, 28),
             children: [
@@ -104,12 +123,50 @@ class _CitiesPageState extends State<CitiesPage> {
                 caption: 'Daha iyi pazarlar, daha yüksek hedefler.',
               ),
               const SizedBox(height: 12),
+              TextField(
+                key: const ValueKey('city-search'),
+                onChanged: (value) => setState(() => _query = value),
+                decoration: InputDecoration(
+                  hintText: 'Şehir ara',
+                  prefixIcon: const Icon(Icons.search_rounded),
+                  suffixIcon: IconButton(
+                    tooltip: _costFirst
+                        ? 'Taşınma maliyetine göre sıralı'
+                        : 'Ada göre sıralı',
+                    onPressed: () => setState(() => _costFirst = !_costFirst),
+                    icon: Icon(
+                      _costFirst
+                          ? Icons.payments_outlined
+                          : Icons.sort_by_alpha_rounded,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 9),
               _CityFilterBar(
                 selected: _filter,
                 onSelected: (filter) => setState(() => _filter = filter),
               ),
               const SizedBox(height: 9),
-              for (final city in filterCities(CityCatalog.cities, _filter)) ...[
+              Text(
+                '${cities.length}/${CityCatalog.cities.length} şehir · ${_costFirst
+                    ? "maliyet"
+                    : _filter == CityFilter.highestTechnology
+                    ? "teknoloji"
+                    : "ad"} sırası',
+                style: const TextStyle(
+                  color: AppPalette.textMuted,
+                  fontSize: 11,
+                ),
+              ),
+              const SizedBox(height: 9),
+              if (cities.isEmpty)
+                const AppEmptyState(
+                  icon: Icons.search_off_rounded,
+                  title: 'Şehir bulunamadı',
+                  message: 'Arama metnini veya pazar filtresini değiştir.',
+                ),
+              for (final city in cities) ...[
                 _CityCard(city: city, session: session),
                 const SizedBox(height: 10),
               ],

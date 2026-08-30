@@ -6,6 +6,7 @@ import 'package:kariyerden_sirkete/app/theme/app_palette.dart';
 import 'package:kariyerden_sirkete/app/theme/app_theme.dart';
 import 'package:kariyerden_sirkete/core/database/player_state_store.dart';
 import 'package:kariyerden_sirkete/core/widgets/app_gradient_background.dart';
+import 'package:kariyerden_sirkete/core/widgets/app_state_view.dart';
 import 'package:kariyerden_sirkete/core/widgets/game_top_bar.dart';
 import 'package:kariyerden_sirkete/features/assets/presentation/pages/assets_page.dart';
 import 'package:kariyerden_sirkete/features/assets/domain/services/asset_service.dart';
@@ -55,7 +56,13 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Oyuna başla'), findsOneWidget);
+    expect(find.text('Kısa öğretici · 1/3'), findsOneWidget);
+    expect(find.text('Devam'), findsOneWidget);
+
+    await tester.tap(find.text('Devam'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Devam'));
+    await tester.pumpAndSettle();
 
     await tester.tap(find.text('Oyuna başla'));
     await tester.pumpAndSettle();
@@ -95,6 +102,48 @@ void main() {
       _contrastRatio(AppPalette.secondary, AppPalette.surface),
       greaterThanOrEqualTo(4.5),
     );
+  });
+
+  testWidgets('shared UX states render consistently', (tester) async {
+    for (final state in AppViewState.values) {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.dark(),
+          home: Scaffold(
+            body: AppStateView(
+              state: state,
+              title: state.name,
+              message: 'Durum açıklaması',
+            ),
+          ),
+        ),
+      );
+      expect(find.text(state.name), findsOneWidget);
+      expect(find.text('Durum açıklaması'), findsOneWidget);
+    }
+  });
+
+  testWidgets('city list supports search, filtering and sorting', (
+    tester,
+  ) async {
+    final session = await _readySession();
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.dark(),
+        home: AppGradientBackground(child: CitiesPage(session: session)),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byKey(const ValueKey('city-search')), 'Ankara');
+    await tester.pumpAndSettle();
+    expect(find.textContaining('1/81 şehir'), findsOneWidget);
+    expect(find.text('Ankara'), findsWidgets);
+
+    await tester.tap(find.byTooltip('Ada göre sıralı'));
+    await tester.pumpAndSettle();
+    expect(find.byTooltip('Taşınma maliyetine göre sıralı'), findsOneWidget);
+    session.dispose();
   });
 
   testWidgets('theme animates pushed routes with fade and slide', (
@@ -306,7 +355,11 @@ void main() {
     final marketing = find.byKey(
       const ValueKey('company-budget-marketing-medium'),
     );
-    await tester.ensureVisible(marketing);
+    await tester.scrollUntilVisible(
+      marketing,
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
     await tester.pumpAndSettle();
     expect(find.bySemanticsLabel('Pazarlama bütçesi: Orta'), findsOneWidget);
     expect(find.text('Günlük ₺0 / ₺75'), findsOneWidget);
@@ -323,7 +376,11 @@ void main() {
     final research = find.byKey(
       const ValueKey('company-budget-research-medium'),
     );
-    await tester.ensureVisible(research);
+    await tester.scrollUntilVisible(
+      research,
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
     await tester.pumpAndSettle();
     await tester.tap(research);
     await tester.pumpAndSettle();
@@ -547,6 +604,9 @@ void main() {
       await tester.ensureVisible(find.text('Kurumsal çözüm'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Kurumsal çözüm'));
+      await tester.pumpAndSettle();
+      expect(find.text('Şirket kasası · -₺300'), findsOneWidget);
+      await tester.tap(find.text('Projeyi seç'));
       await tester.pumpAndSettle();
 
       expect(session.state.activeProjectId, 3);
@@ -879,6 +939,11 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Hesabım'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('Yeni oyuna başla'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
     expect(find.text('Yeni oyuna başla'), findsOneWidget);
     expect(find.text('Uygulama'), findsNothing);
     expect(find.text('Operasyon görünümü'), findsNothing);

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'app_page.dart';
+import 'app_state_view.dart';
 
 class StorageErrorPage extends StatelessWidget {
   const StorageErrorPage({
@@ -19,7 +20,8 @@ class StorageErrorPage extends StatelessWidget {
       child: Center(
         child: Padding(
           padding: const EdgeInsets.all(22),
-          child: AppEmptyState(
+          child: AppStateView(
+            state: AppViewState.error,
             icon: Icons.storage_rounded,
             title: 'Yerel kayıt açılamadı',
             message: message,

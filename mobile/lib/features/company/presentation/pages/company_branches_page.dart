@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../app/theme/app_palette.dart';
 import '../../../../core/widgets/app_feedback.dart';
 import '../../../../core/widgets/app_page.dart';
+import '../../../../core/widgets/app_transaction_preview.dart';
 import '../../../../core/widgets/feature_error_view.dart';
 import '../../../cities/domain/entities/city.dart';
 import '../../../cities/domain/services/city_catalog.dart';
@@ -253,6 +254,21 @@ class _CityBranchCard extends StatelessWidget {
   }
 
   Future<void> _open(BuildContext context) async {
+    final cost = CompanyBranchService().openingCostFor(session.state, city);
+    final confirmed = await showAppConfirmation(
+      context,
+      title: '${city.name} bayisi açılsın mı?',
+      summary: AppTransactionPreview(
+        account: 'Şirket kasası',
+        cost: '-₺$cost',
+        returnSummary: 'Yerel gelir, pazar etkisi ve bölge avantajı',
+        duration: InvestmentReturnService.target(InvestmentType.branch).label,
+        risk: 'Orta · personel ve işletme gideri',
+      ),
+      confirmLabel: 'Bayiyi aç',
+      irreversibleWarning: 'Bayi yatırımı otomatik geri alınamaz.',
+    );
+    if (!confirmed || !context.mounted) return;
     final message = await session.openBranch(city);
     if (context.mounted && message != null) AppFeedback.show(context, message);
   }

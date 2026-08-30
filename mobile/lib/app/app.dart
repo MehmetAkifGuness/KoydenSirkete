@@ -11,6 +11,7 @@ import '../core/widgets/game_bottom_nav.dart';
 import '../core/widgets/game_account_bar.dart';
 import '../core/widgets/game_top_bar.dart';
 import '../core/widgets/storage_error_page.dart';
+import '../core/widgets/app_state_view.dart';
 import '../features/career/presentation/pages/career_page.dart';
 import '../features/assets/presentation/pages/assets_page.dart';
 import '../features/cities/presentation/pages/cities_page.dart';
@@ -69,7 +70,7 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
   late final ForegroundClockTicker _clockTicker;
   late final PlayerStateStore _playerStateStore;
   late final GameSessionController _session;
-  bool _showWelcome = true;
+  bool _showWelcome = false;
   int _gameSpeed = 1;
   bool _clockPaused = false;
 
@@ -90,7 +91,7 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
       onTick: _tickClock,
       interval: GameClockService.intervalForSpeed(_gameSpeed),
     );
-    _session.initialize();
+    unawaited(_initializeSession());
   }
 
   @override
@@ -126,7 +127,18 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
           return _shellTransition(
             context,
             'loading',
-            const Scaffold(body: Center(child: CircularProgressIndicator())),
+            const Scaffold(
+              body: Center(
+                child: Padding(
+                  padding: EdgeInsets.all(24),
+                  child: AppStateView(
+                    state: AppViewState.loading,
+                    title: 'Oyun yükleniyor',
+                    message: 'Kayıt ve ekonomi bilgileri hazırlanıyor.',
+                  ),
+                ),
+              ),
+            ),
           );
         }
         if (_session.errorMessage != null) {
@@ -226,6 +238,12 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
     if (!mounted) return;
     setState(() => _showWelcome = false);
     unawaited(_resumeGame());
+  }
+
+  Future<void> _initializeSession() async {
+    await _session.initialize();
+    if (!mounted || !_session.isReady) return;
+    setState(() => _showWelcome = !_session.state.isOnboarded);
   }
 
   void _changeGameSpeed(int speed) {
