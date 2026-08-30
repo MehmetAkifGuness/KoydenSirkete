@@ -36,9 +36,17 @@ class CompanyStageService {
         milestones[highest + 1].isUnlocked) {
       highest++;
     }
-    return highest == state.companyStageIndex
-        ? state
-        : state.copyWith(companyStageIndex: highest);
+    final reachedLateGame = highest >= CompanyStage.nationalBrand.index;
+    if (highest == state.companyStageIndex &&
+        (!reachedLateGame || state.lateGameReachedDay > 0)) {
+      return state;
+    }
+    return state.copyWith(
+      companyStageIndex: highest,
+      lateGameReachedDay: reachedLateGame && state.lateGameReachedDay == 0
+          ? state.day
+          : state.lateGameReachedDay,
+    );
   }
 
   CompanyStageMilestone _local() => const CompanyStageMilestone(

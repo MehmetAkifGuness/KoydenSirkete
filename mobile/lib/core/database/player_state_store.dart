@@ -41,6 +41,8 @@ class PlayerStateRecord {
     this.companyCompetitionJson,
     this.companyExpansionJson,
     this.companyStageIndex = 0,
+    this.firstCompanyDay = 0,
+    this.lateGameReachedDay = 0,
     this.pendingPersonalEventId,
     this.lastPersonalEventDay = 0,
     this.ownedCarId,
@@ -109,6 +111,8 @@ class PlayerStateRecord {
   final String? companyCompetitionJson;
   final String? companyExpansionJson;
   final int companyStageIndex;
+  final int firstCompanyDay;
+  final int lateGameReachedDay;
   final int? pendingPersonalEventId;
   final int lastPersonalEventDay;
   final int? ownedCarId;

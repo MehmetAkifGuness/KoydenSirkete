@@ -38,6 +38,17 @@ void main() {
     expect(service.evaluate(_holdingState()).companyStageIndex, 3);
   });
 
+  test('reaching national brand records the late-game milestone once', () {
+    final service = CompanyStageService();
+    final reached = service.evaluate(
+      _nationalState().copyWith(day: 240, firstCompanyDay: 35),
+    );
+    final reevaluated = service.evaluate(reached.copyWith(day: 300));
+
+    expect(reached.lateGameReachedDay, 240);
+    expect(reevaluated.lateGameReachedDay, 240);
+  });
+
   test('an unlocked company stage never regresses', () {
     final service = CompanyStageService();
     final regional = service.evaluate(

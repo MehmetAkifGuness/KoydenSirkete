@@ -49,7 +49,7 @@ MÜDÜR — 10/10 HEDEF PLANI
 - [TAMAMLANDI — v2.41.0] Pasif gelirlerin aktif oynanışı gereksiz hâle getirmemesini sağla.
 - [TAMAMLANDI — v2.42.0] Rastgele sonuçlarda olasılıkları oyuncuya anlaşılır biçimde göster ve sonuçları kaydedilebilir tohumla üret.
 - [TAMAMLANDI — v2.43.0] Kolay, normal ve zor ekonomi seçenekleri ekle; varsayılan denge normal mod olmalı.
-- Yeni oyuncunun ilk şirketi kurma süresi ile deneyimli oyuncunun geç oyun süresini gerçek kullanıcı testleriyle ölç.
+- [ÖLÇÜME HAZIR — v2.44.0] Yeni oyuncunun ilk şirketi kurma süresi ile deneyimli oyuncunun geç oyun süresini gerçek kullanıcı testleriyle ölç.
 
 6. ÖNCELİK — KULLANICI DENEYİMİ
 

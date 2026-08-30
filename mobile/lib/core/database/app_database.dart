@@ -17,7 +17,7 @@ class AppDatabase extends SqlitePlayerStateStore {
     final databasePath = join(await getDatabasesPath(), _databaseName);
     return _database = await openDatabase(
       databasePath,
-      version: 35,
+      version: 36,
       onCreate: (database, _) async {
         await database.execute('''
           CREATE TABLE $_tableName (
@@ -49,6 +49,8 @@ class AppDatabase extends SqlitePlayerStateStore {
             company_competition_json TEXT,
             company_expansion_json TEXT,
             company_stage_index INTEGER NOT NULL DEFAULT 0,
+            first_company_day INTEGER NOT NULL DEFAULT 0,
+            late_game_reached_day INTEGER NOT NULL DEFAULT 0,
             pending_personal_event_id INTEGER,
             last_personal_event_day INTEGER NOT NULL DEFAULT 0,
             owned_car_id INTEGER,
@@ -328,6 +330,14 @@ class AppDatabase extends SqlitePlayerStateStore {
             "ALTER TABLE $_tableName ADD COLUMN economy_difficulty TEXT NOT NULL DEFAULT 'normal'",
           );
         }
+        if (oldVersion < 36) {
+          await database.execute(
+            'ALTER TABLE $_tableName ADD COLUMN first_company_day INTEGER NOT NULL DEFAULT 0',
+          );
+          await database.execute(
+            'ALTER TABLE $_tableName ADD COLUMN late_game_reached_day INTEGER NOT NULL DEFAULT 0',
+          );
+        }
       },
     );
   }
@@ -382,6 +392,8 @@ abstract class SqlitePlayerStateStore implements PlayerStateStore {
       companyCompetitionJson: row['company_competition_json'] as String?,
       companyExpansionJson: row['company_expansion_json'] as String?,
       companyStageIndex: row['company_stage_index'] as int? ?? 0,
+      firstCompanyDay: row['first_company_day'] as int? ?? 0,
+      lateGameReachedDay: row['late_game_reached_day'] as int? ?? 0,
       pendingPersonalEventId: row['pending_personal_event_id'] as int?,
       lastPersonalEventDay: row['last_personal_event_day'] as int? ?? 0,
       ownedCarId: row['owned_car_id'] as int?,
@@ -455,6 +467,8 @@ abstract class SqlitePlayerStateStore implements PlayerStateStore {
       'company_competition_json': record.companyCompetitionJson,
       'company_expansion_json': record.companyExpansionJson,
       'company_stage_index': record.companyStageIndex,
+      'first_company_day': record.firstCompanyDay,
+      'late_game_reached_day': record.lateGameReachedDay,
       'pending_personal_event_id': record.pendingPersonalEventId,
       'last_personal_event_day': record.lastPersonalEventDay,
       'owned_car_id': record.ownedCarId,

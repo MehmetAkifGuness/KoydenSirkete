@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.44.0
+
+- İlk şirketin kurulduğu oyun günü ile ulusal markaya ulaşılan geç oyun günü kalıcı olarak ölçülür.
+- Profil ekranından kişisel veri içermeyen oynanış testi raporu kopyalanabilir.
+
 ## 2.43.0
 
 - Profil ekranına kalıcı kolay, normal ve zor ekonomi seçenekleri eklendi; yeni oyunlar normal modda başlar.

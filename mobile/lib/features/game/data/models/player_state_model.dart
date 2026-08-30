@@ -90,6 +90,8 @@ class PlayerStateModel {
     this.companyCompetition = const CompanyCompetitionState(),
     this.companyExpansion = const CompanyExpansionState(),
     this.companyStageIndex = 0,
+    this.firstCompanyDay = 0,
+    this.lateGameReachedDay = 0,
     this.pendingPersonalEventId,
     this.lastPersonalEventDay = 0,
     this.isOnboarded = false,
@@ -181,6 +183,8 @@ class PlayerStateModel {
         record.companyExpansionJson,
       ),
       companyStageIndex: record.companyStageIndex,
+      firstCompanyDay: record.firstCompanyDay,
+      lateGameReachedDay: record.lateGameReachedDay,
       pendingPersonalEventId: record.pendingPersonalEventId,
       lastPersonalEventDay: record.lastPersonalEventDay,
       isOnboarded: record.isOnboarded,
@@ -249,6 +253,8 @@ class PlayerStateModel {
   final CompanyCompetitionState companyCompetition;
   final CompanyExpansionState companyExpansion;
   final int companyStageIndex;
+  final int firstCompanyDay;
+  final int lateGameReachedDay;
   final int? pendingPersonalEventId;
   final int lastPersonalEventDay;
   final bool isOnboarded;
@@ -317,6 +323,8 @@ class PlayerStateModel {
       companyCompetition: entity.companyCompetition,
       companyExpansion: entity.companyExpansion,
       companyStageIndex: entity.companyStageIndex,
+      firstCompanyDay: entity.firstCompanyDay,
+      lateGameReachedDay: entity.lateGameReachedDay,
       pendingPersonalEventId: entity.pendingPersonalEventId,
       lastPersonalEventDay: entity.lastPersonalEventDay,
       isOnboarded: entity.isOnboarded,

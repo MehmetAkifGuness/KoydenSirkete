@@ -435,6 +435,7 @@ void main() {
     test('company can be established, staffed and progressed', () {
       final service = CompanyService();
       final ready = PlayerState.initial.copyWith(
+        day: 18,
         money: CompanyService.establishmentCost + 500,
         careerLevel: 3,
         currentJobId: 1,
@@ -454,6 +455,7 @@ void main() {
       final progress = service.advanceProject(staffed);
 
       expect(company.companyLevel, 1);
+      expect(company.firstCompanyDay, 18);
       expect(company.currentJobId, isNull);
       expect(company.employment, isNull);
       expect(staffed.employeeCount, 1);

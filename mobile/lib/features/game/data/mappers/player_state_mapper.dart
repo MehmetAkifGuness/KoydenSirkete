@@ -65,6 +65,8 @@ class PlayerStateMapper {
       companyCompetition: model.companyCompetition,
       companyExpansion: model.companyExpansion,
       companyStageIndex: model.companyStageIndex,
+      firstCompanyDay: model.firstCompanyDay,
+      lateGameReachedDay: model.lateGameReachedDay,
       pendingPersonalEventId: model.pendingPersonalEventId,
       lastPersonalEventDay: model.lastPersonalEventDay,
       isOnboarded: model.isOnboarded,

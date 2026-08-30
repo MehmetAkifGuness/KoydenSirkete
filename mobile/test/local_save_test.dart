@@ -145,6 +145,8 @@ void main() {
         ],
       ),
       companyStageIndex: 2,
+      firstCompanyDay: 22,
+      lateGameReachedDay: 190,
       pendingPersonalEventId: 3,
       lastPersonalEventDay: 18,
       companyExpansion: const CompanyExpansionState(
@@ -210,6 +212,8 @@ void main() {
     expect(actual?.companyCompetition.seasonHistory.last.rank, 2);
     expect(actual?.companyCompetition.seasonHistory.last.cashReward, 3000);
     expect(actual?.companyStageIndex, 2);
+    expect(actual?.firstCompanyDay, 22);
+    expect(actual?.lateGameReachedDay, 190);
     expect(actual?.pendingPersonalEventId, 3);
     expect(actual?.lastPersonalEventDay, 18);
     expect(actual?.companyExpansion.completedDealIds, [

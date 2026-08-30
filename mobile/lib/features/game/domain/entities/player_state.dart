@@ -77,13 +77,15 @@ class PlayerState {
     this.companyCompetition = const CompanyCompetitionState(),
     this.companyExpansion = const CompanyExpansionState(),
     this.companyStageIndex = 0,
+    this.firstCompanyDay = 0,
+    this.lateGameReachedDay = 0,
     this.pendingPersonalEventId,
     this.lastPersonalEventDay = 0,
     this.isOnboarded = false,
     this.economyDifficulty = EconomyDifficulty.normal,
   }) : _legacyActiveActivity = activeActivity;
   static const initial = PlayerState(
-    schemaVersion: 35,
+    schemaVersion: 36,
     money: 240,
     energy: 100,
     knowledge: 0,
@@ -153,6 +155,8 @@ class PlayerState {
   final CompanyCompetitionState companyCompetition;
   final CompanyExpansionState companyExpansion;
   final int companyStageIndex;
+  final int firstCompanyDay;
+  final int lateGameReachedDay;
   final int? pendingPersonalEventId;
   final int lastPersonalEventDay;
   final bool isOnboarded;
@@ -219,6 +223,8 @@ class PlayerState {
     CompanyCompetitionState? companyCompetition,
     CompanyExpansionState? companyExpansion,
     int? companyStageIndex,
+    int? firstCompanyDay,
+    int? lateGameReachedDay,
     Object? pendingPersonalEventId = _unset,
     int? lastPersonalEventDay,
     bool? isOnboarded,
@@ -327,6 +333,8 @@ class PlayerState {
       companyCompetition: companyCompetition ?? this.companyCompetition,
       companyExpansion: companyExpansion ?? this.companyExpansion,
       companyStageIndex: companyStageIndex ?? this.companyStageIndex,
+      firstCompanyDay: firstCompanyDay ?? this.firstCompanyDay,
+      lateGameReachedDay: lateGameReachedDay ?? this.lateGameReachedDay,
       pendingPersonalEventId: identical(pendingPersonalEventId, _unset)
           ? this.pendingPersonalEventId
           : pendingPersonalEventId as int?,

@@ -202,6 +202,9 @@ class CompanyService {
       employment: null,
       money: state.money - establishmentCost,
       companyLevel: 1,
+      firstCompanyDay: state.firstCompanyDay == 0
+          ? state.day
+          : state.firstCompanyDay,
       companyFunds: 500,
       employeeCount: 0,
       projectProgress: 0,

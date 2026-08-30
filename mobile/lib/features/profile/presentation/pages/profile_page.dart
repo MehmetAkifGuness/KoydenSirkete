@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../../../app/theme/app_palette.dart';
 import '../../../../core/widgets/app_page.dart';
@@ -9,6 +10,7 @@ import '../../../game/presentation/pages/developer_data_page.dart';
 import '../../../game/presentation/state/game_session_controller.dart';
 import '../../../progress/presentation/pages/progress_page.dart';
 import '../../../economy/domain/entities/economy_difficulty.dart';
+import '../../../game/domain/services/playtest_metrics_service.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({required this.session, super.key});
@@ -21,6 +23,7 @@ class ProfilePage extends StatelessWidget {
       animation: session,
       builder: (context, _) {
         final state = session.state;
+        const metrics = PlaytestMetricsService();
         return AppPage(
           title: 'Profil',
           subtitle: 'İlerlemeni ve kişisel alanını yönet.',
@@ -124,6 +127,34 @@ class ProfilePage extends StatelessWidget {
               ],
               const SizedBox(height: 28),
               const AppSectionHeader(
+                title: 'Oynanış testi ölçümleri',
+                caption: 'Kişisel veri içermeyen yerel denge sonuçları.',
+              ),
+              const SizedBox(height: 12),
+              AppInfoCard(
+                accent: AppPalette.secondary,
+                padding: const EdgeInsets.all(14),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'İlk şirket: ${metrics.firstCompanyDays(state)?.toString() ?? "Henüz tamamlanmadı"} oyun günü',
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      'Geç oyuna ulaşma: ${metrics.lateGameDays(state)?.toString() ?? "Henüz tamamlanmadı"} oyun günü',
+                    ),
+                    const SizedBox(height: 10),
+                    OutlinedButton.icon(
+                      onPressed: () => _copyPlaytestReport(context, metrics),
+                      icon: const Icon(Icons.copy_rounded),
+                      label: const Text('Raporu kopyala'),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 28),
+              const AppSectionHeader(
                 title: 'Ekonomi zorluğu',
                 caption: 'Gelirleri, giderleri ve enflasyon hızını belirler.',
               ),
@@ -181,6 +212,39 @@ class ProfilePage extends StatelessWidget {
       ),
     );
     if (confirmed == true) await session.resetGame();
+  }
+
+  Future<void> _copyPlaytestReport(
+    BuildContext context,
+    PlaytestMetricsService metrics,
+  ) async {
+    final testerProfile = await showDialog<String>(
+      context: context,
+      builder: (context) => SimpleDialog(
+        title: const Text('Test deneyimini seç'),
+        children: [
+          SimpleDialogOption(
+            onPressed: () => Navigator.pop(context, 'Yeni oyuncu'),
+            child: const Text('Yeni oyuncu'),
+          ),
+          SimpleDialogOption(
+            onPressed: () => Navigator.pop(context, 'Deneyimli oyuncu'),
+            child: const Text('Deneyimli oyuncu'),
+          ),
+        ],
+      ),
+    );
+    if (testerProfile == null) return;
+    await Clipboard.setData(
+      ClipboardData(
+        text: metrics.report(session.state, testerProfile: testerProfile),
+      ),
+    );
+    if (context.mounted) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Ölçüm raporu kopyalandı.')));
+    }
   }
 }
 
