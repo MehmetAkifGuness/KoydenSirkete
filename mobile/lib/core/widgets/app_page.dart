@@ -10,12 +10,14 @@ class AppPage extends StatelessWidget {
     required this.title,
     required this.child,
     this.subtitle,
+    this.nextAction,
     this.actions,
     super.key,
   });
 
   final String title;
   final String? subtitle;
+  final String? nextAction;
   final Widget child;
   final List<Widget>? actions;
 
@@ -76,7 +78,7 @@ class AppPage extends StatelessWidget {
                     const SizedBox(height: 4),
                     AppPageGuidance(
                       purpose: subtitle ?? title,
-                      nextAction: appNextAction(title),
+                      nextAction: nextAction ?? appNextAction(title),
                     ),
                     const SizedBox(height: 13),
                     const Divider(height: 1),

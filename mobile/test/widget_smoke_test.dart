@@ -40,6 +40,7 @@ import 'package:kariyerden_sirkete/features/game/presentation/state/game_session
 import 'package:kariyerden_sirkete/features/jobs/domain/services/job_catalog.dart';
 import 'package:kariyerden_sirkete/features/jobs/presentation/pages/jobs_page.dart';
 import 'package:kariyerden_sirkete/features/onboarding/presentation/pages/onboarding_page.dart';
+import 'package:kariyerden_sirkete/features/onboarding/presentation/widgets/game_tutorial_overlay.dart';
 import 'package:kariyerden_sirkete/features/profile/presentation/pages/profile_page.dart';
 import 'package:kariyerden_sirkete/features/progress/presentation/pages/progress_page.dart';
 import 'package:kariyerden_sirkete/features/skills/presentation/pages/skills_page.dart';
@@ -56,24 +57,64 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Kısa öğretici · 1/3'), findsOneWidget);
-    expect(find.text('Devam'), findsOneWidget);
-
-    await tester.tap(find.text('Devam'));
+    expect(find.text('Kariyerini kur'), findsOneWidget);
+    await tester.tap(find.text('Normal'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Devam'));
+    await tester.tap(find.text('Gerçek ekranlarda demoyu başlat'));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Oyuna başla'));
+    expect(find.byType(GameTutorialOverlay), findsOneWidget);
+    expect(find.text('Panelini tanı'), findsOneWidget);
+    for (final label in [
+      'Devam',
+      'Bu adımı geç',
+      'Bu adımı geç',
+      'Devam',
+      'Bu adımı geç',
+      'Devam',
+      'Bu adımı geç',
+    ]) {
+      await tester.tap(find.widgetWithText(FilledButton, label));
+      await tester.pumpAndSettle();
+    }
+    expect(find.text('Artık sıra sende'), findsOneWidget);
+    await tester.tap(find.widgetWithText(FilledButton, 'Turu bitir'));
     await tester.pumpAndSettle();
 
     expect(find.text('Panel'), findsOneWidget);
+    expect(find.text('Kişisel cüzdan · ₺240'), findsOneWidget);
 
     await tester.tap(find.text('Kariyer'));
     await tester.pump(const Duration(milliseconds: 80));
     expect(find.byType(FadeTransition), findsWidgets);
     await tester.pumpAndSettle();
     expect(find.text('Bir sonraki seviyene giden yol'), findsOneWidget);
+  });
+
+  testWidgets('unfinished tutorial resumes from the saved screen', (
+    tester,
+  ) async {
+    final store = _MemoryPlayerStateStore(
+      const PlayerStateRecord(
+        id: 1,
+        schemaVersion: 38,
+        money: 240,
+        energy: 100,
+        knowledge: 0,
+        experience: 0,
+        day: 1,
+        hour: 8,
+        earningSessionsToday: 0,
+        isOnboarded: true,
+        tutorialStep: 5,
+      ),
+    );
+    await tester.pumpWidget(CareerToCompanyApp(playerStateStore: store));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(GameTutorialOverlay), findsOneWidget);
+    expect(find.text('Paranın akışını planla'), findsOneWidget);
+    expect(find.text('Finans'), findsOneWidget);
   });
 
   test('palette keeps small text readable on every surface', () {
@@ -1008,6 +1049,8 @@ class _MemoryPlayerStateStoreRepository implements PlayerStateRepository {
 }
 
 class _MemoryPlayerStateStore implements PlayerStateStore {
+  _MemoryPlayerStateStore([this._record]);
+
   PlayerStateRecord? _record;
 
   @override

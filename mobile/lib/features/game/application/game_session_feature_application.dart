@@ -46,11 +46,37 @@ extension GameSessionFeatureApplication on GameSessionApplicationService {
   Future<PlayerState> moveCity(PlayerState state, City city) =>
       _persist(_cityService.move(state, city));
 
-  Future<PlayerState> completeOnboarding(PlayerState state) =>
-      _persist(state.copyWith(isOnboarded: true));
+  Future<PlayerState> completeOnboarding(
+    PlayerState state,
+    EconomyDifficulty difficulty,
+  ) => _persist(
+    state.copyWith(isOnboarded: true, economyDifficulty: difficulty),
+  );
 
   Future<PlayerState> resetGame() =>
       _persist(PlayerState.initial.copyWith(randomSeed: _newRandomSeed()));
+
+  Future<PlayerState> setTutorialProgress(
+    PlayerState state, {
+    required int step,
+    required bool completed,
+  }) => _persist(
+    state.copyWith(
+      tutorialStep: step.clamp(0, 7),
+      tutorialCompleted: completed,
+    ),
+  );
+
+  Future<PlayerState> setFeedbackPreferences(
+    PlayerState state, {
+    bool? soundEffectsEnabled,
+    bool? hapticsEnabled,
+  }) => _persist(
+    state.copyWith(
+      soundEffectsEnabled: soundEffectsEnabled,
+      hapticsEnabled: hapticsEnabled,
+    ),
+  );
 
   Future<PlayerState> updateDebugState(
     PlayerState state,

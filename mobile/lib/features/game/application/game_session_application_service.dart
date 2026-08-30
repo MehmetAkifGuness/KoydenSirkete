@@ -1,3 +1,4 @@
+import '../../../core/errors/game_rule_exception.dart';
 import '../../earning/domain/entities/earning_performance.dart';
 import '../../training/domain/entities/course.dart';
 import '../../jobs/domain/entities/job.dart';
@@ -235,6 +236,11 @@ class GameSessionApplicationService {
     PlayerState state,
     EconomyDifficulty difficulty,
   ) {
+    if (state.isOnboarded) {
+      throw const GameRuleException(
+        'Ekonomi zorluğu yeni oyun başında bir kez seçilir ve değiştirilemez.',
+      );
+    }
     var updated = state.copyWith(economyDifficulty: difficulty);
     final employment = updated.employment;
     final job = JobCatalog.findById(employment?.jobId);

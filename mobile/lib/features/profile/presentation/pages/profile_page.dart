@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 
 import '../../../../app/theme/app_palette.dart';
 import '../../../../core/accessibility/app_feedback_preferences.dart';
+import '../../../../core/database/player_state_store.dart';
 import '../../../../core/widgets/app_page.dart';
 import '../../../../core/widgets/app_transaction_preview.dart';
 import '../../../../core/widgets/game_account_bar.dart';
@@ -11,21 +12,34 @@ import '../../../assets/presentation/pages/assets_page.dart';
 import '../../../game/presentation/pages/developer_data_page.dart';
 import '../../../game/presentation/state/game_session_controller.dart';
 import '../../../progress/presentation/pages/progress_page.dart';
-import '../../../economy/domain/entities/economy_difficulty.dart';
 import '../../../game/domain/services/playtest_metrics_service.dart';
+import 'save_management_page.dart';
 
 class ProfilePage extends StatelessWidget {
-  const ProfilePage({required this.session, super.key});
+  const ProfilePage({
+    required this.session,
+    this.saveSlotStore,
+    this.onSlotSelected,
+    this.onStartTutorial,
+    super.key,
+  });
 
   final GameSessionController session;
+  final SaveSlotStore? saveSlotStore;
+  final Future<void> Function(int slot)? onSlotSelected;
+  final VoidCallback? onStartTutorial;
 
   @override
   Widget build(BuildContext context) {
     final feedbackPreferences = AppFeedbackPreferences.instance;
     return AnimatedBuilder(
-      animation: Listenable.merge([session, feedbackPreferences]),
+      animation: session,
       builder: (context, _) {
         final state = session.state;
+        feedbackPreferences.configure(
+          soundEffects: state.soundEffectsEnabled,
+          haptics: state.hapticsEnabled,
+        );
         const metrics = PlaytestMetricsService();
         return AppPage(
           title: 'Profil',
@@ -109,6 +123,33 @@ class ProfilePage extends StatelessWidget {
                   ),
                 ),
               ),
+              if (saveSlotStore != null && onSlotSelected != null) ...[
+                const SizedBox(height: 9),
+                _ProfileAction(
+                  icon: Icons.save_outlined,
+                  title: 'Kayıt yuvaları ve yedekler',
+                  subtitle: '3 yerel yuvayı aç, dışa aktar veya içe aktar.',
+                  enabled: !session.isBusy,
+                  onTap: session.isBusy
+                      ? null
+                      : () => Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) => SaveManagementPage(
+                              store: saveSlotStore!,
+                              onSlotSelected: onSlotSelected!,
+                            ),
+                          ),
+                        ),
+                ),
+              ],
+              const SizedBox(height: 9),
+              _ProfileAction(
+                icon: Icons.school_outlined,
+                title: 'Gerçek ekran turunu tekrar aç',
+                subtitle: 'Gerçek oyun ekranlarını demo kaydıyla yeniden dene.',
+                enabled: onStartTutorial != null,
+                onTap: onStartTutorial,
+              ),
               if (kDebugMode) ...[
                 const SizedBox(height: 9),
                 _ProfileAction(
@@ -143,16 +184,38 @@ class ProfilePage extends StatelessWidget {
                       secondary: const Icon(Icons.volume_up_outlined),
                       title: const Text('Ses efektleri'),
                       subtitle: const Text('İşlem geri bildirim sesleri'),
-                      value: feedbackPreferences.soundEffectsEnabled,
-                      onChanged: feedbackPreferences.setSoundEffects,
+                      value: state.soundEffectsEnabled,
+                      onChanged: session.isBusy
+                          ? null
+                          : (value) => session.setFeedbackPreferences(
+                              soundEffectsEnabled: value,
+                            ),
+                    ),
+                    TextButton.icon(
+                      onPressed: state.soundEffectsEnabled
+                          ? feedbackPreferences.previewSound
+                          : null,
+                      icon: const Icon(Icons.play_arrow_rounded),
+                      label: const Text('Sesi dene'),
                     ),
                     const Divider(height: 1),
                     SwitchListTile(
                       secondary: const Icon(Icons.vibration_rounded),
                       title: const Text('Titreşim'),
                       subtitle: const Text('Dokunsal işlem geri bildirimi'),
-                      value: feedbackPreferences.hapticsEnabled,
-                      onChanged: feedbackPreferences.setHaptics,
+                      value: state.hapticsEnabled,
+                      onChanged: session.isBusy
+                          ? null
+                          : (value) => session.setFeedbackPreferences(
+                              hapticsEnabled: value,
+                            ),
+                    ),
+                    TextButton.icon(
+                      onPressed: state.hapticsEnabled
+                          ? feedbackPreferences.previewHaptic
+                          : null,
+                      icon: const Icon(Icons.touch_app_rounded),
+                      label: const Text('Titreşimi dene'),
                     ),
                   ],
                 ),
@@ -194,19 +257,30 @@ class ProfilePage extends StatelessWidget {
               AppInfoCard(
                 accent: AppPalette.primary,
                 padding: const EdgeInsets.all(14),
-                child: SegmentedButton<EconomyDifficulty>(
-                  segments: [
-                    for (final difficulty in EconomyDifficulty.values)
-                      ButtonSegment(
-                        value: difficulty,
-                        label: Text(difficulty.label),
+                child: Row(
+                  children: [
+                    const Icon(Icons.lock_outline_rounded),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            state.economyDifficulty.label,
+                            style: const TextStyle(fontWeight: FontWeight.w900),
+                          ),
+                          const SizedBox(height: 3),
+                          const Text(
+                            'Yeni oyun başında seçildi · Bu kariyer boyunca değiştirilemez.',
+                            style: TextStyle(
+                              color: AppPalette.textMuted,
+                              fontSize: 11,
+                            ),
+                          ),
+                        ],
                       ),
+                    ),
                   ],
-                  selected: {state.economyDifficulty},
-                  onSelectionChanged: session.isBusy
-                      ? null
-                      : (selection) =>
-                            session.setEconomyDifficulty(selection.first),
                 ),
               ),
               const SizedBox(height: 9),

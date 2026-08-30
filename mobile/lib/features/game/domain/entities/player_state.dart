@@ -82,10 +82,14 @@ class PlayerState {
     this.pendingPersonalEventId,
     this.lastPersonalEventDay = 0,
     this.isOnboarded = false,
+    this.tutorialCompleted = false,
+    this.tutorialStep = 0,
     this.economyDifficulty = EconomyDifficulty.normal,
+    this.soundEffectsEnabled = true,
+    this.hapticsEnabled = true,
   }) : _legacyActiveActivity = activeActivity;
   static const initial = PlayerState(
-    schemaVersion: 36,
+    schemaVersion: 39,
     money: 240,
     energy: 100,
     knowledge: 0,
@@ -160,7 +164,11 @@ class PlayerState {
   final int? pendingPersonalEventId;
   final int lastPersonalEventDay;
   final bool isOnboarded;
+  final bool tutorialCompleted;
+  final int tutorialStep;
   final EconomyDifficulty economyDifficulty;
+  final bool soundEffectsEnabled;
+  final bool hapticsEnabled;
   PlayerState copyWith({
     int? schemaVersion,
     int? money,
@@ -228,7 +236,11 @@ class PlayerState {
     Object? pendingPersonalEventId = _unset,
     int? lastPersonalEventDay,
     bool? isOnboarded,
+    bool? tutorialCompleted,
+    int? tutorialStep,
     EconomyDifficulty? economyDifficulty,
+    bool? soundEffectsEnabled,
+    bool? hapticsEnabled,
   }) {
     return PlayerState(
       schemaVersion: schemaVersion ?? this.schemaVersion,
@@ -340,7 +352,11 @@ class PlayerState {
           : pendingPersonalEventId as int?,
       lastPersonalEventDay: lastPersonalEventDay ?? this.lastPersonalEventDay,
       isOnboarded: isOnboarded ?? this.isOnboarded,
+      tutorialCompleted: tutorialCompleted ?? this.tutorialCompleted,
+      tutorialStep: tutorialStep ?? this.tutorialStep,
       economyDifficulty: economyDifficulty ?? this.economyDifficulty,
+      soundEffectsEnabled: soundEffectsEnabled ?? this.soundEffectsEnabled,
+      hapticsEnabled: hapticsEnabled ?? this.hapticsEnabled,
     );
   }
 

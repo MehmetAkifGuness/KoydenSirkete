@@ -11,9 +11,10 @@ import '../../../wheel/presentation/widgets/esnaf_wheel_panel.dart';
 import '../../../work/presentation/pages/work_page.dart';
 
 class EmploymentPage extends StatelessWidget {
-  const EmploymentPage({required this.session, super.key});
+  const EmploymentPage({required this.session, this.onFindJob, super.key});
 
   final GameSessionController session;
+  final VoidCallback? onFindJob;
 
   @override
   Widget build(BuildContext context) {
@@ -34,11 +35,18 @@ class EmploymentPage extends StatelessWidget {
             return ListView(
               padding: const EdgeInsets.fromLTRB(18, 8, 18, 28),
               children: [
-                const AppEmptyState(
+                AppEmptyState(
                   icon: Icons.work_off_rounded,
                   title: 'Aktif işin yok',
                   message:
                       'İş fırsatları ekranından bir role başvur. Uygun bir işi seçtiğinde görevlerin burada görünecek.',
+                  action: onFindJob == null
+                      ? null
+                      : FilledButton.icon(
+                          onPressed: onFindJob,
+                          icon: const Icon(Icons.search_rounded),
+                          label: const Text('İş fırsatlarını aç'),
+                        ),
                 ),
                 const SizedBox(height: 16),
                 EsnafWheelPanel(session: session),

@@ -122,7 +122,11 @@ class LocalPlayerStateRepository implements PlayerStateRepository {
         activeProjectId: model.activeProjectId,
         completedProjects: model.completedProjects,
         isOnboarded: model.isOnboarded,
+        tutorialCompleted: model.tutorialCompleted,
+        tutorialStep: model.tutorialStep,
         economyDifficulty: model.economyDifficulty.name,
+        soundEffectsEnabled: model.soundEffectsEnabled,
+        hapticsEnabled: model.hapticsEnabled,
       ),
     );
   }

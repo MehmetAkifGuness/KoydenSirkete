@@ -95,7 +95,11 @@ class PlayerStateModel {
     this.pendingPersonalEventId,
     this.lastPersonalEventDay = 0,
     this.isOnboarded = false,
+    this.tutorialCompleted = false,
+    this.tutorialStep = 0,
     this.economyDifficulty = EconomyDifficulty.normal,
+    this.soundEffectsEnabled = true,
+    this.hapticsEnabled = true,
   });
 
   factory PlayerStateModel.fromRecord(PlayerStateRecord record) {
@@ -188,7 +192,11 @@ class PlayerStateModel {
       pendingPersonalEventId: record.pendingPersonalEventId,
       lastPersonalEventDay: record.lastPersonalEventDay,
       isOnboarded: record.isOnboarded,
+      tutorialCompleted: record.tutorialCompleted,
+      tutorialStep: record.tutorialStep,
       economyDifficulty: EconomyDifficulty.fromName(record.economyDifficulty),
+      soundEffectsEnabled: record.soundEffectsEnabled,
+      hapticsEnabled: record.hapticsEnabled,
     );
   }
 
@@ -258,7 +266,11 @@ class PlayerStateModel {
   final int? pendingPersonalEventId;
   final int lastPersonalEventDay;
   final bool isOnboarded;
+  final bool tutorialCompleted;
+  final int tutorialStep;
   final EconomyDifficulty economyDifficulty;
+  final bool soundEffectsEnabled;
+  final bool hapticsEnabled;
 
   factory PlayerStateModel.fromEntity(PlayerState entity) {
     return PlayerStateModel(
@@ -328,7 +340,11 @@ class PlayerStateModel {
       pendingPersonalEventId: entity.pendingPersonalEventId,
       lastPersonalEventDay: entity.lastPersonalEventDay,
       isOnboarded: entity.isOnboarded,
+      tutorialCompleted: entity.tutorialCompleted,
+      tutorialStep: entity.tutorialStep,
       economyDifficulty: entity.economyDifficulty,
+      soundEffectsEnabled: entity.soundEffectsEnabled,
+      hapticsEnabled: entity.hapticsEnabled,
     );
   }
 }

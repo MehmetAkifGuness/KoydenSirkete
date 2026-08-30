@@ -9,6 +9,7 @@ class EnergyRecoveryService {
 
   static const recoveryInterval = Duration(minutes: 1);
   static const recoveryAmount = 10;
+  static const maximumOfflineRecovery = Duration(hours: 12);
 
   final AssetService _assetService;
 
@@ -21,11 +22,15 @@ class EnergyRecoveryService {
 
     final elapsed = currentTime.difference(anchor);
     if (elapsed.isNegative) {
-      return state.copyWith(energyRecoveryAt: currentTime);
+      return state;
     }
 
-    final completedIntervals = elapsed.inSeconds ~/ recoveryInterval.inSeconds;
-    final remainder = elapsed.inSeconds % recoveryInterval.inSeconds;
+    final creditedElapsed = elapsed > maximumOfflineRecovery
+        ? maximumOfflineRecovery
+        : elapsed;
+    final completedIntervals =
+        creditedElapsed.inSeconds ~/ recoveryInterval.inSeconds;
+    final remainder = creditedElapsed.inSeconds % recoveryInterval.inSeconds;
     final recoveredEnergy = math.min(
       state.maxEnergy,
       state.energy +
@@ -34,7 +39,9 @@ class EnergyRecoveryService {
     );
     return state.copyWith(
       energy: recoveredEnergy,
-      energyRecoveryAt: currentTime.subtract(Duration(seconds: remainder)),
+      energyRecoveryAt: elapsed > maximumOfflineRecovery
+          ? currentTime
+          : currentTime.subtract(Duration(seconds: remainder)),
     );
   }
 }

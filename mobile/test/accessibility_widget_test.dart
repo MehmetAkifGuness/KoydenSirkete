@@ -12,6 +12,7 @@ import 'package:kariyerden_sirkete/features/game/domain/entities/player_state.da
 import 'package:kariyerden_sirkete/features/game/domain/repositories/player_state_repository.dart';
 import 'package:kariyerden_sirkete/features/game/presentation/state/game_session_controller.dart';
 import 'package:kariyerden_sirkete/features/onboarding/presentation/pages/onboarding_page.dart';
+import 'package:kariyerden_sirkete/features/onboarding/presentation/widgets/game_tutorial_overlay.dart';
 
 void main() {
   test(
@@ -104,6 +105,53 @@ void main() {
       );
     });
   }
+
+  testWidgets('tutorial coach remains usable with large text', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(320, 568));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    var collapsed = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.dark(),
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(
+            context,
+          ).copyWith(textScaler: const TextScaler.linear(2)),
+          child: child!,
+        ),
+        home: StatefulBuilder(
+          builder: (context, setState) => Scaffold(
+            body: Stack(
+              children: [
+                const SizedBox.expand(),
+                GameTutorialOverlay(
+                  step: 1,
+                  totalSteps: 8,
+                  title: 'İlk sermayeni kazan',
+                  description:
+                      'Kazanç ekranındaki gerçek işlemi güvenle deneyebilirsin.',
+                  task: 'Bir kazanç aktivitesi başlat.',
+                  taskCompleted: false,
+                  collapsed: collapsed,
+                  onNext: () {},
+                  onBack: () {},
+                  onToggleCollapsed: () =>
+                      setState(() => collapsed = !collapsed),
+                  onExit: () {},
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    await tester.tap(find.byTooltip('Rehberi küçült'));
+    await tester.pumpAndSettle();
+    expect(find.byTooltip('Rehberi büyüt'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
 
   testWidgets('dashboard fits a compact landscape viewport', (tester) async {
     await tester.binding.setSurfaceSize(const Size(640, 360));

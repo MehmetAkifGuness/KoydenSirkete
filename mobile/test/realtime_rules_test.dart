@@ -54,6 +54,39 @@ void main() {
     expect(state.energy, 100);
   });
 
+  test('clock rollback cannot create energy and keeps the trusted anchor', () {
+    final anchor = DateTime(2026, 1, 2);
+    final state = PlayerState.initial.copyWith(
+      energy: 40,
+      energyRecoveryAt: anchor,
+    );
+
+    final recovered = EnergyRecoveryService().recover(
+      state,
+      now: anchor.subtract(const Duration(days: 1)),
+    );
+
+    expect(recovered.energy, 40);
+    expect(recovered.energyRecoveryAt, anchor);
+  });
+
+  test('large clock jump is credited once with a bounded interval', () {
+    final anchor = DateTime(2026, 1, 1);
+    final state = PlayerState.initial.copyWith(
+      energy: 0,
+      maxEnergy: 100000,
+      energyRecoveryAt: anchor,
+    );
+    final jumped = anchor.add(const Duration(days: 365));
+
+    final first = EnergyRecoveryService().recover(state, now: jumped);
+    final second = EnergyRecoveryService().recover(first, now: jumped);
+
+    expect(first.energy, 7200);
+    expect(first.energyRecoveryAt, jumped);
+    expect(second.energy, first.energy);
+  });
+
   test('negative money triggers bankruptcy after 24 game hours', () {
     final clock = GameClockService();
     var state = PlayerState.initial.copyWith(money: -1);

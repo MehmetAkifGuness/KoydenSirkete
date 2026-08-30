@@ -9,6 +9,7 @@ import '../../../../core/widgets/metric_tile.dart';
 import '../../../../core/widgets/section_title.dart';
 import '../../../daily_goals/domain/entities/daily_goal.dart';
 import '../../../game/domain/entities/active_activity.dart';
+import '../../../game/domain/services/player_guidance_service.dart';
 import '../../../game/presentation/state/game_session_controller.dart';
 import '../../../personal_life/presentation/widgets/personal_event_panel.dart';
 import '../models/dashboard_models.dart';
@@ -34,6 +35,7 @@ class DashboardPage extends StatelessWidget {
         return AppPage(
           title: 'Kontrol',
           subtitle: 'Bugünün kararlarını yönet.',
+          nextAction: const PlayerGuidanceService().nextAction(session.state),
           child: ListView(
             padding: const EdgeInsets.fromLTRB(18, 16, 18, 28),
             children: [

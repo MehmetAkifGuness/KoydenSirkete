@@ -153,6 +153,10 @@ void main() {
         completedDealIds: ['rota_logistics', 'mavi_software'],
       ),
       isOnboarded: true,
+      tutorialCompleted: true,
+      tutorialStep: 6,
+      soundEffectsEnabled: false,
+      hapticsEnabled: false,
     );
 
     await repository.save(expected);
@@ -221,6 +225,10 @@ void main() {
       'mavi_software',
     ]);
     expect(actual?.isOnboarded, expected.isOnboarded);
+    expect(actual?.tutorialCompleted, isTrue);
+    expect(actual?.tutorialStep, 6);
+    expect(actual?.soundEffectsEnabled, isFalse);
+    expect(actual?.hapticsEnabled, isFalse);
   });
 
   test('player state repository persists concurrent activities', () async {

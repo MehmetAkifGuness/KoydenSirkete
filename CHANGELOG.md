@@ -1,5 +1,20 @@
 # Changelog
 
+## 2.48.0
+
+- Üç bağımsız yerel kayıt yuvası ile panoya güvenli dışa/içe aktarma ekranı eklendi.
+- SQLite v39 kayıtları bütünlük özeti, atomik işlem ve yuva başına son sağlam yedekle korunur; bozuk kayıt otomatik geri alınır.
+- SQLite v1’den v39’a tüm migrasyon zinciri ve uygulama kapanması benzetimli atomik ödeme senaryosu otomatik test edildi.
+- Sistem saati geri alma ve aşırı ileri taşıma istismarı sınırlandı; tüm sayı alanlarına negatif, taşma ve üst sınır doğrulaması eklendi.
+- Kayıt hataları mevcut veriyi silmeden anlaşılır yeniden deneme akışına yönlendirilir.
+
+## 2.47.0
+
+- Ekonomi zorluğu yeni kariyerin başında bir kez seçilir; mevcut ve eski kayıtların seçimi sonradan değiştirilemez.
+- Sekiz aşamalı öğretici gerçek oyun ekranlarında çalışan ayrı demo oturumuna dönüştürüldü; görev algılama, geri dönüş, küçültme, profilden tekrar oynatma ve SQLite v38 ile kaldığı adımdan devam etme eklendi.
+- Panel yönlendirmesi oyuncunun enerji, para, etkinlik, iş ve şirket durumuna göre dinamikleştirildi; işi olmayan oyuncuya doğrudan ilanlara geçiş verildi.
+- Ses ve titreşim tercihleri SQLite v37 ile kalıcılaştırıldı; ayarlara deneme eylemleri ve Android yerel ton/titreşim köprüsü eklendi.
+
 ## 2.46.0
 
 - WCAG AA renk çiftleri, renk dışı ikon/metin göstergeleri ve küçük/yatay ekran ile büyük yazı kontrolleri erişilebilirlik testleriyle güvenceye alındı.

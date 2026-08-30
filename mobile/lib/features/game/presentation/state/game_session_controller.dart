@@ -228,14 +228,14 @@ class GameSessionController extends ChangeNotifier {
     );
   }
 
-  Future<void> completeOnboarding() async {
+  Future<void> completeOnboarding(EconomyDifficulty difficulty) async {
     if (_isBusy) {
       return;
     }
     _isBusy = true;
     notifyListeners();
     try {
-      _state = await _applicationService.completeOnboarding(_state);
+      _state = await _applicationService.completeOnboarding(_state, difficulty);
     } catch (_) {
       _errorMessage = 'Onboarding bilgisi kaydedilemedi. Lütfen tekrar dene.';
     } finally {
@@ -260,6 +260,20 @@ class GameSessionController extends ChangeNotifier {
     }
   }
 
+  Future<String?> setTutorialProgress({
+    required int step,
+    required bool completed,
+  }) => _execute(
+    action: (state) => _applicationService.setTutorialProgress(
+      state,
+      step: step,
+      completed: completed,
+    ),
+    stateOf: (result) => result,
+    message: (_) =>
+        completed ? 'Uygulamalı tur tamamlandı.' : 'Tur ilerlemesi kaydedildi.',
+  );
+
   Future<String?> setEconomyDifficulty(EconomyDifficulty difficulty) =>
       _execute(
         action: (state) =>
@@ -268,6 +282,19 @@ class GameSessionController extends ChangeNotifier {
         message: (_) =>
             'Ekonomi zorluğu ${difficulty.label} olarak kaydedildi.',
       );
+
+  Future<String?> setFeedbackPreferences({
+    bool? soundEffectsEnabled,
+    bool? hapticsEnabled,
+  }) => _execute(
+    action: (state) => _applicationService.setFeedbackPreferences(
+      state,
+      soundEffectsEnabled: soundEffectsEnabled,
+      hapticsEnabled: hapticsEnabled,
+    ),
+    stateOf: (result) => result,
+    message: (_) => 'Geri bildirim ayarı kaydedildi.',
+  );
 
   Future<String?> updateDebugState(DebugStatePatch patch) async {
     return _execute(

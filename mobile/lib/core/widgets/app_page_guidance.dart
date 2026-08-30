@@ -28,7 +28,7 @@ class AppPageGuidance extends StatelessWidget {
           Expanded(
             child: Text(
               'Sonraki hamle · $nextAction',
-              maxLines: 1,
+              maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
                 color: AppPalette.textSecondary,

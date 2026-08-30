@@ -70,7 +70,11 @@ class PlayerStateMapper {
       pendingPersonalEventId: model.pendingPersonalEventId,
       lastPersonalEventDay: model.lastPersonalEventDay,
       isOnboarded: model.isOnboarded,
+      tutorialCompleted: model.tutorialCompleted,
+      tutorialStep: model.tutorialStep,
       economyDifficulty: model.economyDifficulty,
+      soundEffectsEnabled: model.soundEffectsEnabled,
+      hapticsEnabled: model.hapticsEnabled,
     );
   }
 

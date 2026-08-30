@@ -74,13 +74,13 @@ MÜDÜR — 10/10 HEDEF PLANI
 
 8. ÖNCELİK — KAYIT VE GÜVENİLİRLİK
 
-- En az üç yerel kayıt yuvası ile dışa aktarma ve içe aktarma özelliği ekle.
-- Hatalı veya yarım kalmış kayıtta son sağlam kayda dönen yerel yedek sistemi oluştur.
-- SQLite v1’den güncel sürüme kadar tüm migrasyon yollarını otomatik test et.
-- Para, ödül, satış ve sezon kapanışlarının uygulama kapanması durumunda iki kez çalışmamasını garanti et.
-- Sistem saatinin ileri/geri alınmasıyla enerji veya ekonomi istismarını sınırla.
-- Tüm sayı girişlerinde negatif değer, taşma ve aşırı büyük değer kontrolleri uygula.
-- Kayıt hatasında veriyi silmeden tekrar deneme ve anlaşılır hata mesajı sun.
+- [TAMAMLANDI — v2.48.0] En az üç yerel kayıt yuvası ile dışa aktarma ve içe aktarma özelliği ekle.
+- [TAMAMLANDI — v2.48.0] Hatalı veya yarım kalmış kayıtta son sağlam kayda dönen yerel yedek sistemi oluştur.
+- [TAMAMLANDI — v2.48.0] SQLite v1’den güncel sürüme kadar tüm migrasyon yollarını otomatik test et.
+- [TAMAMLANDI — v2.48.0] Para, ödül, satış ve sezon kapanışlarının uygulama kapanması durumunda iki kez çalışmamasını garanti et.
+- [TAMAMLANDI — v2.48.0] Sistem saatinin ileri/geri alınmasıyla enerji veya ekonomi istismarını sınırla.
+- [TAMAMLANDI — v2.48.0] Tüm sayı girişlerinde negatif değer, taşma ve aşırı büyük değer kontrolleri uygula.
+- [TAMAMLANDI — v2.48.0] Kayıt hatasında veriyi silmeden tekrar deneme ve anlaşılır hata mesajı sun.
 
 9. ÖNCELİK — TEST, PERFORMANS VE KOD KALİTESİ
 

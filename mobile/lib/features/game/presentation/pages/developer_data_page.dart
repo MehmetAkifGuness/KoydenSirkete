@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import '../../../../core/input/bounded_integer_input_formatter.dart';
 
 import '../../../../app/theme/app_palette.dart';
 import '../../../../core/widgets/app_page.dart';
@@ -127,6 +128,9 @@ class _DeveloperDataPageState extends State<DeveloperDataPage> {
     child: TextField(
       controller: _fields[key],
       keyboardType: const TextInputType.numberWithOptions(signed: true),
+      inputFormatters: [
+        BoundedIntegerInputFormatter(minimum: key == 'money' ? -1000000000 : 0),
+      ],
       decoration: InputDecoration(labelText: label),
     ),
   );
@@ -136,6 +140,9 @@ class _DeveloperDataPageState extends State<DeveloperDataPage> {
     child: TextField(
       controller: _skillFields[skill],
       keyboardType: const TextInputType.numberWithOptions(signed: false),
+      inputFormatters: [
+        BoundedIntegerInputFormatter(maximum: SkillProfile.maxValue),
+      ],
       decoration: InputDecoration(
         labelText: '${skill.label} (0–${SkillProfile.maxValue})',
       ),

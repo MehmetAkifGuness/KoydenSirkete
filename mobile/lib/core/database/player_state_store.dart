@@ -6,6 +6,45 @@ abstract interface class PlayerStateStore {
   Future<void> close();
 }
 
+abstract interface class SaveSlotStore implements PlayerStateStore {
+  int get activeSlot;
+
+  Future<List<SaveSlotInfo>> listSlots();
+
+  Future<void> switchSlot(int slot);
+
+  Future<String> exportSlot(int slot);
+
+  Future<void> importSlot(String data, {required int slot});
+}
+
+class SaveSlotInfo {
+  const SaveSlotInfo({
+    required this.slot,
+    required this.hasSave,
+    required this.isHealthy,
+    this.day,
+    this.money,
+    this.updatedAt,
+  });
+
+  final int slot;
+  final bool hasSave;
+  final bool isHealthy;
+  final int? day;
+  final int? money;
+  final DateTime? updatedAt;
+}
+
+class SaveDataException implements Exception {
+  const SaveDataException(this.message);
+
+  final String message;
+
+  @override
+  String toString() => message;
+}
+
 class PlayerStateRecord {
   const PlayerStateRecord({
     required this.id,
@@ -75,7 +114,11 @@ class PlayerStateRecord {
     this.activeProjectId = 1,
     this.completedProjects = 0,
     this.isOnboarded = false,
+    this.tutorialCompleted = false,
+    this.tutorialStep = 0,
     this.economyDifficulty = 'normal',
+    this.soundEffectsEnabled = true,
+    this.hapticsEnabled = true,
   });
 
   final int id;
@@ -145,5 +188,9 @@ class PlayerStateRecord {
   final int activeProjectId;
   final int completedProjects;
   final bool isOnboarded;
+  final bool tutorialCompleted;
+  final int tutorialStep;
   final String economyDifficulty;
+  final bool soundEffectsEnabled;
+  final bool hapticsEnabled;
 }

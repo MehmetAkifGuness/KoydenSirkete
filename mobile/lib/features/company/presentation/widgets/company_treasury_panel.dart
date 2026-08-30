@@ -1,7 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import '../../../../core/input/bounded_integer_input_formatter.dart';
 
 import '../../../../app/theme/app_palette.dart';
 import '../../../../core/widgets/app_feedback.dart';
@@ -224,7 +224,9 @@ class _TreasuryAmountDialogState extends State<_TreasuryAmountDialog> {
             controller: _controller,
             autofocus: true,
             keyboardType: TextInputType.number,
-            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            inputFormatters: [
+              BoundedIntegerInputFormatter(maximum: widget.available),
+            ],
             onChanged: (_) => setState(() {}),
             decoration: const InputDecoration(
               labelText: 'Tutar',

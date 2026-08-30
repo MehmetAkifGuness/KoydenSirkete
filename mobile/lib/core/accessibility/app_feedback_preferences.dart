@@ -11,6 +11,13 @@ class AppFeedbackPreferences extends ChangeNotifier {
   bool soundEffectsEnabled = true;
   bool hapticsEnabled = true;
 
+  static const _channel = MethodChannel('com.koydensirkete/feedback');
+
+  void configure({required bool soundEffects, required bool haptics}) {
+    soundEffectsEnabled = soundEffects;
+    hapticsEnabled = haptics;
+  }
+
   void setSoundEffects(bool value) {
     if (soundEffectsEnabled == value) return;
     soundEffectsEnabled = value;
@@ -28,19 +35,27 @@ class AppFeedbackPreferences extends ChangeNotifier {
     if (hapticsEnabled) unawaited(_vibrate());
   }
 
+  Future<void> previewSound() => _playSound();
+
+  Future<void> previewHaptic() => _vibrate();
+
   Future<void> _playSound() async {
     try {
+      await _channel.invokeMethod<void>('playClick');
+    } on MissingPluginException {
       await SystemSound.play(SystemSoundType.click);
     } on PlatformException {
-      // Unsupported platforms continue without optional feedback.
+      await SystemSound.play(SystemSoundType.click);
     }
   }
 
   Future<void> _vibrate() async {
     try {
-      await HapticFeedback.selectionClick();
+      await _channel.invokeMethod<void>('vibrate');
+    } on MissingPluginException {
+      await HapticFeedback.mediumImpact();
     } on PlatformException {
-      // Unsupported platforms continue without optional feedback.
+      await HapticFeedback.mediumImpact();
     }
   }
 }

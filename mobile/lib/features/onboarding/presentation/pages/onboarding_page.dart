@@ -1,227 +1,161 @@
 import 'package:flutter/material.dart';
 
-import '../../../../app/theme/app_motion.dart';
 import '../../../../app/theme/app_palette.dart';
+import '../../../../core/widgets/app_page.dart';
+import '../../../economy/domain/entities/economy_difficulty.dart';
 import '../../../game/presentation/state/game_session_controller.dart';
 
 class OnboardingPage extends StatefulWidget {
-  const OnboardingPage({required this.session, this.onStart, super.key});
+  const OnboardingPage({
+    required this.session,
+    this.onStart,
+    this.onSkip,
+    super.key,
+  });
 
   final GameSessionController session;
   final VoidCallback? onStart;
+  final VoidCallback? onSkip;
 
   @override
   State<OnboardingPage> createState() => _OnboardingPageState();
 }
 
-class _OnboardingPageState extends State<OnboardingPage>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
-  late final Animation<double> _opacity;
-  late final Animation<Offset> _offset;
+class _OnboardingPageState extends State<OnboardingPage> {
+  EconomyDifficulty? _difficulty;
   bool _isStarting = false;
-  final PageController _pageController = PageController();
-  int _step = 0;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 850),
-    )..forward();
-    final curve = CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeOutCubic,
-    );
-    _opacity = Tween<double>(begin: 0, end: 1).animate(curve);
-    _offset = Tween<Offset>(
-      begin: const Offset(0, .06),
-      end: Offset.zero,
-    ).animate(curve);
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    _pageController.dispose();
-    super.dispose();
+    if (widget.session.state.isOnboarded) {
+      _difficulty = widget.session.state.economyDifficulty;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final locked = widget.session.state.isOnboarded;
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: SafeArea(
-        child: _entryTransition(
-          context,
-          Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(22, 12, 14, 0),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        'Kısa öğretici · ${_step + 1}/3',
-                        style: const TextStyle(
-                          color: AppPalette.textMuted,
-                          fontWeight: FontWeight.w800,
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(20),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 520),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Semantics(
+                    image: true,
+                    label: 'Müdür uygulama logosu',
+                    child: Center(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(22),
+                        child: Image.asset(
+                          'assets/images/mudurum_cover.png',
+                          width: 88,
+                          height: 88,
+                          fit: BoxFit.cover,
                         ),
                       ),
                     ),
-                    TextButton(
-                      onPressed: _isStarting ? null : _start,
-                      child: const Text('Atla'),
-                    ),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: PageView(
-                  controller: _pageController,
-                  onPageChanged: (value) => setState(() => _step = value),
-                  children: const [
-                    _TutorialStep(
-                      icon: Icons.bolt_rounded,
-                      title: 'Gününü yönet',
-                      description:
-                          'Enerjini kazanç, eğitim ve iş görevleri arasında paylaştır. Zaman akışını üst çubuktan durdurabilirsin.',
-                      action: 'İlk hamle: Kazanç ekranında sermaye oluştur.',
-                    ),
-                    _TutorialStep(
-                      icon: Icons.trending_up_rounded,
-                      title: 'Kariyerini büyüt',
-                      description:
-                          'Yeteneklerini geliştir, koşullarını karşıladığın işe başvur ve günlük performansını koru.',
-                      action: 'Sonraki hamle: Kariyer ekranındaki hedefi izle.',
-                    ),
-                    _TutorialStep(
-                      icon: Icons.business_rounded,
-                      title: 'Şirketini kur',
-                      description:
-                          'Kişisel cüzdanın ile şirket kasan ayrıdır. Her işlemde kullanılan hesabı ve tahmini sonucu kontrol et.',
-                      action: 'Uzun hedef: Seviye 3 ve ₺15.000 sermaye.',
-                    ),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(22, 8, 22, 20),
-                child: SizedBox(
-                  width: double.infinity,
-                  child: FilledButton.icon(
-                    onPressed: _isStarting || widget.session.isBusy
-                        ? null
-                        : _step == 2
-                        ? _start
-                        : _next,
-                    icon: Icon(
-                      _step == 2
-                          ? Icons.play_arrow_rounded
-                          : Icons.arrow_forward_rounded,
-                    ),
-                    label: Text(_step == 2 ? 'Oyuna başla' : 'Devam'),
                   ),
-                ),
+                  const SizedBox(height: 18),
+                  Text(
+                    locked
+                        ? 'Oyunu gerçek ekranlarda keşfet'
+                        : 'Kariyerini kur',
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.headlineMedium,
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Yönlendirmeli turda gerçek Panel, Kazanç, Eğitim, Kariyer, İşim, Finans ve Şirket ekranlarını kullanacaksın. Turdaki işlemler ayrı bir demo kaydında kalır.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: AppPalette.textSecondary,
+                      height: 1.45,
+                    ),
+                  ),
+                  const SizedBox(height: 22),
+                  AppInfoCard(
+                    accent: AppPalette.primary,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        const Text(
+                          'Ekonomi zorluğu',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontWeight: FontWeight.w900),
+                        ),
+                        const SizedBox(height: 12),
+                        Wrap(
+                          alignment: WrapAlignment.center,
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: [
+                            for (final value in EconomyDifficulty.values)
+                              ChoiceChip(
+                                label: Text(value.label),
+                                selected: _difficulty == value,
+                                onSelected: locked
+                                    ? null
+                                    : (_) =>
+                                          setState(() => _difficulty = value),
+                              ),
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+                        Text(
+                          locked
+                              ? '${_difficulty!.label} bu kariyer için kilitli.'
+                              : 'Bu seçim yalnızca yeni oyunun başında yapılır ve kariyer boyunca değiştirilemez.',
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            color: AppPalette.textMuted,
+                            fontSize: 11,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+                  FilledButton.icon(
+                    onPressed: _difficulty == null || _isStarting
+                        ? null
+                        : () => _finish(startTutorial: true),
+                    icon: const Icon(Icons.explore_outlined),
+                    label: const Text('Gerçek ekranlarda demoyu başlat'),
+                  ),
+                  TextButton(
+                    onPressed: _difficulty == null || _isStarting
+                        ? null
+                        : () => _finish(startTutorial: false),
+                    child: const Text('Öğreticiyi atla'),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _entryTransition(BuildContext context, Widget child) {
-    if (AppMotion.isReduced(context)) return child;
-    return FadeTransition(
-      opacity: _opacity,
-      child: SlideTransition(position: _offset, child: child),
-    );
-  }
-
-  void _next() {
-    _pageController.nextPage(
-      duration: AppMotion.duration(context, AppMotion.fast),
-      curve: AppMotion.enterCurve,
-    );
-  }
-
-  Future<void> _start() async {
-    if (_isStarting) return;
+  Future<void> _finish({required bool startTutorial}) async {
+    final difficulty = _difficulty;
+    if (_isStarting || difficulty == null) return;
     setState(() => _isStarting = true);
     if (!widget.session.state.isOnboarded) {
-      await widget.session.completeOnboarding();
+      await widget.session.completeOnboarding(difficulty);
     }
-    if (mounted) widget.onStart?.call();
+    if (!mounted) return;
+    if (startTutorial) {
+      widget.onStart?.call();
+    } else {
+      (widget.onSkip ?? widget.onStart)?.call();
+    }
   }
-}
-
-class _TutorialStep extends StatelessWidget {
-  const _TutorialStep({
-    required this.icon,
-    required this.title,
-    required this.description,
-    required this.action,
-  });
-
-  final IconData icon;
-  final String title;
-  final String description;
-  final String action;
-
-  @override
-  Widget build(BuildContext context) => SingleChildScrollView(
-    padding: const EdgeInsets.fromLTRB(22, 24, 22, 16),
-    child: Column(
-      children: [
-        const SizedBox(height: 28),
-        Semantics(
-          image: true,
-          label: 'Müdür uygulama logosu',
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(24),
-            child: Image.asset(
-              'assets/images/mudurum_cover.png',
-              width: 112,
-              height: 112,
-              fit: BoxFit.cover,
-            ),
-          ),
-        ),
-        const SizedBox(height: 10),
-        Icon(icon, size: 32, color: AppPalette.primary),
-        const SizedBox(height: 28),
-        Text(
-          title,
-          textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.headlineMedium,
-        ),
-        const SizedBox(height: 13),
-        Text(
-          description,
-          textAlign: TextAlign.center,
-          style: const TextStyle(
-            color: AppPalette.textSecondary,
-            fontSize: 15,
-            height: 1.5,
-          ),
-        ),
-        const SizedBox(height: 20),
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            color: AppPalette.tertiary.withValues(alpha: .1),
-            borderRadius: BorderRadius.circular(14),
-          ),
-          child: Text(
-            action,
-            textAlign: TextAlign.center,
-            style: const TextStyle(fontWeight: FontWeight.w800),
-          ),
-        ),
-      ],
-    ),
-  );
 }
