@@ -17,7 +17,7 @@ class AppDatabase extends SqlitePlayerStateStore {
     final databasePath = join(await getDatabasesPath(), _databaseName);
     return _database = await openDatabase(
       databasePath,
-      version: 33,
+      version: 34,
       onCreate: (database, _) async {
         await database.execute('''
           CREATE TABLE $_tableName (
@@ -35,6 +35,7 @@ class AppDatabase extends SqlitePlayerStateStore {
             wheel_energy_buff_tasks INTEGER NOT NULL DEFAULT 0,
             wheel_reward_buff_percent INTEGER NOT NULL DEFAULT 0,
             wheel_reward_buff_tasks INTEGER NOT NULL DEFAULT 0,
+            random_seed INTEGER NOT NULL DEFAULT 1592594996,
             active_activity_json TEXT,
             active_activities_json TEXT,
             skills_json TEXT,
@@ -316,6 +317,11 @@ class AppDatabase extends SqlitePlayerStateStore {
             'ALTER TABLE $_tableName ADD COLUMN personal_finance_json TEXT',
           );
         }
+        if (oldVersion < 34) {
+          await database.execute(
+            'ALTER TABLE $_tableName ADD COLUMN random_seed INTEGER NOT NULL DEFAULT 1592594996',
+          );
+        }
       },
     );
   }
@@ -356,6 +362,7 @@ abstract class SqlitePlayerStateStore implements PlayerStateStore {
       wheelEnergyBuffTasks: row['wheel_energy_buff_tasks'] as int? ?? 0,
       wheelRewardBuffPercent: row['wheel_reward_buff_percent'] as int? ?? 0,
       wheelRewardBuffTasks: row['wheel_reward_buff_tasks'] as int? ?? 0,
+      randomSeed: row['random_seed'] as int? ?? 1592594996,
       activeActivityJson: row['active_activity_json'] as String?,
       activeActivitiesJson: row['active_activities_json'] as String?,
       skillsJson: row['skills_json'] as String?,
@@ -427,6 +434,7 @@ abstract class SqlitePlayerStateStore implements PlayerStateStore {
       'wheel_energy_buff_tasks': record.wheelEnergyBuffTasks,
       'wheel_reward_buff_percent': record.wheelRewardBuffPercent,
       'wheel_reward_buff_tasks': record.wheelRewardBuffTasks,
+      'random_seed': record.randomSeed,
       'active_activity_json': record.activeActivityJson,
       'active_activities_json': record.activeActivitiesJson,
       'skills_json': record.skillsJson,

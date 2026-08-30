@@ -324,9 +324,30 @@ void main() {
       expect(count(EsnafWheelRewardType.bigTender), 1);
       expect(count(EsnafWheelRewardType.tipRain), 1);
       expect(count(EsnafWheelRewardType.smallTip), 2);
+      expect(
+        EsnafWheelRewardCatalog.chancePercent(EsnafWheelRewardType.empty),
+        35,
+      );
+      expect(
+        EsnafWheelRewardCatalog.chancePercent(
+          EsnafWheelRewardType.customerPenalty,
+        ),
+        25,
+      );
       for (var index = 0; index < sectors.length; index++) {
         expect(sectors[index], isNot(sectors[(index + 1) % sectors.length]));
       }
+    });
+
+    test('replays a spin from the saved seed and advances it', () {
+      final state = PlayerState.initial.copyWith(money: 100, randomSeed: 42);
+
+      final first = EsnafWheelService().spin(state);
+      final replay = EsnafWheelService().spin(state);
+
+      expect(replay.sectorIndex, first.sectorIndex);
+      expect(replay.reward.type, first.reward.type);
+      expect(first.state.randomSeed, isNot(state.randomSeed));
     });
 
     test('applies every cash reward and penalty amount', () {

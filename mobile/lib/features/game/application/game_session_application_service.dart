@@ -174,7 +174,9 @@ class GameSessionApplicationService {
   ) => _persist(_personalEventService.resolve(state, choice));
 
   Future<PlayerState> load() async {
-    final loaded = await _repository.load() ?? PlayerState.initial;
+    final loaded =
+        await _repository.load() ??
+        PlayerState.initial.copyWith(randomSeed: _newRandomSeed());
     if (loaded.employment == null && loaded.currentJobId != null) {
       final job = JobCatalog.findById(loaded.currentJobId);
       if (job != null) {
@@ -223,6 +225,8 @@ class GameSessionApplicationService {
     }
     return _persist(loaded);
   }
+
+  int _newRandomSeed() => DateTime.now().microsecondsSinceEpoch & 0x7fffffff;
 
   Future<PlayerState> startEarning(
     PlayerState state, {

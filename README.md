@@ -330,6 +330,11 @@ Android-first, tamamen offline kariyer ve şirket simülasyonu.
 - Kira portföyü geliri aktif iş kazancı kapasitesiyle sınırlıdır.
 - İş ilerlemesi kira tavanını artırırken aktif görevler en güçlü günlük kazanç kaynağı olarak kalır.
 
+## v2.42.0 şeffaf ve tekrarlanabilir rastgelelik
+
+- Esnaf Çarkı ve yatırım planları tüm sonuç olasılıklarını açık yüzdelerle gösterir.
+- Çark sonuçları SQLite v34 ile saklanan ve her tur ilerleyen deterministik tohumdan üretilir.
+
 ## v2.40.0 ortak ekonomi endeksi
 
 - Maaş, yaşam gideri, şirket geliri ve çalışan maliyetleri aylık `%1`, en fazla `%25` ortak endeksle birlikte büyür.

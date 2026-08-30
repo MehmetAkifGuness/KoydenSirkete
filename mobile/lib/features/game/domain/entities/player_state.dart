@@ -33,6 +33,7 @@ class PlayerState {
     this.wheelEnergyBuffTasks = 0,
     this.wheelRewardBuffPercent = 0,
     this.wheelRewardBuffTasks = 0,
+    this.randomSeed = 1592594996,
     ActiveActivity? activeActivity,
     this.activeActivities = const <ActiveActivity>[],
     this.skills = const SkillProfile(),
@@ -80,7 +81,7 @@ class PlayerState {
     this.isOnboarded = false,
   }) : _legacyActiveActivity = activeActivity;
   static const initial = PlayerState(
-    schemaVersion: 33,
+    schemaVersion: 34,
     money: 240,
     energy: 100,
     knowledge: 0,
@@ -107,6 +108,7 @@ class PlayerState {
   final int wheelEnergyBuffTasks;
   final int wheelRewardBuffPercent;
   final int wheelRewardBuffTasks;
+  final int randomSeed;
   final ActiveActivity? _legacyActiveActivity;
   final List<ActiveActivity> activeActivities;
   final SkillProfile skills;
@@ -171,6 +173,7 @@ class PlayerState {
     int? wheelEnergyBuffTasks,
     int? wheelRewardBuffPercent,
     int? wheelRewardBuffTasks,
+    int? randomSeed,
     Object? activeActivity = _unset,
     Object? activeActivities = _unset,
     SkillProfile? skills,
@@ -241,6 +244,7 @@ class PlayerState {
       wheelRewardBuffPercent:
           wheelRewardBuffPercent ?? this.wheelRewardBuffPercent,
       wheelRewardBuffTasks: wheelRewardBuffTasks ?? this.wheelRewardBuffTasks,
+      randomSeed: randomSeed ?? this.randomSeed,
       activeActivity: identical(activeActivities, _unset)
           ? (identical(activeActivity, _unset)
                 ? _legacyActiveActivity

@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.42.0
+
+- Esnaf Çarkı sonuçları kayıt dosyasında ilerletilen deterministik bir tohumla üretilir; yeniden yükleme aynı bekleyen sonucu güvenle tekrarlar.
+- Tüm çark ödül/ceza ve yatırım getirisi olasılıkları işlemden önce açık yüzdelerle gösterilir.
+
 ## 2.41.0
 
 - Toplam kira geliri, oyuncunun tek bir aktif işten kazanabileceği günlük tutarla sınırlandı.

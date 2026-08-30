@@ -116,6 +116,15 @@ class _EsnafWheelPanelState extends State<EsnafWheelPanel>
               AppPill(label: 'İş gerektirmez', color: AppPalette.primary),
             ],
           ),
+          const SizedBox(height: 9),
+          Text(
+            _probabilityText(),
+            style: const TextStyle(
+              color: AppPalette.textMuted,
+              fontSize: 10,
+              height: 1.35,
+            ),
+          ),
           if (state.wheelDurationBuffTasks > 0 ||
               state.wheelEnergyBuffTasks > 0 ||
               state.wheelRewardBuffTasks > 0) ...[
@@ -175,6 +184,18 @@ class _EsnafWheelPanelState extends State<EsnafWheelPanel>
       parts.add('Kazanç x2 · ${state.wheelRewardBuffTasks} görev');
     }
     return parts.join('  |  ');
+  }
+
+  String _probabilityText() {
+    String chance(EsnafWheelRewardType type) =>
+        '%${EsnafWheelRewardCatalog.chancePercent(type)}';
+    return 'Olasılıklar: Boş ${chance(EsnafWheelRewardType.empty)} · '
+        '-₺50 ${chance(EsnafWheelRewardType.customerPenalty)} · '
+        '-₺100 ${chance(EsnafWheelRewardType.majorPenalty)} · '
+        '+₺50 ${chance(EsnafWheelRewardType.smallTip)} · '
+        '+₺100 ${chance(EsnafWheelRewardType.tipRain)} · '
+        'İhale ${chance(EsnafWheelRewardType.bigTender)} · '
+        'Şans ${chance(EsnafWheelRewardType.luckyDay)}';
   }
 
   Future<void> _spin(BuildContext context) async {

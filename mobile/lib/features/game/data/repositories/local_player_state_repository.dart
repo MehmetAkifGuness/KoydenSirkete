@@ -60,6 +60,7 @@ class LocalPlayerStateRepository implements PlayerStateRepository {
         wheelEnergyBuffTasks: model.wheelEnergyBuffTasks,
         wheelRewardBuffPercent: model.wheelRewardBuffPercent,
         wheelRewardBuffTasks: model.wheelRewardBuffTasks,
+        randomSeed: model.randomSeed,
         activeActivityJson: ActiveActivityCodec().encode(model.activeActivity),
         activeActivitiesJson: ActiveActivityCodec().encodeList(
           model.activeActivities,

@@ -27,6 +27,7 @@ class PlayerStateRecord {
     this.wheelEnergyBuffTasks = 0,
     this.wheelRewardBuffPercent = 0,
     this.wheelRewardBuffTasks = 0,
+    this.randomSeed = 1592594996,
     this.activeActivityJson,
     this.activeActivitiesJson,
     this.skillsJson,
@@ -93,6 +94,7 @@ class PlayerStateRecord {
   final int wheelEnergyBuffTasks;
   final int wheelRewardBuffPercent;
   final int wheelRewardBuffTasks;
+  final int randomSeed;
   final String? activeActivityJson;
   final String? activeActivitiesJson;
   final String? skillsJson;

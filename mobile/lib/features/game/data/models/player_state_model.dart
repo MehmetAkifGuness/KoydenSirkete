@@ -46,6 +46,7 @@ class PlayerStateModel {
     this.wheelEnergyBuffTasks = 0,
     this.wheelRewardBuffPercent = 0,
     this.wheelRewardBuffTasks = 0,
+    this.randomSeed = 1592594996,
     this.activeActivity,
     this.activeActivities = const <ActiveActivity>[],
     this.skills = const SkillProfile(),
@@ -113,6 +114,7 @@ class PlayerStateModel {
       wheelEnergyBuffTasks: record.wheelEnergyBuffTasks,
       wheelRewardBuffPercent: record.wheelRewardBuffPercent,
       wheelRewardBuffTasks: record.wheelRewardBuffTasks,
+      randomSeed: record.randomSeed,
       activeActivity: ActiveActivityCodec().decode(record.activeActivityJson),
       activeActivities: ActiveActivityCodec().decodeList(
         record.activeActivitiesJson,
@@ -201,6 +203,7 @@ class PlayerStateModel {
   final int wheelEnergyBuffTasks;
   final int wheelRewardBuffPercent;
   final int wheelRewardBuffTasks;
+  final int randomSeed;
   final ActiveActivity? activeActivity;
   final List<ActiveActivity> activeActivities;
   final SkillProfile skills;
@@ -267,6 +270,7 @@ class PlayerStateModel {
       wheelEnergyBuffTasks: entity.wheelEnergyBuffTasks,
       wheelRewardBuffPercent: entity.wheelRewardBuffPercent,
       wheelRewardBuffTasks: entity.wheelRewardBuffTasks,
+      randomSeed: entity.randomSeed,
       activeActivity: entity.activeActivity,
       activeActivities: entity.activities,
       skills: entity.skills,

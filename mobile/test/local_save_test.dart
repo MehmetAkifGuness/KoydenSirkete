@@ -83,6 +83,7 @@ void main() {
       wheelEnergyBuffTasks: 1,
       wheelRewardBuffPercent: 100,
       wheelRewardBuffTasks: 2,
+      randomSeed: 987654321,
       companyCompetition: const CompanyCompetitionState(
         seasonNumber: 4,
         points: 24,
@@ -188,6 +189,7 @@ void main() {
     expect(actual?.wheelEnergyBuffTasks, expected.wheelEnergyBuffTasks);
     expect(actual?.wheelRewardBuffPercent, expected.wheelRewardBuffPercent);
     expect(actual?.wheelRewardBuffTasks, expected.wheelRewardBuffTasks);
+    expect(actual?.randomSeed, expected.randomSeed);
     expect(actual?.companyCompetition.seasonNumber, 4);
     expect(actual?.companyCompetition.points, 24);
     expect(actual?.companyCompetition.championships, 2);
@@ -398,7 +400,10 @@ void main() {
     expect(actual?.branches.single.cityId, 2);
     expect(actual?.branches.single.level, 2);
     expect(actual?.branches.single.managerEmployeeId, branchManager.id);
-    expect(actual?.branches.single.localGoal, CompanyBranchLocalGoal.marketGrowth);
+    expect(
+      actual?.branches.single.localGoal,
+      CompanyBranchLocalGoal.marketGrowth,
+    );
     expect(actual?.branches.single.specialty, CompanySpecialty.leadership);
     expect(actual?.branches.single.employees.single.experience, 420);
     expect(

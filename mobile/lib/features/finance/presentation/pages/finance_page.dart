@@ -562,8 +562,8 @@ extension on FinanceCategory {
 
 extension on InvestmentPlan {
   String get riskLabel => switch (this) {
-    InvestmentPlan.protected => 'risksiz %4',
-    InvestmentPlan.balanced => 'orta risk -%5/+%18',
-    InvestmentPlan.growth => 'yüksek risk -%20/+%35',
+    InvestmentPlan.protected => 'kesin +%4',
+    InvestmentPlan.balanced => '%25: -%5 · %50: +%10 · %25: +%18',
+    InvestmentPlan.growth => '%25: -%20 · %50: +%15 · %25: +%35',
   };
 }

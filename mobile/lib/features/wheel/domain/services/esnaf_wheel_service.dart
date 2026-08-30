@@ -27,13 +27,13 @@ class WheelSpinOutcome {
 }
 
 class EsnafWheelService {
-  EsnafWheelService({Random? random}) : _random = random ?? Random();
+  EsnafWheelService({Random? random}) : _random = random;
 
   static const spinCost = 50;
   static const dailyMajorRewardLimit = 3;
   static const buffTaskCount = 2;
 
-  final Random _random;
+  final Random? _random;
 
   WheelAvailability availability(PlayerState state) {
     if (state.money < spinCost) {
@@ -54,7 +54,8 @@ class EsnafWheelService {
       throw GameRuleException(availability.reason);
     }
 
-    final drawn = _drawReward();
+    final random = _random ?? Random(state.randomSeed);
+    final drawn = _drawReward(random);
     var reward = drawn.reward;
     var sectorIndex = drawn.index;
     if (reward.isMajor &&
@@ -70,12 +71,13 @@ class EsnafWheelService {
               EsnafWheelRewardType.tipRain)
             index,
       ];
-      sectorIndex = tipSectors[_random.nextInt(tipSectors.length)];
+      sectorIndex = tipSectors[random.nextInt(tipSectors.length)];
     }
     var nextState = state.copyWith(
       money: state.money - spinCost,
       wheelMajorRewardsToday:
           state.wheelMajorRewardsToday + (reward.isMajor ? 1 : 0),
+      randomSeed: _nextSeed(state.randomSeed),
     );
     nextState = _applyReward(nextState, reward.type);
     nextState = nextState.copyWith(
@@ -105,8 +107,8 @@ class EsnafWheelService {
     );
   }
 
-  _DrawnReward _drawReward() {
-    final index = _random.nextInt(EsnafWheelRewardCatalog.sectorTypes.length);
+  _DrawnReward _drawReward(Random random) {
+    final index = random.nextInt(EsnafWheelRewardCatalog.sectorTypes.length);
     return _DrawnReward(
       index: index,
       reward: EsnafWheelRewardCatalog.byType(
@@ -133,9 +135,7 @@ class EsnafWheelService {
         money: state.money + 1000,
       ),
       EsnafWheelRewardType.tipRain => state.copyWith(money: state.money + 100),
-      EsnafWheelRewardType.smallTip => state.copyWith(
-        money: state.money + 50,
-      ),
+      EsnafWheelRewardType.smallTip => state.copyWith(money: state.money + 50),
       EsnafWheelRewardType.customerPenalty => state.copyWith(
         money: state.money - 50,
       ),
@@ -146,6 +146,8 @@ class EsnafWheelService {
   }
 
   int _remainingTasks(int tasks) => max(0, tasks - 1);
+
+  int _nextSeed(int seed) => (seed * 1103515245 + 12345) & 0x7fffffff;
 }
 
 class _DrawnReward {

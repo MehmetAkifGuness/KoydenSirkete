@@ -94,4 +94,9 @@ abstract final class EsnafWheelRewardCatalog {
 
   static EsnafWheelReward byType(EsnafWheelRewardType type) =>
       rewards.firstWhere((reward) => reward.type == type);
+
+  static int chancePercent(EsnafWheelRewardType type) =>
+      sectorTypes.where((sector) => sector == type).length *
+      100 ~/
+      sectorTypes.length;
 }

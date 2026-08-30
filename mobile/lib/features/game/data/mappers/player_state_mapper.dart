@@ -22,6 +22,7 @@ class PlayerStateMapper {
       wheelEnergyBuffTasks: model.wheelEnergyBuffTasks,
       wheelRewardBuffPercent: model.wheelRewardBuffPercent,
       wheelRewardBuffTasks: model.wheelRewardBuffTasks,
+      randomSeed: model.randomSeed,
       activeActivity: model.activeActivity,
       activeActivities: model.activeActivities,
       skills: model.skills,

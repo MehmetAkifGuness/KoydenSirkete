@@ -49,7 +49,8 @@ extension GameSessionFeatureApplication on GameSessionApplicationService {
   Future<PlayerState> completeOnboarding(PlayerState state) =>
       _persist(state.copyWith(isOnboarded: true));
 
-  Future<PlayerState> resetGame() => _persist(PlayerState.initial);
+  Future<PlayerState> resetGame() =>
+      _persist(PlayerState.initial.copyWith(randomSeed: _newRandomSeed()));
 
   Future<PlayerState> updateDebugState(
     PlayerState state,
