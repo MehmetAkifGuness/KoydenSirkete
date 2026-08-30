@@ -68,6 +68,7 @@ class PlayerStateMapper {
       pendingPersonalEventId: model.pendingPersonalEventId,
       lastPersonalEventDay: model.lastPersonalEventDay,
       isOnboarded: model.isOnboarded,
+      economyDifficulty: model.economyDifficulty,
     );
   }
 

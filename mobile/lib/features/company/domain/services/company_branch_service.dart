@@ -273,9 +273,10 @@ class CompanyBranchService {
         _seasonRewardService.sponsorshipRevenueBonus(state) +
         _budgetService.marketingRevenueBonusPercent(state) +
         _budgetService.maintenanceRevenueBonusPercent(state);
-    return _economyIndexService.apply(
+    return _economyIndexService.applyIncome(
       (dailyRevenue(branch) * (100 + bonus) / 100).round(),
       day ?? state.day,
+      difficulty: state.economyDifficulty,
     );
   }
 
@@ -291,9 +292,10 @@ class CompanyBranchService {
     final multiplier = (100 + branch.localGoal.payrollPercent - discount)
         .clamp(0, 200)
         .toInt();
-    return _economyIndexService.apply(
+    return _economyIndexService.applyExpense(
       (dailyPayroll(branch) * multiplier / 100).round(),
       day ?? state.day,
+      difficulty: state.economyDifficulty,
     );
   }
 

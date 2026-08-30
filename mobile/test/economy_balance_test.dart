@@ -10,6 +10,8 @@ import 'package:kariyerden_sirkete/features/company/domain/services/company_serv
 import 'package:kariyerden_sirkete/features/daily_goals/domain/entities/daily_goal.dart';
 import 'package:kariyerden_sirkete/features/earning/domain/entities/earning_performance.dart';
 import 'package:kariyerden_sirkete/features/earning/domain/services/earning_service.dart';
+import 'package:kariyerden_sirkete/features/economy/domain/entities/economy_difficulty.dart';
+import 'package:kariyerden_sirkete/features/economy/domain/services/economy_index_service.dart';
 import 'package:kariyerden_sirkete/features/employment/domain/entities/employment.dart';
 import 'package:kariyerden_sirkete/features/finance/domain/entities/finance_ledger.dart';
 import 'package:kariyerden_sirkete/features/game/domain/entities/player_state.dart';
@@ -19,6 +21,25 @@ import 'package:kariyerden_sirkete/features/work/domain/services/employer_task_g
 import 'package:kariyerden_sirkete/features/work/domain/services/work_service.dart';
 
 void main() {
+  test('economy difficulty defaults to normal and scales both sides', () {
+    const index = EconomyIndexService();
+    const amount = 1000;
+
+    expect(PlayerState.initial.economyDifficulty, EconomyDifficulty.normal);
+    expect(
+      index.applyIncome(amount, 365, difficulty: EconomyDifficulty.easy),
+      greaterThan(
+        index.applyIncome(amount, 365, difficulty: EconomyDifficulty.hard),
+      ),
+    );
+    expect(
+      index.applyExpense(amount, 365, difficulty: EconomyDifficulty.easy),
+      lessThan(
+        index.applyExpense(amount, 365, difficulty: EconomyDifficulty.hard),
+      ),
+    );
+  });
+
   group('automated economy simulations', () {
     for (final days in const [30, 100, 365, 1000]) {
       test('$days game days stay deterministic and playable', () {

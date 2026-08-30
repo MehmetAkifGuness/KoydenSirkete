@@ -8,6 +8,7 @@ import '../../../assets/presentation/pages/assets_page.dart';
 import '../../../game/presentation/pages/developer_data_page.dart';
 import '../../../game/presentation/state/game_session_controller.dart';
 import '../../../progress/presentation/pages/progress_page.dart';
+import '../../../economy/domain/entities/economy_difficulty.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({required this.session, super.key});
@@ -121,6 +122,30 @@ class ProfilePage extends StatelessWidget {
                         ),
                 ),
               ],
+              const SizedBox(height: 28),
+              const AppSectionHeader(
+                title: 'Ekonomi zorluğu',
+                caption: 'Gelirleri, giderleri ve enflasyon hızını belirler.',
+              ),
+              const SizedBox(height: 12),
+              AppInfoCard(
+                accent: AppPalette.primary,
+                padding: const EdgeInsets.all(14),
+                child: SegmentedButton<EconomyDifficulty>(
+                  segments: [
+                    for (final difficulty in EconomyDifficulty.values)
+                      ButtonSegment(
+                        value: difficulty,
+                        label: Text(difficulty.label),
+                      ),
+                  ],
+                  selected: {state.economyDifficulty},
+                  onSelectionChanged: session.isBusy
+                      ? null
+                      : (selection) =>
+                            session.setEconomyDifficulty(selection.first),
+                ),
+              ),
               const SizedBox(height: 9),
               _ProfileAction(
                 icon: Icons.restart_alt_rounded,

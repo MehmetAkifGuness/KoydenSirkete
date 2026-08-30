@@ -61,8 +61,15 @@ class LivingCostService {
   LivingCostBreakdown breakdown(PlayerState state, int cityId) {
     final city = CityCatalog.findById(cityId);
     if (city == null) return LivingCostBreakdown.empty;
-    final inflation = _economyIndexService.multiplierForDay(state.day);
-    final cityBase = (city.dailyCost * inflation).round();
+    final inflation = _economyIndexService.multiplierForDay(
+      state.day,
+      difficulty: state.economyDifficulty,
+    );
+    final cityBase = _economyIndexService.applyExpense(
+      city.dailyCost,
+      state.day,
+      difficulty: state.economyDifficulty,
+    );
     final housingBase = cityBase * housingPercent ~/ 100;
     final foodBase = cityBase * foodPercent ~/ 100;
     final utilitiesBase = cityBase * utilitiesPercent ~/ 100;

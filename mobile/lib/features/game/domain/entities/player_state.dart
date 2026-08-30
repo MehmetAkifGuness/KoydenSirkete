@@ -10,6 +10,7 @@ import '../../../company/domain/entities/company_project_team_state.dart';
 import '../../../company/domain/entities/company_budget_state.dart';
 import '../../../finance/domain/entities/finance_ledger.dart';
 import '../../../finance/domain/entities/personal_finance_state.dart';
+import '../../../economy/domain/entities/economy_difficulty.dart';
 
 class PlayerState {
   static const _unset = Object();
@@ -79,9 +80,10 @@ class PlayerState {
     this.pendingPersonalEventId,
     this.lastPersonalEventDay = 0,
     this.isOnboarded = false,
+    this.economyDifficulty = EconomyDifficulty.normal,
   }) : _legacyActiveActivity = activeActivity;
   static const initial = PlayerState(
-    schemaVersion: 34,
+    schemaVersion: 35,
     money: 240,
     energy: 100,
     knowledge: 0,
@@ -154,6 +156,7 @@ class PlayerState {
   final int? pendingPersonalEventId;
   final int lastPersonalEventDay;
   final bool isOnboarded;
+  final EconomyDifficulty economyDifficulty;
   PlayerState copyWith({
     int? schemaVersion,
     int? money,
@@ -219,6 +222,7 @@ class PlayerState {
     Object? pendingPersonalEventId = _unset,
     int? lastPersonalEventDay,
     bool? isOnboarded,
+    EconomyDifficulty? economyDifficulty,
   }) {
     return PlayerState(
       schemaVersion: schemaVersion ?? this.schemaVersion,
@@ -328,6 +332,7 @@ class PlayerState {
           : pendingPersonalEventId as int?,
       lastPersonalEventDay: lastPersonalEventDay ?? this.lastPersonalEventDay,
       isOnboarded: isOnboarded ?? this.isOnboarded,
+      economyDifficulty: economyDifficulty ?? this.economyDifficulty,
     );
   }
 

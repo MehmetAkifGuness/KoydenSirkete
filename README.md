@@ -330,6 +330,11 @@ Android-first, tamamen offline kariyer ve şirket simülasyonu.
 - Kira portföyü geliri aktif iş kazancı kapasitesiyle sınırlıdır.
 - İş ilerlemesi kira tavanını artırırken aktif görevler en güçlü günlük kazanç kaynağı olarak kalır.
 
+## v2.43.0 ekonomi zorluğu
+
+- Profil ekranından kolay, normal ve zor ekonomi dengesi seçilebilir; varsayılan mod normaldir.
+- Seçim gelir, gider ve enflasyon hızına uygulanır ve SQLite v35 ile saklanır.
+
 ## v2.42.0 şeffaf ve tekrarlanabilir rastgelelik
 
 - Esnaf Çarkı ve yatırım planları tüm sonuç olasılıklarını açık yüzdelerle gösterir.

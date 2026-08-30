@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.43.0
+
+- Profil ekranına kalıcı kolay, normal ve zor ekonomi seçenekleri eklendi; yeni oyunlar normal modda başlar.
+- Zorluk seçimi gelir, gider ve enflasyon hızını dengeli biçimde değiştirir.
+
 ## 2.42.0
 
 - Esnaf Çarkı sonuçları kayıt dosyasında ilerletilen deterministik bir tohumla üretilir; yeniden yükleme aynı bekleyen sonucu güvenle tekrarlar.

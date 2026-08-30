@@ -87,12 +87,14 @@ class CompanyService {
     );
   }
 
-  int dailyPayroll(PlayerState state, {int? day}) => _economyIndexService.apply(
-    employeesFor(
-      state,
-    ).fold(0, (total, employee) => total + employee.dailySalary),
-    day ?? state.day,
-  );
+  int dailyPayroll(PlayerState state, {int? day}) =>
+      _economyIndexService.applyExpense(
+        employeesFor(
+          state,
+        ).fold(0, (total, employee) => total + employee.dailySalary),
+        day ?? state.day,
+        difficulty: state.economyDifficulty,
+      );
 
   int dailyEmployeeContribution(CompanyEmployee employee) =>
       dailyEmployeeRevenue + employee.effectivePerformance ~/ 20;
@@ -113,9 +115,10 @@ class CompanyService {
         _seasonRewardService.sponsorshipRevenueBonus(state) +
         _budgetService.marketingRevenueBonusPercent(state) +
         _budgetService.maintenanceRevenueBonusPercent(state);
-    return _economyIndexService.apply(
+    return _economyIndexService.applyIncome(
       (gross * (100 + bonus) / 100).round(),
       day ?? state.day,
+      difficulty: state.economyDifficulty,
     );
   }
 

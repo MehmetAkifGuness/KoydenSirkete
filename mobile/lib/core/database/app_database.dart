@@ -17,7 +17,7 @@ class AppDatabase extends SqlitePlayerStateStore {
     final databasePath = join(await getDatabasesPath(), _databaseName);
     return _database = await openDatabase(
       databasePath,
-      version: 34,
+      version: 35,
       onCreate: (database, _) async {
         await database.execute('''
           CREATE TABLE $_tableName (
@@ -85,7 +85,8 @@ class AppDatabase extends SqlitePlayerStateStore {
             unlocked_achievements_mask INTEGER NOT NULL DEFAULT 0,
             active_project_id INTEGER NOT NULL DEFAULT 1,
             completed_projects INTEGER NOT NULL DEFAULT 0,
-            is_onboarded INTEGER NOT NULL DEFAULT 0
+            is_onboarded INTEGER NOT NULL DEFAULT 0,
+            economy_difficulty TEXT NOT NULL DEFAULT 'normal'
           )
         ''');
       },
@@ -322,6 +323,11 @@ class AppDatabase extends SqlitePlayerStateStore {
             'ALTER TABLE $_tableName ADD COLUMN random_seed INTEGER NOT NULL DEFAULT 1592594996',
           );
         }
+        if (oldVersion < 35) {
+          await database.execute(
+            "ALTER TABLE $_tableName ADD COLUMN economy_difficulty TEXT NOT NULL DEFAULT 'normal'",
+          );
+        }
       },
     );
   }
@@ -414,6 +420,7 @@ abstract class SqlitePlayerStateStore implements PlayerStateStore {
       activeProjectId: row['active_project_id'] as int? ?? 1,
       completedProjects: row['completed_projects'] as int? ?? 0,
       isOnboarded: (row['is_onboarded'] as int? ?? 0) == 1,
+      economyDifficulty: row['economy_difficulty'] as String? ?? 'normal',
     );
   }
 
@@ -485,6 +492,7 @@ abstract class SqlitePlayerStateStore implements PlayerStateStore {
       'active_project_id': record.activeProjectId,
       'completed_projects': record.completedProjects,
       'is_onboarded': record.isOnboarded ? 1 : 0,
+      'economy_difficulty': record.economyDifficulty,
     }, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 

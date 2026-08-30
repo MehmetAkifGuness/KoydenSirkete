@@ -73,6 +73,7 @@ class PlayerStateRecord {
     this.activeProjectId = 1,
     this.completedProjects = 0,
     this.isOnboarded = false,
+    this.economyDifficulty = 'normal',
   });
 
   final int id;
@@ -140,4 +141,5 @@ class PlayerStateRecord {
   final int activeProjectId;
   final int completedProjects;
   final bool isOnboarded;
+  final String economyDifficulty;
 }

@@ -34,6 +34,7 @@ import '../../../jobs/domain/entities/job_listing.dart';
 import '../../../wheel/domain/services/esnaf_wheel_service.dart';
 import '../../../personal_life/domain/entities/personal_event.dart';
 import '../../../finance/domain/entities/personal_finance_state.dart';
+import '../../../economy/domain/entities/economy_difficulty.dart';
 
 part 'game_session_feature_controller.dart';
 
@@ -258,6 +259,15 @@ class GameSessionController extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  Future<String?> setEconomyDifficulty(EconomyDifficulty difficulty) =>
+      _execute(
+        action: (state) =>
+            _applicationService.setEconomyDifficulty(state, difficulty),
+        stateOf: (result) => result,
+        message: (_) =>
+            'Ekonomi zorluğu ${difficulty.label} olarak kaydedildi.',
+      );
 
   Future<String?> updateDebugState(DebugStatePatch patch) async {
     return _execute(

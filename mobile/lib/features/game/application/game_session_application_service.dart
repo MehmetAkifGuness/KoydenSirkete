@@ -56,6 +56,7 @@ import '../../personal_life/domain/entities/personal_event.dart';
 import '../../personal_life/domain/services/personal_event_service.dart';
 import '../../finance/domain/services/personal_finance_service.dart';
 import '../../finance/domain/entities/personal_finance_state.dart';
+import '../../economy/domain/entities/economy_difficulty.dart';
 
 part 'game_session_feature_application.dart';
 
@@ -189,6 +190,7 @@ class GameSessionApplicationService {
                 job,
                 loaded.currentCityId,
                 day: loaded.day,
+                difficulty: loaded.economyDifficulty,
               ),
               company: job.company,
               startedDay: loaded.day,
@@ -205,6 +207,7 @@ class GameSessionApplicationService {
           employmentJob,
           loaded.currentCityId,
           day: loaded.day,
+          difficulty: loaded.economyDifficulty,
         );
         if (loaded.currentJobId != employmentJob.id ||
             loaded.careerLevel != employmentJob.level ||
@@ -227,6 +230,28 @@ class GameSessionApplicationService {
   }
 
   int _newRandomSeed() => DateTime.now().microsecondsSinceEpoch & 0x7fffffff;
+
+  Future<PlayerState> setEconomyDifficulty(
+    PlayerState state,
+    EconomyDifficulty difficulty,
+  ) {
+    var updated = state.copyWith(economyDifficulty: difficulty);
+    final employment = updated.employment;
+    final job = JobCatalog.findById(employment?.jobId);
+    if (employment != null && job != null) {
+      updated = updated.copyWith(
+        employment: employment.copyWith(
+          salary: _citySalaryService.calculate(
+            job,
+            updated.currentCityId,
+            day: updated.day,
+            difficulty: difficulty,
+          ),
+        ),
+      );
+    }
+    return _persist(updated);
+  }
 
   Future<PlayerState> startEarning(
     PlayerState state, {
@@ -317,6 +342,7 @@ class GameSessionApplicationService {
               job,
               nextState.currentCityId,
               day: nextState.day,
+              difficulty: nextState.economyDifficulty,
             ),
           ),
         );

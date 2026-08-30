@@ -25,6 +25,7 @@ import '../../../company/domain/entities/company_budget_state.dart';
 import '../../../finance/domain/entities/finance_ledger.dart';
 import '../../../finance/domain/entities/personal_finance_state.dart';
 import '../mappers/personal_finance_codec.dart';
+import '../../../economy/domain/entities/economy_difficulty.dart';
 
 class PlayerStateModel {
   const PlayerStateModel({
@@ -92,6 +93,7 @@ class PlayerStateModel {
     this.pendingPersonalEventId,
     this.lastPersonalEventDay = 0,
     this.isOnboarded = false,
+    this.economyDifficulty = EconomyDifficulty.normal,
   });
 
   factory PlayerStateModel.fromRecord(PlayerStateRecord record) {
@@ -182,6 +184,7 @@ class PlayerStateModel {
       pendingPersonalEventId: record.pendingPersonalEventId,
       lastPersonalEventDay: record.lastPersonalEventDay,
       isOnboarded: record.isOnboarded,
+      economyDifficulty: EconomyDifficulty.fromName(record.economyDifficulty),
     );
   }
 
@@ -249,6 +252,7 @@ class PlayerStateModel {
   final int? pendingPersonalEventId;
   final int lastPersonalEventDay;
   final bool isOnboarded;
+  final EconomyDifficulty economyDifficulty;
 
   factory PlayerStateModel.fromEntity(PlayerState entity) {
     return PlayerStateModel(
@@ -316,6 +320,7 @@ class PlayerStateModel {
       pendingPersonalEventId: entity.pendingPersonalEventId,
       lastPersonalEventDay: entity.lastPersonalEventDay,
       isOnboarded: entity.isOnboarded,
+      economyDifficulty: entity.economyDifficulty,
     );
   }
 }
