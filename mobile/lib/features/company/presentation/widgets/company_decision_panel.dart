@@ -81,6 +81,7 @@ class CompanyDecisionPanel extends StatelessWidget {
               _ChoiceCard(
                 choice: choice,
                 cost: service.cost(state, choice),
+                hardReward: service.hardModeRewardPreview(state, choice),
                 enabled: !session.isBusy,
                 onPressed: () => _resolve(context, choice),
               ),
@@ -104,12 +105,14 @@ class _ChoiceCard extends StatelessWidget {
   const _ChoiceCard({
     required this.choice,
     required this.cost,
+    required this.hardReward,
     required this.enabled,
     required this.onPressed,
   });
 
   final CompanyDecisionChoice choice;
   final int cost;
+  final String? hardReward;
   final bool enabled;
   final VoidCallback onPressed;
 
@@ -143,6 +146,17 @@ class _ChoiceCard extends StatelessWidget {
           choice.description,
           style: const TextStyle(color: AppPalette.textMuted, fontSize: 11),
         ),
+        if (hardReward != null) ...[
+          const SizedBox(height: 7),
+          Text(
+            hardReward!,
+            style: const TextStyle(
+              color: AppPalette.success,
+              fontSize: 11,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ],
         const SizedBox(height: 7),
         Wrap(
           spacing: 6,

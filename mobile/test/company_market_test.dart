@@ -8,6 +8,7 @@ import 'package:kariyerden_sirkete/features/company/domain/services/company_seas
 import 'package:kariyerden_sirkete/features/company/domain/services/company_competition_service.dart';
 import 'package:kariyerden_sirkete/features/company/domain/services/company_service.dart';
 import 'package:kariyerden_sirkete/features/game/domain/entities/player_state.dart';
+import 'package:kariyerden_sirkete/features/economy/domain/entities/economy_difficulty.dart';
 
 void main() {
   test('market events rotate every seven days deterministically', () {
@@ -44,6 +45,17 @@ void main() {
     expect(
       service.forecast(strong, day: 20).playerScore,
       greaterThan(service.forecast(weak, day: 20).playerScore),
+    );
+  });
+
+  test('hard economy gives rivals a variable strength bonus', () {
+    final service = CompanyMarketService();
+    final normal = _companyState();
+    final hard = normal.copyWith(economyDifficulty: EconomyDifficulty.hard);
+
+    expect(
+      service.forecast(hard, day: 20).competitorScore,
+      greaterThan(service.forecast(normal, day: 20).competitorScore),
     );
   });
 

@@ -20,6 +20,7 @@ import '../../company/domain/services/company_competition_service.dart';
 import '../../company/domain/services/company_stage_service.dart';
 import '../../company/domain/services/company_treasury_service.dart';
 import '../../company/domain/services/company_budget_service.dart';
+import '../../company/domain/services/company_automation_service.dart';
 import '../../company/domain/services/company_decision_service.dart';
 import '../../company/domain/entities/company_budget_state.dart';
 import '../../company/domain/entities/company_decision.dart';

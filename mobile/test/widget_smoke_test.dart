@@ -44,6 +44,7 @@ import 'package:kariyerden_sirkete/features/onboarding/presentation/pages/onboar
 import 'package:kariyerden_sirkete/features/onboarding/presentation/widgets/game_tutorial_overlay.dart';
 import 'package:kariyerden_sirkete/features/profile/presentation/pages/profile_page.dart';
 import 'package:kariyerden_sirkete/features/progress/presentation/pages/progress_page.dart';
+import 'package:kariyerden_sirkete/features/progress/presentation/pages/career_final_page.dart';
 import 'package:kariyerden_sirkete/features/skills/presentation/pages/skills_page.dart';
 import 'package:kariyerden_sirkete/features/sport/presentation/pages/sport_page.dart';
 import 'package:kariyerden_sirkete/features/training/presentation/pages/training_page.dart';
@@ -1002,6 +1003,48 @@ void main() {
     expect(find.text('Bitiş yok · Prestij devam eder'), findsOneWidget);
     expect(find.text('Sıradaki puan hedefleri'), findsOneWidget);
     expect(find.text('Çalışma serisi'), findsOneWidget);
+    session.dispose();
+  });
+
+  testWidgets('career final summarizes completion and continues free play', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(800, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final session = await _readySession(
+      PlayerState.initial.copyWith(
+        day: 320,
+        companyLevel: 3,
+        companyFunds: 1500000,
+        completedProjects: 40,
+        companyStageIndex: 3,
+        careerCompletedDay: 300,
+        isOnboarded: true,
+      ),
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.dark(),
+        home: AppGradientBackground(child: CareerFinalPage(session: session)),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('HOLDİNG KURULDU'), findsOneWidget);
+    expect(find.textContaining('300. günde tamamlandı'), findsOneWidget);
+    final continueButton = find.byKey(
+      const ValueKey('career-final-continue'),
+    );
+    await tester.scrollUntilVisible(
+      continueButton,
+      250,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.drag(find.byType(ListView), const Offset(0, -120));
+    await tester.pumpAndSettle();
+    await tester.tap(continueButton);
+    await tester.pumpAndSettle();
+    expect(session.state.careerFinalSeen, isTrue);
     session.dispose();
   });
 

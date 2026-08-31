@@ -2,6 +2,7 @@ import '../../../game/domain/entities/player_state.dart';
 import '../entities/achievement.dart';
 import '../../../finance/domain/entities/finance_ledger.dart';
 import '../../../company/domain/services/company_growth_service.dart';
+import '../../../economy/domain/entities/economy_difficulty.dart';
 
 class AchievementService {
   static final achievements = <Achievement>[
@@ -100,6 +101,28 @@ class AchievementService {
       reward: 12000,
       target: 30,
       measure: CompanyGrowthService.marketShareFor,
+    ),
+    Achievement(
+      id: 13,
+      title: 'Zor girişimci',
+      description: 'Zor ekonomide kendi şirketini kur.',
+      reward: 5000,
+      target: 1,
+      measure: (state) =>
+          state.economyDifficulty == EconomyDifficulty.hard &&
+              state.companyLevel > 0
+          ? 1
+          : 0,
+    ),
+    Achievement(
+      id: 14,
+      title: 'Zor mod şampiyonu',
+      description: 'Zor ekonomide bir şirket sezonunu şampiyon bitir.',
+      reward: 12000,
+      target: 1,
+      measure: (state) => state.economyDifficulty == EconomyDifficulty.hard
+          ? state.companyCompetition.championships
+          : 0,
     ),
   ];
 

@@ -37,8 +37,10 @@ class CompanyStageService {
       highest++;
     }
     final reachedLateGame = highest >= CompanyStage.nationalBrand.index;
+    final completedCareer = highest >= CompanyStage.holding.index;
     if (highest == state.companyStageIndex &&
-        (!reachedLateGame || state.lateGameReachedDay > 0)) {
+        (!reachedLateGame || state.lateGameReachedDay > 0) &&
+        (!completedCareer || state.careerCompletedDay > 0)) {
       return state;
     }
     return state.copyWith(
@@ -46,6 +48,9 @@ class CompanyStageService {
       lateGameReachedDay: reachedLateGame && state.lateGameReachedDay == 0
           ? state.day
           : state.lateGameReachedDay,
+      careerCompletedDay: completedCareer && state.careerCompletedDay == 0
+          ? state.day
+          : state.careerCompletedDay,
     );
   }
 

@@ -5,7 +5,7 @@ import 'player_state_store.dart';
 
 const _databaseName = 'career_to_company.db';
 const _tableName = 'player_state';
-const _currentDatabaseVersion = 41;
+const _currentDatabaseVersion = 42;
 
 class AppDatabase extends SqlitePlayerStateStore {
   AppDatabase({String? databasePath, DatabaseFactory? factory})
@@ -78,6 +78,8 @@ extension _AppDatabaseOpening on AppDatabase {
             company_stage_index INTEGER NOT NULL DEFAULT 0,
             first_company_day INTEGER NOT NULL DEFAULT 0,
             late_game_reached_day INTEGER NOT NULL DEFAULT 0,
+            career_completed_day INTEGER NOT NULL DEFAULT 0,
+            career_final_seen INTEGER NOT NULL DEFAULT 0,
             pending_personal_event_id INTEGER,
             last_personal_event_day INTEGER NOT NULL DEFAULT 0,
             owned_car_id INTEGER,
@@ -388,10 +390,34 @@ extension _AppDatabaseOpening on AppDatabase {
           if (oldVersion < 41) {
             await _restoreSinglePlayerState(database);
           }
+          if (oldVersion < 42) {
+            await _addColumnIfMissing(
+              database,
+              'career_completed_day',
+              'INTEGER NOT NULL DEFAULT 0',
+            );
+            await _addColumnIfMissing(
+              database,
+              'career_final_seen',
+              'INTEGER NOT NULL DEFAULT 0',
+            );
+          }
         },
       ),
     );
   }
+}
+
+Future<void> _addColumnIfMissing(
+  Database database,
+  String name,
+  String definition,
+) async {
+  final columns = await database.rawQuery('PRAGMA table_info($_tableName)');
+  if (columns.any((column) => column['name'] == name)) return;
+  await database.execute(
+    'ALTER TABLE $_tableName ADD COLUMN $name $definition',
+  );
 }
 
 Future<void> _restoreSinglePlayerState(Database database) async {
@@ -474,6 +500,8 @@ abstract class SqlitePlayerStateStore implements PlayerStateStore {
       companyStageIndex: row['company_stage_index'] as int? ?? 0,
       firstCompanyDay: row['first_company_day'] as int? ?? 0,
       lateGameReachedDay: row['late_game_reached_day'] as int? ?? 0,
+      careerCompletedDay: row['career_completed_day'] as int? ?? 0,
+      careerFinalSeen: (row['career_final_seen'] as int? ?? 0) == 1,
       pendingPersonalEventId: row['pending_personal_event_id'] as int?,
       lastPersonalEventDay: row['last_personal_event_day'] as int? ?? 0,
       ownedCarId: row['owned_car_id'] as int?,
@@ -560,6 +588,8 @@ abstract class SqlitePlayerStateStore implements PlayerStateStore {
     'company_stage_index': record.companyStageIndex,
     'first_company_day': record.firstCompanyDay,
     'late_game_reached_day': record.lateGameReachedDay,
+    'career_completed_day': record.careerCompletedDay,
+    'career_final_seen': record.careerFinalSeen ? 1 : 0,
     'pending_personal_event_id': record.pendingPersonalEventId,
     'last_personal_event_day': record.lastPersonalEventDay,
     'owned_car_id': record.ownedCarId,

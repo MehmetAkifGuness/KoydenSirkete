@@ -92,6 +92,8 @@ class PlayerStateModel {
     this.companyStageIndex = 0,
     this.firstCompanyDay = 0,
     this.lateGameReachedDay = 0,
+    this.careerCompletedDay = 0,
+    this.careerFinalSeen = false,
     this.pendingPersonalEventId,
     this.lastPersonalEventDay = 0,
     this.isOnboarded = false,
@@ -189,6 +191,8 @@ class PlayerStateModel {
       companyStageIndex: record.companyStageIndex,
       firstCompanyDay: record.firstCompanyDay,
       lateGameReachedDay: record.lateGameReachedDay,
+      careerCompletedDay: record.careerCompletedDay,
+      careerFinalSeen: record.careerFinalSeen,
       pendingPersonalEventId: record.pendingPersonalEventId,
       lastPersonalEventDay: record.lastPersonalEventDay,
       isOnboarded: record.isOnboarded,
@@ -263,6 +267,8 @@ class PlayerStateModel {
   final int companyStageIndex;
   final int firstCompanyDay;
   final int lateGameReachedDay;
+  final int careerCompletedDay;
+  final bool careerFinalSeen;
   final int? pendingPersonalEventId;
   final int lastPersonalEventDay;
   final bool isOnboarded;
@@ -341,6 +347,8 @@ PlayerStateModel _playerStateModelFromEntity(PlayerState entity) =>
       companyStageIndex: entity.companyStageIndex,
       firstCompanyDay: entity.firstCompanyDay,
       lateGameReachedDay: entity.lateGameReachedDay,
+      careerCompletedDay: entity.careerCompletedDay,
+      careerFinalSeen: entity.careerFinalSeen,
       pendingPersonalEventId: entity.pendingPersonalEventId,
       lastPersonalEventDay: entity.lastPersonalEventDay,
       isOnboarded: entity.isOnboarded,

@@ -40,6 +40,7 @@ class CompanyProject {
     required this.deliveryDays,
     required this.delayRiskPercent,
     this.requiresSeasonInvitation = false,
+    this.hardModeOnly = false,
   });
 
   final int id;
@@ -57,4 +58,5 @@ class CompanyProject {
   final int deliveryDays;
   final int delayRiskPercent;
   final bool requiresSeasonInvitation;
+  final bool hardModeOnly;
 }

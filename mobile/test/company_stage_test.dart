@@ -49,6 +49,15 @@ void main() {
     expect(reevaluated.lateGameReachedDay, 240);
   });
 
+  test('reaching holding records career completion once', () {
+    final service = CompanyStageService();
+    final reached = service.evaluate(_holdingState().copyWith(day: 310));
+    final reevaluated = service.evaluate(reached.copyWith(day: 400));
+
+    expect(reached.careerCompletedDay, 310);
+    expect(reevaluated.careerCompletedDay, 310);
+  });
+
   test('an unlocked company stage never regresses', () {
     final service = CompanyStageService();
     final regional = service.evaluate(

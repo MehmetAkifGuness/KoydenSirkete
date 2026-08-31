@@ -1,21 +1,24 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kariyerden_sirkete/features/company/domain/entities/company_project.dart';
 import 'package:kariyerden_sirkete/features/company/domain/services/company_project_catalog.dart';
+import 'package:kariyerden_sirkete/features/company/domain/services/company_service.dart';
+import 'package:kariyerden_sirkete/features/economy/domain/entities/economy_difficulty.dart';
+import 'package:kariyerden_sirkete/features/game/domain/entities/player_state.dart';
 
 void main() {
   test('project catalog offers balanced and valid contract categories', () {
     final projects = CompanyProjectCatalog.projects;
     final ids = projects.map((project) => project.id).toSet();
 
-    expect(projects, hasLength(15));
+    expect(projects, hasLength(17));
     expect(ids, hasLength(projects.length));
     expect(ids, containsAll(List<int>.generate(15, (index) => index + 1)));
 
     const expectedCounts = <CompanyProjectCategory, int>{
       CompanyProjectCategory.shortTerm: 4,
       CompanyProjectCategory.mediumTerm: 4,
-      CompanyProjectCategory.large: 4,
-      CompanyProjectCategory.strategic: 3,
+      CompanyProjectCategory.large: 5,
+      CompanyProjectCategory.strategic: 4,
     };
     for (final entry in expectedCounts.entries) {
       expect(
@@ -41,5 +44,22 @@ void main() {
       (project) => project.requiresSeasonInvitation,
     );
     expect(invited.category, CompanyProjectCategory.strategic);
+    expect(projects.where((project) => project.hardModeOnly), hasLength(2));
+
+    final hardProject = projects.firstWhere((project) => project.hardModeOnly);
+    final company = PlayerState.initial.copyWith(companyLevel: 3);
+    expect(
+      CompanyService().checkProjectSelection(company, hardProject).isEligible,
+      isFalse,
+    );
+    expect(
+      CompanyService()
+          .checkProjectSelection(
+            company.copyWith(economyDifficulty: EconomyDifficulty.hard),
+            hardProject,
+          )
+          .isEligible,
+      isTrue,
+    );
   });
 }

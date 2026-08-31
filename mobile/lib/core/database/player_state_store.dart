@@ -43,6 +43,8 @@ class PlayerStateRecord {
     this.companyStageIndex = 0,
     this.firstCompanyDay = 0,
     this.lateGameReachedDay = 0,
+    this.careerCompletedDay = 0,
+    this.careerFinalSeen = false,
     this.pendingPersonalEventId,
     this.lastPersonalEventDay = 0,
     this.ownedCarId,
@@ -117,6 +119,8 @@ class PlayerStateRecord {
   final int companyStageIndex;
   final int firstCompanyDay;
   final int lateGameReachedDay;
+  final int careerCompletedDay;
+  final bool careerFinalSeen;
   final int? pendingPersonalEventId;
   final int lastPersonalEventDay;
   final int? ownedCarId;

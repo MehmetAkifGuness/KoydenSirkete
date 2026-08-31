@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import '../../../game/domain/entities/player_state.dart';
+import '../../../economy/domain/entities/economy_difficulty.dart';
 import '../entities/company_competition_strategy.dart';
 import '../entities/company_competitor.dart';
 import '../entities/company_market_event.dart';
@@ -211,11 +212,15 @@ class CompanyMarketService {
             .clamp(0, 100)
             .toInt();
     final profileModifier = competitorProfileModifier(competitor, event);
+    final hardRivalBonus = state.economyDifficulty == EconomyDifficulty.hard
+        ? 4 + (currentDay * 11 + competitor.baseStrength) % 7
+        : 0;
     final competitorScore =
         (competitor.baseStrength +
                 competitorVariation +
                 profileModifier +
-                competitorSeasonRuleModifier)
+                competitorSeasonRuleModifier +
+                hardRivalBonus)
             .clamp(0, 100)
             .toInt();
     final revenue = _totalRevenue(state);

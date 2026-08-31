@@ -74,7 +74,7 @@ void main() {
       await store.close();
 
       final migrated = await databaseFactoryFfi.openDatabase(databasePath);
-      expect(await migrated.getVersion(), 41);
+      expect(await migrated.getVersion(), 42);
       final columns = (await migrated.rawQuery(
         'PRAGMA table_info(player_state)',
       )).map((row) => row['name']).toSet();

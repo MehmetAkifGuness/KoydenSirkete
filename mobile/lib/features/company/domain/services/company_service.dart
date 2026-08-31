@@ -1,5 +1,6 @@
 import '../../../../core/errors/game_rule_exception.dart';
 import '../../../economy/domain/services/economy_index_service.dart';
+import '../../../economy/domain/entities/economy_difficulty.dart';
 import '../../../game/domain/entities/player_state.dart';
 import '../entities/company_employee.dart';
 import '../entities/company_project.dart';
@@ -410,6 +411,13 @@ extension CompanyProjectOperations on CompanyService {
       return const CompanyCheck(
         isEligible: false,
         reason: 'Önce şirketini kurmalısın.',
+      );
+    }
+    if (project.hardModeOnly &&
+        state.economyDifficulty != EconomyDifficulty.hard) {
+      return const CompanyCheck(
+        isEligible: false,
+        reason: 'Bu yüksek riskli sözleşme yalnızca Zor ekonomide açılır.',
       );
     }
     if (project.requiresSeasonInvitation &&

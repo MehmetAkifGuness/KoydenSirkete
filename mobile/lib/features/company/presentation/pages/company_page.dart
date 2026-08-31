@@ -7,6 +7,7 @@ import '../../../../core/widgets/app_transaction_preview.dart';
 import '../../../../core/widgets/game_account_bar.dart';
 import '../../../game/presentation/state/game_session_controller.dart';
 import '../../../economy/domain/services/investment_return_service.dart';
+import '../../../economy/domain/entities/economy_difficulty.dart';
 import '../../domain/entities/company_employee.dart';
 import '../../domain/entities/company_project.dart';
 import '../../domain/entities/company_specialty.dart';
@@ -26,6 +27,7 @@ import '../widgets/company_expansion_panel.dart';
 import '../widgets/company_treasury_panel.dart';
 import '../widgets/company_budget_panel.dart';
 import '../widgets/company_decision_panel.dart';
+import '../widgets/company_automation_panel.dart';
 import '../widgets/company_trophy_panel.dart';
 import '../widgets/company_project_team_panel.dart';
 import 'company_branches_page.dart';
@@ -407,8 +409,13 @@ extension _CompanyViewBuilder on _CompanyViewState {
     final lastProject = lastOutcome == null
         ? null
         : CompanyProjectCatalog.byId(lastOutcome.projectId);
+    final availableProjects = CompanyProjectCatalog.projects.where(
+      (item) =>
+          !item.hardModeOnly ||
+          state.economyDifficulty == EconomyDifficulty.hard,
+    );
     final projects =
-        CompanyProjectCatalog.projects.where((item) {
+        availableProjects.where((item) {
           final query = _projectQuery.trim().toLowerCase();
           return (_projectCategory == null ||
                   item.category == _projectCategory) &&
@@ -591,6 +598,8 @@ extension _CompanyViewBuilder on _CompanyViewState {
           CompanyDecisionPanel(session: session),
           const SizedBox(height: 12),
           CompanyBudgetPanel(session: session),
+          const SizedBox(height: 12),
+          CompanyAutomationPanel(session: session),
           const SizedBox(height: 25),
         ],
         if (section == _CompanySection.projects) ...[
@@ -708,7 +717,7 @@ extension _CompanyViewBuilder on _CompanyViewState {
           ),
           const SizedBox(height: 7),
           Text(
-            '${projects.length}/${CompanyProjectCatalog.projects.length} proje · ${_projectRewardFirst ? "getiri" : "maliyet"} sırası',
+            '${projects.length}/${availableProjects.length} proje · ${_projectRewardFirst ? "getiri" : "maliyet"} sırası',
             style: const TextStyle(color: AppPalette.textMuted, fontSize: 11),
           ),
           if (projects.isEmpty) ...[
@@ -887,6 +896,12 @@ class _ProjectCard extends StatelessWidget {
                     runSpacing: 6,
                     children: [
                       AppPill(label: project.category.label),
+                      if (project.hardModeOnly)
+                        const AppPill(
+                          label: 'Zor moda özel',
+                          color: AppPalette.warning,
+                          icon: Icons.local_fire_department_outlined,
+                        ),
                       AppPill(label: project.customerType.label),
                       AppPill(label: '${project.specialty.label} uzmanlığı'),
                       AppPill(

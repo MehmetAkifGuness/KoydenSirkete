@@ -147,6 +147,8 @@ void main() {
       companyStageIndex: 2,
       firstCompanyDay: 22,
       lateGameReachedDay: 190,
+      careerCompletedDay: 260,
+      careerFinalSeen: true,
       pendingPersonalEventId: 3,
       lastPersonalEventDay: 18,
       companyExpansion: const CompanyExpansionState(
@@ -218,6 +220,8 @@ void main() {
     expect(actual?.companyStageIndex, 2);
     expect(actual?.firstCompanyDay, 22);
     expect(actual?.lateGameReachedDay, 190);
+    expect(actual?.careerCompletedDay, 260);
+    expect(actual?.careerFinalSeen, isTrue);
     expect(actual?.pendingPersonalEventId, 3);
     expect(actual?.lastPersonalEventDay, 18);
     expect(actual?.companyExpansion.completedDealIds, [

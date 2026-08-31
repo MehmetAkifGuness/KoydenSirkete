@@ -35,6 +35,7 @@ import '../features/onboarding/presentation/models/guided_tutorial_step.dart';
 import '../features/onboarding/presentation/pages/onboarding_page.dart';
 import '../features/onboarding/presentation/widgets/game_tutorial_overlay.dart';
 import '../features/profile/presentation/pages/profile_page.dart';
+import '../features/progress/presentation/pages/career_final_page.dart';
 import '../features/skills/presentation/pages/skills_page.dart';
 import '../features/sport/presentation/pages/sport_page.dart';
 import '../features/training/presentation/pages/training_page.dart';
@@ -188,6 +189,14 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
             context,
             'welcome',
             OnboardingPage(session: _session, onStart: _enterGameWithTutorial),
+          );
+        }
+        if (_session.state.careerCompletedDay > 0 &&
+            !_session.state.careerFinalSeen) {
+          return _shellTransition(
+            context,
+            'career-final',
+            CareerFinalPage(session: _session),
           );
         }
         final tutorialStep = _tutorialStep;

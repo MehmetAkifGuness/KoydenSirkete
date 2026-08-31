@@ -56,6 +56,9 @@ extension GameSessionFeatureApplication on GameSessionApplicationService {
   Future<PlayerState> resetGame() =>
       _persist(PlayerState.initial.copyWith(randomSeed: _newRandomSeed()));
 
+  Future<PlayerState> acknowledgeCareerFinal(PlayerState state) =>
+      _persist(state.copyWith(careerFinalSeen: true));
+
   Future<PlayerState> setTutorialProgress(
     PlayerState state, {
     required int step,
@@ -154,6 +157,18 @@ extension GameSessionFeatureApplication on GameSessionApplicationService {
     PlayerState state,
     CompanyDecisionChoice choice,
   ) => _persist(const CompanyDecisionService().resolve(state, choice));
+
+  Future<CompanyAutomationResult> applyCompanyAutomation(
+    PlayerState state,
+    CompanyAutomationPreset preset,
+  ) async {
+    final result = const CompanyAutomationService().apply(state, preset);
+    return CompanyAutomationResult(
+      state: await _persist(result.state),
+      managerCount: result.managerCount,
+      raiseCount: result.raiseCount,
+    );
+  }
 
   Future<PlayerState> recruitEmployee(
     PlayerState state, {

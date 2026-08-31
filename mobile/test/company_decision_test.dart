@@ -8,6 +8,7 @@ import 'package:kariyerden_sirkete/features/company/domain/services/company_grow
 import 'package:kariyerden_sirkete/features/finance/domain/entities/finance_ledger.dart';
 import 'package:kariyerden_sirkete/features/game/data/mappers/company_competition_codec.dart';
 import 'package:kariyerden_sirkete/features/game/domain/entities/player_state.dart';
+import 'package:kariyerden_sirkete/features/economy/domain/entities/economy_difficulty.dart';
 
 void main() {
   const service = CompanyDecisionService();
@@ -81,5 +82,21 @@ void main() {
     );
     expect(decoded.lastDecisionChoiceId, 'people');
     expect(decoded.decisionReputation, 1);
+  });
+
+  test('correct hard-mode crisis choice grants the advertised bonus', () {
+    final state = readyState().copyWith(
+      economyDifficulty: EconomyDifficulty.hard,
+    );
+    final choice = CompanyDecisionService.choices.singleWhere(
+      (item) => service.hardModeRewardPreview(state, item) != null,
+    );
+    final expense = service.cost(state, choice);
+
+    final result = service.resolve(state, choice);
+
+    expect(result.companyFunds, state.companyFunds - expense + 1600);
+    expect(result.projectProgress, (choice.projectProgress + 5).clamp(0, 99));
+    expect(result.companyCompetition.decisionReputation, choice.reputation + 3);
   });
 }

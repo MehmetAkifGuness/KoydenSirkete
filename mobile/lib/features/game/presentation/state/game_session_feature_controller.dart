@@ -1,6 +1,13 @@
 part of 'game_session_controller.dart';
 
 extension GameSessionFeatureController on GameSessionController {
+  Future<String?> acknowledgeCareerFinal() => _execute(
+    action: _applicationService.acknowledgeCareerFinal,
+    stateOf: (result) => result,
+    message: (_) =>
+        'Serbest oyun başladı. Holdingini büyütmeye devam edebilirsin.',
+  );
+
   int get creditLimit => _applicationService.creditLimit(_state);
 
   Future<String?> borrow(int amount) => _execute(
@@ -84,6 +91,21 @@ extension GameSessionFeatureController on GameSessionController {
         stateOf: (result) => result,
         message: (_) => '${choice.title} kararı uygulandı.',
       );
+
+  Future<String?> applyCompanyAutomation(
+    CompanyAutomationPreset preset,
+  ) => _execute(
+    action: (state) =>
+        _applicationService.applyCompanyAutomation(state, preset),
+    stateOf: (result) => result.state,
+    message: (result) =>
+        '${preset.label} planı uygulandı: ${result.managerCount} bayi yöneticisi ve ${result.raiseCount} zam talebi düzenlendi. Aktif proje aynı ekiple otomatik yenilenir.',
+  );
+
+  Future<String?> tickToNextDay() {
+    final hours = 24 - _state.hour;
+    return tick(hours: hours <= 0 ? 24 : hours);
+  }
 
   Future<String?> recruitEmployee(CompanyEmployee employee) => _execute(
     action: (state) =>
@@ -189,31 +211,28 @@ extension GameSessionFeatureController on GameSessionController {
             : '${employee.name} bayi yöneticisi oldu.',
       );
 
-  Future<String?> setBranchLocalGoal(
-    int cityId,
-    CompanyBranchLocalGoal goal,
-  ) => _execute(
-    action: (state) => _applicationService.setBranchLocalGoal(
-      state,
-      cityId: cityId,
-      goal: goal,
-    ),
-    stateOf: (result) => result,
-    message: (_) => 'Yerel hedef “${goal.label}” olarak güncellendi.',
-  );
+  Future<String?> setBranchLocalGoal(int cityId, CompanyBranchLocalGoal goal) =>
+      _execute(
+        action: (state) => _applicationService.setBranchLocalGoal(
+          state,
+          cityId: cityId,
+          goal: goal,
+        ),
+        stateOf: (result) => result,
+        message: (_) => 'Yerel hedef “${goal.label}” olarak güncellendi.',
+      );
 
-  Future<String?> setBranchSpecialty(
-    int cityId,
-    CompanySpecialty specialty,
-  ) => _execute(
-    action: (state) => _applicationService.setBranchSpecialty(
-      state,
-      cityId: cityId,
-      specialty: specialty,
-    ),
-    stateOf: (result) => result,
-    message: (_) => 'Bayi uzmanlığı “${specialty.label}” olarak güncellendi.',
-  );
+  Future<String?> setBranchSpecialty(int cityId, CompanySpecialty specialty) =>
+      _execute(
+        action: (state) => _applicationService.setBranchSpecialty(
+          state,
+          cityId: cityId,
+          specialty: specialty,
+        ),
+        stateOf: (result) => result,
+        message: (_) =>
+            'Bayi uzmanlığı “${specialty.label}” olarak güncellendi.',
+      );
 
   EmployeeDevelopmentCheck checkBranchEmployeeDevelopment(
     int cityId,

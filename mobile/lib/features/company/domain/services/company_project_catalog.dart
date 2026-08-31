@@ -2,7 +2,7 @@ import '../entities/company_project.dart';
 import '../entities/company_specialty.dart';
 
 abstract final class CompanyProjectCatalog {
-  static const version = 6;
+  static const version = 7;
 
   static const projects = <CompanyProject>[
     CompanyProject(
@@ -249,6 +249,41 @@ abstract final class CompanyProjectCatalog {
       customerType: CompanyCustomerType.international,
       deliveryDays: 42,
       delayRiskPercent: 36,
+    ),
+    CompanyProject(
+      id: 16,
+      name: 'Kriz fırsatı devralma',
+      description: 'Zayıflayan rakibin sözleşmesini yüksek riskle devral.',
+      cost: 12000,
+      reward: 90000,
+      progressPerEmployee: 3,
+      experienceReward: 100,
+      riskPercent: 55,
+      recommendedCompanyLevel: 2,
+      specialty: CompanySpecialty.finance,
+      category: CompanyProjectCategory.large,
+      customerType: CompanyCustomerType.corporate,
+      deliveryDays: 28,
+      delayRiskPercent: 50,
+      hardModeOnly: true,
+    ),
+    CompanyProject(
+      id: 17,
+      name: 'Yüksek kaldıraçlı dönüşüm',
+      description:
+          'Holding yolunda büyük sermayeyi tek bir küresel hamleye bağla.',
+      cost: 30000,
+      reward: 220000,
+      progressPerEmployee: 2,
+      experienceReward: 180,
+      riskPercent: 65,
+      recommendedCompanyLevel: 3,
+      specialty: CompanySpecialty.leadership,
+      category: CompanyProjectCategory.strategic,
+      customerType: CompanyCustomerType.international,
+      deliveryDays: 45,
+      delayRiskPercent: 60,
+      hardModeOnly: true,
     ),
   ];
 

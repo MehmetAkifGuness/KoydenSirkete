@@ -13,6 +13,7 @@ import '../../../company/domain/services/company_service.dart';
 import '../../../company/domain/services/company_employee_development_service.dart';
 import '../../../company/domain/services/company_employee_management_service.dart';
 import '../../../company/domain/services/company_treasury_service.dart';
+import '../../../company/domain/services/company_automation_service.dart';
 import '../../../company/domain/entities/company_deal.dart';
 import '../../../company/domain/entities/company_competition_strategy.dart';
 import '../../../company/domain/services/company_expansion_service.dart';

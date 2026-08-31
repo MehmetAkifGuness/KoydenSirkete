@@ -1,6 +1,7 @@
 import '../../../../core/errors/game_rule_exception.dart';
 import '../../../finance/domain/entities/finance_ledger.dart';
 import '../../../game/domain/entities/player_state.dart';
+import '../../../economy/domain/entities/economy_difficulty.dart';
 import '../entities/company_decision.dart';
 import '../entities/company_employee.dart';
 import '../entities/company_market_event.dart';
@@ -69,6 +70,17 @@ class CompanyDecisionService {
   int cost(PlayerState state, CompanyDecisionChoice choice) =>
       choice.costPerLevel * state.companyLevel.clamp(1, 10);
 
+  String? hardModeRewardPreview(
+    PlayerState state,
+    CompanyDecisionChoice choice,
+  ) {
+    if (state.economyDifficulty != EconomyDifficulty.hard ||
+        choice.id != _recommendedChoiceId(current(state).event.category)) {
+      return null;
+    }
+    return 'Doğru kriz hamlesi: kasa +₺${state.companyLevel.clamp(1, 10) * 800}, proje +5, itibar +3';
+  }
+
   PlayerState resolve(PlayerState state, CompanyDecisionChoice choice) {
     if (state.companyLevel == 0) {
       throw const GameRuleException('Önce şirketini kurmalısın.');
@@ -90,21 +102,30 @@ class CompanyDecisionService {
       ...state.companyCompetition.resolvedDecisionKeys,
       decision.key,
     ];
+    final correctHardChoice =
+        state.economyDifficulty == EconomyDifficulty.hard &&
+        choice.id == _recommendedChoiceId(decision.event.category);
+    final hardFundsReward = correctHardChoice
+        ? state.companyLevel.clamp(1, 10) * 800
+        : 0;
+    final hardProjectReward = correctHardChoice ? 5 : 0;
+    final hardReputationReward = correctHardChoice ? 3 : 0;
     final competition = state.companyCompetition.copyWith(
       resolvedDecisionKeys: decisionKeys.length <= maxResolvedDecisions
           ? decisionKeys
           : decisionKeys.sublist(decisionKeys.length - maxResolvedDecisions),
       lastDecisionChoiceId: choice.id,
       decisionReputation:
-          (state.companyCompetition.decisionReputation + choice.reputation)
+          (state.companyCompetition.decisionReputation +
+                  choice.reputation +
+                  hardReputationReward)
               .clamp(0, 100),
     );
     return state.copyWith(
-      companyFunds: state.companyFunds - expense,
-      projectProgress: (state.projectProgress + choice.projectProgress).clamp(
-        0,
-        99,
-      ),
+      companyFunds: state.companyFunds - expense + hardFundsReward,
+      projectProgress:
+          (state.projectProgress + choice.projectProgress + hardProjectReward)
+              .clamp(0, 99),
       employees: [
         for (final employee in state.employees) _affect(employee, choice),
       ],
@@ -121,7 +142,7 @@ class CompanyDecisionService {
       financeLedger: CompanyFinanceRecorder.record(
         state,
         FinanceCategory.companyMarket,
-        -expense,
+        hardFundsReward - expense,
       ),
     );
   }
@@ -140,4 +161,12 @@ class CompanyDecisionService {
     CompanyMarketEventCategory.workforce => 'Ekip gündemi',
     CompanyMarketEventCategory.stable => 'Yönetim kurulu kararı',
   };
+
+  String _recommendedChoiceId(CompanyMarketEventCategory category) =>
+      switch (category) {
+        CompanyMarketEventCategory.opportunity => 'growth',
+        CompanyMarketEventCategory.threat => 'cautious',
+        CompanyMarketEventCategory.workforce => 'people',
+        CompanyMarketEventCategory.stable => 'cautious',
+      };
 }

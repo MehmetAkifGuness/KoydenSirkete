@@ -80,6 +80,8 @@ class PlayerState {
     this.companyStageIndex = 0,
     this.firstCompanyDay = 0,
     this.lateGameReachedDay = 0,
+    this.careerCompletedDay = 0,
+    this.careerFinalSeen = false,
     this.pendingPersonalEventId,
     this.lastPersonalEventDay = 0,
     this.isOnboarded = false,
@@ -90,7 +92,7 @@ class PlayerState {
     this.hapticsEnabled = true,
   }) : _legacyActiveActivity = activeActivity;
   static const initial = PlayerState(
-    schemaVersion: 41,
+    schemaVersion: 42,
     money: 240,
     energy: 100,
     knowledge: 0,
@@ -162,6 +164,8 @@ class PlayerState {
   final int companyStageIndex;
   final int firstCompanyDay;
   final int lateGameReachedDay;
+  final int careerCompletedDay;
+  final bool careerFinalSeen;
   final int? pendingPersonalEventId;
   final int lastPersonalEventDay;
   final bool isOnboarded;
@@ -251,6 +255,8 @@ extension PlayerStateCopy on PlayerState {
     int? companyStageIndex,
     int? firstCompanyDay,
     int? lateGameReachedDay,
+    int? careerCompletedDay,
+    bool? careerFinalSeen,
     Object? pendingPersonalEventId = _unset,
     int? lastPersonalEventDay,
     bool? isOnboarded,
@@ -365,6 +371,8 @@ extension PlayerStateCopy on PlayerState {
       companyStageIndex: companyStageIndex ?? this.companyStageIndex,
       firstCompanyDay: firstCompanyDay ?? this.firstCompanyDay,
       lateGameReachedDay: lateGameReachedDay ?? this.lateGameReachedDay,
+      careerCompletedDay: careerCompletedDay ?? this.careerCompletedDay,
+      careerFinalSeen: careerFinalSeen ?? this.careerFinalSeen,
       pendingPersonalEventId: identical(pendingPersonalEventId, _unset)
           ? this.pendingPersonalEventId
           : pendingPersonalEventId as int?,

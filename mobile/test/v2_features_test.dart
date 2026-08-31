@@ -554,9 +554,11 @@ void main() {
       performance: 70,
       dailySalary: 30,
     );
-    final project = CompanyProjectCatalog.projects.reduce(
-      (left, right) => left.riskPercent >= right.riskPercent ? left : right,
-    );
+    final project = CompanyProjectCatalog.projects
+        .where((project) => !project.hardModeOnly)
+        .reduce(
+          (left, right) => left.riskPercent >= right.riskPercent ? left : right,
+        );
     final strategy = CompanyProjectStrategyService();
     final base = PlayerState.initial.copyWith(
       companyLevel: 1,
@@ -848,7 +850,7 @@ void main() {
     expect(service.valuation(state), greaterThan(state.companyFunds));
     expect(service.reputation(state), greaterThan(0));
     expect(service.marketShare(state), greaterThan(0));
-    expect(CompanyProjectCatalog.projects, hasLength(15));
+    expect(CompanyProjectCatalog.projects, hasLength(17));
     expect(CompanyProjectCatalog.projects.last.progressPerEmployee, 2);
   });
 
