@@ -38,7 +38,6 @@ abstract final class AppTheme {
       colorScheme: colors,
       scaffoldBackgroundColor: Colors.transparent,
       canvasColor: AppPalette.background,
-      fontFamily: 'sans-serif',
       pageTransitionsTheme: const PageTransitionsTheme(
         builders: {
           TargetPlatform.android: AppPageTransitionsBuilder(),

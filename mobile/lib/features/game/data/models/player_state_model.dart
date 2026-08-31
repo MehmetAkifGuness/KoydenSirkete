@@ -272,8 +272,12 @@ class PlayerStateModel {
   final bool soundEffectsEnabled;
   final bool hapticsEnabled;
 
-  factory PlayerStateModel.fromEntity(PlayerState entity) {
-    return PlayerStateModel(
+  factory PlayerStateModel.fromEntity(PlayerState entity) =>
+      _playerStateModelFromEntity(entity);
+}
+
+PlayerStateModel _playerStateModelFromEntity(PlayerState entity) =>
+    PlayerStateModel(
       schemaVersion: entity.schemaVersion,
       money: entity.money,
       energy: entity.energy,
@@ -346,5 +350,3 @@ class PlayerStateModel {
       soundEffectsEnabled: entity.soundEffectsEnabled,
       hapticsEnabled: entity.hapticsEnabled,
     );
-  }
-}

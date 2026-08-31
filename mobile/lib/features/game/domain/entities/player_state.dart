@@ -12,8 +12,9 @@ import '../../../finance/domain/entities/finance_ledger.dart';
 import '../../../finance/domain/entities/personal_finance_state.dart';
 import '../../../economy/domain/entities/economy_difficulty.dart';
 
+const _unset = Object();
+
 class PlayerState {
-  static const _unset = Object();
   static const bankruptcyDurationHours = 24;
   const PlayerState({
     required this.schemaVersion,
@@ -89,7 +90,7 @@ class PlayerState {
     this.hapticsEnabled = true,
   }) : _legacyActiveActivity = activeActivity;
   static const initial = PlayerState(
-    schemaVersion: 39,
+    schemaVersion: 41,
     money: 240,
     energy: 100,
     knowledge: 0,
@@ -169,6 +170,23 @@ class PlayerState {
   final EconomyDifficulty economyDifficulty;
   final bool soundEffectsEnabled;
   final bool hapticsEnabled;
+
+  bool get isBankrupt =>
+      negativeMoneyHours >= PlayerState.bankruptcyDurationHours;
+  ActiveActivity? get activeActivity => activeActivities.isNotEmpty
+      ? activeActivities.first
+      : _legacyActiveActivity;
+  List<ActiveActivity> get activities {
+    if (activeActivities.isNotEmpty) return List.unmodifiable(activeActivities);
+    final legacy = _legacyActiveActivity;
+    return legacy == null ? const [] : List.unmodifiable([legacy]);
+  }
+
+  int get activityCapacity => careerLevel < 1 ? 1 : careerLevel;
+  bool get hasActivityCapacity => activities.length < activityCapacity;
+}
+
+extension PlayerStateCopy on PlayerState {
   PlayerState copyWith({
     int? schemaVersion,
     int? money,
@@ -359,17 +377,4 @@ class PlayerState {
       hapticsEnabled: hapticsEnabled ?? this.hapticsEnabled,
     );
   }
-
-  bool get isBankrupt => negativeMoneyHours >= bankruptcyDurationHours;
-  ActiveActivity? get activeActivity => activeActivities.isNotEmpty
-      ? activeActivities.first
-      : _legacyActiveActivity;
-  List<ActiveActivity> get activities {
-    if (activeActivities.isNotEmpty) return List.unmodifiable(activeActivities);
-    final legacy = _legacyActiveActivity;
-    return legacy == null ? const [] : List.unmodifiable([legacy]);
-  }
-
-  int get activityCapacity => careerLevel < 1 ? 1 : careerLevel;
-  bool get hasActivityCapacity => activities.length < activityCapacity;
 }

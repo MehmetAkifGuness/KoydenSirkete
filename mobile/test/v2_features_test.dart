@@ -646,7 +646,13 @@ void main() {
 
     expect(costs.housing, 0);
     expect(costs.totalExpenses, greaterThan(0));
-    expect(settled.money, homeState.money - costs.totalExpenses);
+    expect(settled.money, 0);
+    expect(
+      settled.financeLedger.entries.any(
+        (entry) => entry.category == FinanceCategory.hardshipSupport,
+      ),
+      isTrue,
+    );
     expect(moved.money, carState.money - (target.moveCost * .8).ceil());
   });
 

@@ -1,0 +1,23 @@
+Müdür, kariyer basamaklarından kendi şirketinin yönetimine uzanan tamamen internetsiz bir yönetim simülasyonudur.
+
+Kariyerini geliştir
+• İş ilanlarını karşılaştır, görevleri tamamla ve uzmanlığını artır.
+• Eğitim, enerji ve kişisel bütçe kararlarını birlikte yönet.
+• Şehir, ev, araç ve yatırım seçimlerinin uzun vadeli etkilerini gör.
+
+Şirketini kur ve büyüt
+• Proje portföyünü maliyet, getiri, süre ve risk bilgileriyle değerlendir.
+• Çalışanları uzmanlıklarına göre ekiplere ata; moral, kıdem ve tükenmişliği yönet.
+• Şubeler aç, yerel hedefler belirle ve şirket bütçesini kişisel cüzdandan ayrı tut.
+
+Rekabete hazırlan
+• Piyasa koşullarına göre strateji seç ve rakip şirketlerle sezonlarda yarış.
+• Kupa, itibar, sponsorluk ve özel sözleşme ödülleri kazan.
+• Kolay, normal veya zor ekonomiyle kendi temponu belirle.
+
+Güvenli ve çevrimdışı
+• İnternet bağlantısı, hesap veya reklam gerekmez.
+• Kayıtlar yalnızca cihazında tutulur.
+• İlerlemeniz doğrudan tek bir yerel SQLite kaydında tutulur.
+
+Köyden başlayan yolculuğunu doğru kararlarla büyük bir şirkete dönüştür.

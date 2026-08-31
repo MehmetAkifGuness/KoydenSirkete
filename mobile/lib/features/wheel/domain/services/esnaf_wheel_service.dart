@@ -39,7 +39,7 @@ class EsnafWheelService {
     if (state.money < spinCost) {
       return const WheelAvailability(
         isAvailable: false,
-        reason: 'Çarkı çevirmek için 50 TL gerekir.',
+        reason: 'Çarkı çevirmek için ₺50 gerekir.',
       );
     }
     return const WheelAvailability(

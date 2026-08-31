@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../app/theme/app_palette.dart';
+import '../../../../core/utils/app_formatters.dart';
 import '../../../../core/widgets/app_feedback.dart';
 import '../../../../core/widgets/app_page.dart';
 import '../../../assets/domain/services/car_catalog.dart';
@@ -253,7 +254,7 @@ class _CityCard extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           Text(
-            'Taşınma ₺$moveCost${car == null ? '' : ' · Araç indirimi %${car.moveDiscountPercent}'} · Maaş x${city.salaryMultiplier.toStringAsFixed(2)} · Pazar ${city.marketLevel}',
+            'Taşınma ₺$moveCost${car == null ? '' : ' · Araç indirimi %${car.moveDiscountPercent}'} · Maaş x${AppFormatters.decimal(city.salaryMultiplier)} · Pazar ${city.marketLevel}',
             style: const TextStyle(color: AppPalette.textMuted, fontSize: 11),
           ),
           const SizedBox(height: 9),

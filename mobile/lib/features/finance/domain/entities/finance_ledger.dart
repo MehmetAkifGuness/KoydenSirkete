@@ -62,6 +62,36 @@ class FinanceTotals {
   int get net => income - expense;
 }
 
+class FinanceLedgerSnapshot {
+  const FinanceLedgerSnapshot({
+    required this.personalEntriesByDay,
+    required this.companyEntriesByDay,
+    required this.personalTotalsByDay,
+    required this.companyTotalsByDay,
+    required this.personalTotal,
+    required this.companyTotal,
+  });
+
+  final Map<int, List<FinanceEntry>> personalEntriesByDay;
+  final Map<int, List<FinanceEntry>> companyEntriesByDay;
+  final Map<int, FinanceTotals> personalTotalsByDay;
+  final Map<int, FinanceTotals> companyTotalsByDay;
+  final FinanceTotals personalTotal;
+  final FinanceTotals companyTotal;
+
+  List<FinanceEntry> entriesFor(int day, FinanceAccount account) =>
+      (account == FinanceAccount.personal
+          ? personalEntriesByDay[day]
+          : companyEntriesByDay[day]) ??
+      const [];
+
+  FinanceTotals totalsFor(int day, FinanceAccount account) =>
+      (account == FinanceAccount.personal
+          ? personalTotalsByDay[day]
+          : companyTotalsByDay[day]) ??
+      const FinanceTotals(income: 0, expense: 0);
+}
+
 class FinanceLedger {
   const FinanceLedger({this.entries = const <FinanceEntry>[]});
 
@@ -153,6 +183,66 @@ class FinanceLedger {
     }
     return FinanceTotals(income: income, expense: expense);
   }
+
+  FinanceLedgerSnapshot snapshot({required int fromDay, required int toDay}) {
+    final personalEntries = <int, List<FinanceEntry>>{};
+    final companyEntries = <int, List<FinanceEntry>>{};
+    final personalAmounts = <int, (int, int)>{};
+    final companyAmounts = <int, (int, int)>{};
+    var personalIncome = 0;
+    var personalExpense = 0;
+    var companyIncome = 0;
+    var companyExpense = 0;
+    for (final entry in entries) {
+      if (entry.day < fromDay || entry.day > toDay) continue;
+      final entryMap = entry.account == FinanceAccount.personal
+          ? personalEntries
+          : companyEntries;
+      entryMap.putIfAbsent(entry.day, () => []).add(entry);
+      final amountMap = entry.account == FinanceAccount.personal
+          ? personalAmounts
+          : companyAmounts;
+      final current = amountMap[entry.day] ?? (0, 0);
+      final income = entry.amount > 0 ? entry.amount : 0;
+      final expense = entry.amount < 0 ? -entry.amount : 0;
+      amountMap[entry.day] = (current.$1 + income, current.$2 + expense);
+      if (entry.account == FinanceAccount.personal) {
+        personalIncome += income;
+        personalExpense += expense;
+      } else {
+        companyIncome += income;
+        companyExpense += expense;
+      }
+    }
+    Map<int, FinanceTotals> totalsOf(Map<int, (int, int)> source) => {
+      for (final entry in source.entries)
+        entry.key: FinanceTotals(
+          income: entry.value.$1,
+          expense: entry.value.$2,
+        ),
+    };
+    return FinanceLedgerSnapshot(
+      personalEntriesByDay: _freezeEntries(personalEntries),
+      companyEntriesByDay: _freezeEntries(companyEntries),
+      personalTotalsByDay: Map.unmodifiable(totalsOf(personalAmounts)),
+      companyTotalsByDay: Map.unmodifiable(totalsOf(companyAmounts)),
+      personalTotal: FinanceTotals(
+        income: personalIncome,
+        expense: personalExpense,
+      ),
+      companyTotal: FinanceTotals(
+        income: companyIncome,
+        expense: companyExpense,
+      ),
+    );
+  }
+
+  static Map<int, List<FinanceEntry>> _freezeEntries(
+    Map<int, List<FinanceEntry>> source,
+  ) => Map.unmodifiable({
+    for (final entry in source.entries)
+      entry.key: List<FinanceEntry>.unmodifiable(entry.value),
+  });
 }
 
 extension FinanceCategoryAccount on FinanceCategory {

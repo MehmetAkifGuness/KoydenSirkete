@@ -60,12 +60,19 @@ extension GameSessionFeatureApplication on GameSessionApplicationService {
     PlayerState state, {
     required int step,
     required bool completed,
-  }) => _persist(
-    state.copyWith(
-      tutorialStep: step.clamp(0, 7),
-      tutorialCompleted: completed,
-    ),
-  );
+  }) {
+    if (!state.isOnboarded) {
+      throw const GameRuleException(
+        'Öğretici ilerlemesinden önce yeni oyun kaydı oluşturulmalıdır.',
+      );
+    }
+    return _persist(
+      state.copyWith(
+        tutorialStep: step.clamp(0, 15),
+        tutorialCompleted: completed,
+      ),
+    );
+  }
 
   Future<PlayerState> setFeedbackPreferences(
     PlayerState state, {

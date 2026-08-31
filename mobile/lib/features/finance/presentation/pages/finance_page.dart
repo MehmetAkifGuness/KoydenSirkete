@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../../../../app/theme/app_palette.dart';
+import '../../../../core/utils/app_formatters.dart';
 import '../../../../core/widgets/app_page.dart';
+import '../../../../core/widgets/game_account_bar.dart';
 import '../../../cities/domain/services/living_cost_service.dart';
 import '../../../game/presentation/state/game_session_controller.dart';
 import '../../domain/entities/finance_ledger.dart';
@@ -9,9 +11,10 @@ import '../../domain/entities/personal_finance_state.dart';
 import '../../domain/services/personal_finance_service.dart';
 
 class FinancePage extends StatelessWidget {
-  const FinancePage({required this.session, super.key});
+  const FinancePage({required this.session, this.onSectionOpened, super.key});
 
   final GameSessionController session;
+  final ValueChanged<String>? onSectionOpened;
 
   @override
   Widget build(BuildContext context) => AppPage(
@@ -22,24 +25,6 @@ class FinancePage extends StatelessWidget {
       builder: (context, _) {
         final state = session.state;
         final costs = LivingCostService().breakdown(state, state.currentCityId);
-        final personalToday = state.financeLedger
-            .forDay(state.day, account: FinanceAccount.personal)
-            .reversed
-            .toList();
-        final companyToday = state.financeLedger
-            .forDay(state.day, account: FinanceAccount.company)
-            .reversed
-            .toList();
-        final personalWeekly = state.financeLedger.totals(
-          fromDay: (state.day - 6).clamp(1, state.day),
-          toDay: state.day,
-          account: FinanceAccount.personal,
-        );
-        final companyWeekly = state.financeLedger.totals(
-          fromDay: (state.day - 6).clamp(1, state.day),
-          toDay: state.day,
-          account: FinanceAccount.company,
-        );
         return ListView(
           padding: const EdgeInsets.fromLTRB(18, 8, 18, 28),
           children: [
@@ -49,49 +34,124 @@ class FinancePage extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             _ProjectionCard(costs: costs),
-            const SizedBox(height: 24),
-            _AccountHistory(
-              title: 'Kişisel hareketler',
-              caption: 'Maaş, yaşam giderleri ve kişisel varlıklar',
-              entries: personalToday,
-            ),
             const SizedBox(height: 22),
-            _AccountHistory(
-              title: 'Şirket hareketleri',
-              caption:
-                  'Projeler, maaşlar, bütçeler, bayiler ve piyasa etkileri',
-              entries: companyToday,
-            ),
-            const SizedBox(height: 22),
-            _PersonalFinancePanel(session: session),
-            const SizedBox(height: 22),
-            AppSectionHeader(
-              title: 'Son 7 gün',
-              caption:
-                  'Kişisel ${_signedMoney(personalWeekly.net)} · Şirket ${_signedMoney(companyWeekly.net)}',
+            const AppSectionHeader(
+              title: 'Finans alanları',
+              caption: 'İhtiyacın olan rapora veya işleme doğrudan git.',
             ),
             const SizedBox(height: 12),
-            for (
-              var day = (state.day - 6).clamp(1, state.day);
-              day <= state.day;
-              day++
-            ) ...[
-              _DailyFinanceRow(
-                day: day,
-                personal: state.financeLedger.totals(
-                  fromDay: day,
-                  toDay: day,
-                  account: FinanceAccount.personal,
-                ),
-                company: state.financeLedger.totals(
-                  fromDay: day,
-                  toDay: day,
-                  account: FinanceAccount.company,
-                ),
-              ),
-              const SizedBox(height: 8),
-            ],
+            AppSubpageCard(
+              icon: Icons.receipt_long_outlined,
+              title: 'Bugünkü hareketler',
+              subtitle: 'Kişisel cüzdan ve şirket kasası işlemleri.',
+              onTap: () => _open(context, _FinanceSection.movements),
+            ),
+            const SizedBox(height: 10),
+            AppSubpageCard(
+              icon: Icons.account_balance_outlined,
+              title: 'Kredi ve yatırım',
+              subtitle: 'Borçlanma, erken ödeme ve yatırım planları.',
+              color: AppPalette.secondary,
+              onTap: () => _open(context, _FinanceSection.personalFinance),
+            ),
+            const SizedBox(height: 10),
+            AppSubpageCard(
+              icon: Icons.analytics_outlined,
+              title: '7 günlük özet',
+              subtitle: 'Gelir, gider ve net değişimi gün gün karşılaştır.',
+              color: AppPalette.tertiary,
+              onTap: () => _open(context, _FinanceSection.history),
+            ),
           ],
+        );
+      },
+    ),
+  );
+
+  void _open(BuildContext context, _FinanceSection section) {
+    onSectionOpened?.call(section.name);
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => GameAccountRoute(
+          session: session,
+          child: _FinanceSectionPage(session: session, section: section),
+        ),
+      ),
+    );
+  }
+}
+
+enum _FinanceSection { movements, personalFinance, history }
+
+class _FinanceSectionPage extends StatelessWidget {
+  const _FinanceSectionPage({required this.session, required this.section});
+
+  final GameSessionController session;
+  final _FinanceSection section;
+
+  @override
+  Widget build(BuildContext context) => AppPage(
+    title: switch (section) {
+      _FinanceSection.movements => 'Bugünkü hareketler',
+      _FinanceSection.personalFinance => 'Kredi ve yatırım',
+      _FinanceSection.history => '7 günlük özet',
+    },
+    subtitle: switch (section) {
+      _FinanceSection.movements => 'Hesap hareketlerini ayrı ayrı incele',
+      _FinanceSection.personalFinance => 'Kişisel finans kararlarını yönet',
+      _FinanceSection.history => 'Gelir ve gider eğilimini karşılaştır',
+    },
+    child: AnimatedBuilder(
+      animation: session,
+      builder: (context, _) {
+        final state = session.state;
+        final firstDay = (state.day - 6).clamp(1, state.day);
+        final snapshot = state.financeLedger.snapshot(
+          fromDay: firstDay,
+          toDay: state.day,
+        );
+        return ListView(
+          padding: const EdgeInsets.fromLTRB(18, 8, 18, 28),
+          children: switch (section) {
+            _FinanceSection.movements => [
+              _AccountHistory(
+                title: 'Kişisel hareketler',
+                caption: 'Maaş, yaşam giderleri ve kişisel varlıklar',
+                entries: snapshot
+                    .entriesFor(state.day, FinanceAccount.personal)
+                    .reversed
+                    .toList(growable: false),
+              ),
+              const SizedBox(height: 22),
+              _AccountHistory(
+                title: 'Şirket hareketleri',
+                caption: 'Projeler, maaşlar, bütçeler ve piyasa etkileri',
+                entries: snapshot
+                    .entriesFor(state.day, FinanceAccount.company)
+                    .reversed
+                    .toList(growable: false),
+              ),
+            ],
+            _FinanceSection.personalFinance => [
+              _PersonalFinancePanel(session: session),
+            ],
+            _FinanceSection.history => [
+              AppSectionHeader(
+                title: 'Son 7 gün',
+                caption:
+                    'Kişisel ${_signedMoney(snapshot.personalTotal.net)} · Şirket ${_signedMoney(snapshot.companyTotal.net)}',
+              ),
+              const SizedBox(height: 12),
+              for (var day = firstDay; day <= state.day; day++) ...[
+                _DailyFinanceRow(
+                  day: day,
+                  personal: snapshot.totalsFor(day, FinanceAccount.personal),
+                  company: snapshot.totalsFor(day, FinanceAccount.company),
+                ),
+                const SizedBox(height: 8),
+              ],
+            ],
+          },
         );
       },
     ),
@@ -361,7 +421,7 @@ class _ProjectionCard extends StatelessWidget {
           ),
           const SizedBox(height: 11),
           Text(
-            'Yaşam düzeyi x${costs.lifestyleMultiplier.toStringAsFixed(2)} · Enflasyon x${costs.inflationMultiplier.toStringAsFixed(2)}',
+            'Yaşam düzeyi x${AppFormatters.decimal(costs.lifestyleMultiplier)} · Enflasyon x${AppFormatters.decimal(costs.inflationMultiplier)}',
             style: const TextStyle(color: AppPalette.textMuted, fontSize: 11),
           ),
         ],

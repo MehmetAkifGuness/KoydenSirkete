@@ -38,6 +38,14 @@ class AppPage extends StatelessWidget {
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
+                        if (Navigator.canPop(context)) ...[
+                          IconButton(
+                            tooltip: 'Geri',
+                            onPressed: () => Navigator.of(context).pop(),
+                            icon: const Icon(Icons.arrow_back_rounded),
+                          ),
+                          const SizedBox(width: 4),
+                        ],
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -263,6 +271,72 @@ class AppStatCard extends StatelessWidget {
       ),
     );
   }
+}
+
+class AppSubpageCard extends StatelessWidget {
+  const AppSubpageCard({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+    this.color = AppPalette.primary,
+    this.trailing,
+    super.key,
+  });
+
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+  final Color color;
+  final String? trailing;
+
+  @override
+  Widget build(BuildContext context) => AppInfoCard(
+    accent: color,
+    padding: EdgeInsets.zero,
+    child: InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Padding(
+        padding: const EdgeInsets.all(15),
+        child: Row(
+          children: [
+            Icon(icon, color: color, size: 24),
+            const SizedBox(width: 13),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(fontWeight: FontWeight.w900),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(
+                      color: AppPalette.textSecondary,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (trailing != null) ...[
+              const SizedBox(width: 8),
+              Text(
+                trailing!,
+                style: TextStyle(color: color, fontWeight: FontWeight.w800),
+              ),
+            ],
+            const SizedBox(width: 8),
+            const Icon(Icons.arrow_forward_rounded, size: 18),
+          ],
+        ),
+      ),
+    ),
+  );
 }
 
 class AppEmptyState extends StatelessWidget {

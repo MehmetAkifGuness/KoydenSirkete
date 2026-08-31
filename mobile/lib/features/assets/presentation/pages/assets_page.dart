@@ -9,6 +9,7 @@ import '../../../cities/domain/entities/city.dart';
 import '../../../cities/domain/services/city_catalog.dart';
 import '../../../economy/domain/services/investment_return_service.dart';
 import '../../../game/presentation/state/game_session_controller.dart';
+import '../../../../core/widgets/game_account_bar.dart';
 import '../../domain/entities/car_asset.dart';
 import '../../domain/entities/home_asset.dart';
 import '../../domain/services/asset_service.dart';
@@ -16,9 +17,10 @@ import '../../domain/services/car_catalog.dart';
 import '../../domain/services/home_catalog.dart';
 
 class AssetsPage extends StatelessWidget {
-  const AssetsPage({required this.session, super.key});
+  const AssetsPage({required this.session, this.onSectionOpened, super.key});
 
   final GameSessionController session;
+  final ValueChanged<String>? onSectionOpened;
 
   @override
   Widget build(BuildContext context) {
@@ -101,39 +103,25 @@ class AssetsPage extends StatelessWidget {
                     ],
                   ),
                 ),
-                const SizedBox(height: 26),
-                const AppSectionHeader(
+                const SizedBox(height: 22),
+                AppSubpageCard(
+                  icon: Icons.home_work_outlined,
                   title: 'Evler',
-                  caption:
-                      'Evinde otur veya kiraya ver. Toplam kira geliri aktif iş kazancı seviyesinde sınırlanır.',
+                  subtitle: 'Satın al, taşın veya kiraya ver.',
+                  trailing: '${ownedHomes.length}',
+                  onTap: () =>
+                      _openSection(context, session, _AssetSection.homes),
                 ),
-                const SizedBox(height: 12),
-                if (ownedHomes.isNotEmpty) ...[
-                  for (final home in ownedHomes) ...[
-                    _OwnedHomeCard(home: home, session: session),
-                    const SizedBox(height: 10),
-                  ],
-                ],
-                if (city != null)
-                  for (final home in HomeCatalog.forCity(city))
-                    if (!state.ownedHomeIds.contains(home.id)) ...[
-                      _HomeCard(home: home, session: session, city: city),
-                      const SizedBox(height: 10),
-                    ],
-                const SizedBox(height: 18),
-                const AppSectionHeader(
+                const SizedBox(height: 10),
+                AppSubpageCard(
+                  icon: Icons.directions_car_outlined,
                   title: 'Arabalar',
-                  caption: 'Şehir değişimlerinde avantaj kazan.',
+                  subtitle: 'Araç seçeneklerini ve şehir avantajlarını yönet.',
+                  color: AppPalette.secondary,
+                  trailing: ownedCar == null ? 'Yok' : '1',
+                  onTap: () =>
+                      _openSection(context, session, _AssetSection.cars),
                 ),
-                const SizedBox(height: 12),
-                if (ownedCar != null) ...[
-                  _OwnedCarCard(car: ownedCar, session: session),
-                  const SizedBox(height: 10),
-                ] else
-                  for (final car in CarCatalog.cars) ...[
-                    _CarCard(car: car, session: session),
-                    const SizedBox(height: 10),
-                  ],
               ],
             );
           } on Object {
@@ -143,6 +131,90 @@ class AssetsPage extends StatelessWidget {
       ),
     );
   }
+
+  void _openSection(
+    BuildContext context,
+    GameSessionController session,
+    _AssetSection section,
+  ) {
+    onSectionOpened?.call(section.name);
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => GameAccountRoute(
+          session: session,
+          child: _AssetSectionPage(session: session, section: section),
+        ),
+      ),
+    );
+  }
+}
+
+enum _AssetSection { homes, cars }
+
+class _AssetSectionPage extends StatelessWidget {
+  const _AssetSectionPage({required this.session, required this.section});
+
+  final GameSessionController session;
+  final _AssetSection section;
+
+  @override
+  Widget build(BuildContext context) => AppPage(
+    title: section == _AssetSection.homes ? 'Evler' : 'Arabalar',
+    subtitle: section == _AssetSection.homes
+        ? 'Konutlarını ve kira gelirini yönet'
+        : 'Ulaşım avantajlarını yönet',
+    child: AnimatedBuilder(
+      animation: session,
+      builder: (context, _) {
+        try {
+          final state = session.state;
+          final city = CityCatalog.findById(state.currentCityId);
+          final ownedHomes = state.ownedHomeIds
+              .map(HomeCatalog.findById)
+              .whereType<HomeAsset>()
+              .toList(growable: false);
+          final ownedCar = CarCatalog.findById(state.ownedCarId);
+          return ListView(
+            padding: const EdgeInsets.fromLTRB(18, 8, 18, 28),
+            children: section == _AssetSection.homes
+                ? [
+                    const AppSectionHeader(
+                      title: 'Konut portföyü',
+                      caption: 'Evinde otur veya düzenli kira geliri kazan.',
+                    ),
+                    const SizedBox(height: 12),
+                    for (final home in ownedHomes) ...[
+                      _OwnedHomeCard(home: home, session: session),
+                      const SizedBox(height: 10),
+                    ],
+                    if (city != null)
+                      for (final home in HomeCatalog.forCity(city))
+                        if (!state.ownedHomeIds.contains(home.id)) ...[
+                          _HomeCard(home: home, session: session, city: city),
+                          const SizedBox(height: 10),
+                        ],
+                  ]
+                : [
+                    const AppSectionHeader(
+                      title: 'Araç garajı',
+                      caption: 'Şehir değişimlerinde avantaj kazan.',
+                    ),
+                    const SizedBox(height: 12),
+                    if (ownedCar != null)
+                      _OwnedCarCard(car: ownedCar, session: session)
+                    else
+                      for (final car in CarCatalog.cars) ...[
+                        _CarCard(car: car, session: session),
+                        const SizedBox(height: 10),
+                      ],
+                  ],
+          );
+        } on Object {
+          return const FeatureErrorView(title: 'Varlık bilgileri okunamadı.');
+        }
+      },
+    ),
+  );
 }
 
 class _HomeCard extends StatelessWidget {
@@ -235,7 +307,8 @@ class _HomeCard extends StatelessWidget {
         account: 'Kişisel cüzdan',
         cost: '-₺${home.price}',
         returnSummary: '₺$monthlyRent/ay brüt kira veya konut avantajı',
-        duration: '${InvestmentReturnService.homeDays(home)} gün hedef geri dönüş',
+        duration:
+            '${InvestmentReturnService.homeDays(home)} gün hedef geri dönüş',
         risk: 'Kira bakımı ve satış değer kaybı',
       ),
       confirmLabel: 'Satın al',
@@ -457,7 +530,8 @@ class _CarCard extends StatelessWidget {
         cost: '-₺${car.price}',
         returnSummary:
             '%${car.moveDiscountPercent} taşınma indirimi ve +${car.opportunityBonus} fırsat',
-        duration: '${InvestmentReturnService.carDays(car)} gün hedef geri dönüş',
+        duration:
+            '${InvestmentReturnService.carDays(car)} gün hedef geri dönüş',
         risk: 'Satışta değer kaybı',
       ),
       confirmLabel: 'Satın al',

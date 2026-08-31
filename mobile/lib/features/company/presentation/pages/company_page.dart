@@ -31,9 +31,18 @@ import '../widgets/company_project_team_panel.dart';
 import 'company_branches_page.dart';
 
 class CompanyPage extends StatelessWidget {
-  const CompanyPage({required this.session, super.key});
+  const CompanyPage({
+    required this.session,
+    this.onSectionOpened,
+    this.establishmentCheckOverride,
+    this.onEstablishCompany,
+    super.key,
+  });
 
   final GameSessionController session;
+  final ValueChanged<String>? onSectionOpened;
+  final CompanyCheck? establishmentCheckOverride;
+  final Future<String?> Function()? onEstablishCompany;
 
   @override
   Widget build(BuildContext context) {
@@ -45,19 +54,139 @@ class CompanyPage extends StatelessWidget {
         builder: (context, _) => session.state.companyLevel == 0
             ? _EstablishmentView(
                 session: session,
-                check: session.checkCompanyEstablishment(),
+                check:
+                    establishmentCheckOverride ??
+                    session.checkCompanyEstablishment(),
+                onEstablishCompany: onEstablishCompany,
               )
-            : _CompanyView(session: session),
+            : _CompanyHub(session: session, onSectionOpened: onSectionOpened),
+      ),
+    );
+  }
+}
+
+enum _CompanySection { operations, projects, growth, team }
+
+class _CompanyHub extends StatelessWidget {
+  const _CompanyHub({required this.session, this.onSectionOpened});
+
+  final GameSessionController session;
+  final ValueChanged<String>? onSectionOpened;
+
+  @override
+  Widget build(BuildContext context) {
+    final state = session.state;
+    final employees = CompanyService.employeesFor(state);
+    final project = CompanyProjectCatalog.byId(state.activeProjectId);
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(18, 8, 18, 28),
+      children: [
+        AppInfoCard(
+          accent: AppPalette.primary,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Seviye ${state.companyLevel} şirket',
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                '${project.name} · %${state.projectProgress} tamamlandı',
+                style: const TextStyle(color: AppPalette.textSecondary),
+              ),
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  AppPill(
+                    label: 'Kasa · ₺${state.companyFunds}',
+                    color: AppPalette.tertiary,
+                  ),
+                  AppPill(
+                    label: '${employees.length} çalışan',
+                    color: AppPalette.secondary,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 22),
+        AppSubpageCard(
+          icon: Icons.settings_suggest_outlined,
+          title: 'Operasyon ve bütçe',
+          subtitle: 'Kasa, bütçe, kararlar, seviye ve bayiler.',
+          onTap: () => _open(context, _CompanySection.operations),
+        ),
+        const SizedBox(height: 10),
+        AppSubpageCard(
+          icon: Icons.assignment_outlined,
+          title: 'Projeler',
+          subtitle: 'Aktif proje ekibi ve yeni proje portföyü.',
+          color: AppPalette.secondary,
+          onTap: () => _open(context, _CompanySection.projects),
+        ),
+        const SizedBox(height: 10),
+        AppSubpageCard(
+          icon: Icons.insights_outlined,
+          title: 'Büyüme ve pazar',
+          subtitle: 'Strateji, rekabet, sezonlar ve genişleme.',
+          color: AppPalette.tertiary,
+          onTap: () => _open(context, _CompanySection.growth),
+        ),
+        const SizedBox(height: 10),
+        AppSubpageCard(
+          icon: Icons.groups_outlined,
+          title: 'Ekip ve adaylar',
+          subtitle: 'Çalışanları yönet ve yeni adayları değerlendir.',
+          color: AppPalette.success,
+          trailing: '${employees.length}',
+          onTap: () => _open(context, _CompanySection.team),
+        ),
+      ],
+    );
+  }
+
+  void _open(BuildContext context, _CompanySection section) {
+    onSectionOpened?.call(section.name);
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => GameAccountRoute(
+          session: session,
+          child: AppPage(
+            title: switch (section) {
+              _CompanySection.operations => 'Operasyon ve bütçe',
+              _CompanySection.projects => 'Projeler',
+              _CompanySection.growth => 'Büyüme ve pazar',
+              _CompanySection.team => 'Ekip ve adaylar',
+            },
+            child: AnimatedBuilder(
+              animation: session,
+              builder: (_, _) =>
+                  _CompanyView(session: session, section: section),
+            ),
+          ),
+        ),
       ),
     );
   }
 }
 
 class _EstablishmentView extends StatelessWidget {
-  const _EstablishmentView({required this.session, required this.check});
+  const _EstablishmentView({
+    required this.session,
+    required this.check,
+    this.onEstablishCompany,
+  });
 
   final GameSessionController session;
   final CompanyCheck check;
+  final Future<String?> Function()? onEstablishCompany;
 
   @override
   Widget build(BuildContext context) {
@@ -169,7 +298,9 @@ class _EstablishmentView extends StatelessWidget {
       irreversibleWarning: 'Bu işlem geri alınamaz.',
     );
     if (!confirmed || !context.mounted) return;
-    final message = await session.establishCompany();
+    final message = onEstablishCompany == null
+        ? await session.establishCompany()
+        : await onEstablishCompany!();
     if (context.mounted && message != null) AppFeedback.show(context, message);
   }
 }
@@ -236,9 +367,10 @@ class _RoadmapStep extends StatelessWidget {
 }
 
 class _CompanyView extends StatefulWidget {
-  const _CompanyView({required this.session});
+  const _CompanyView({required this.session, required this.section});
 
   final GameSessionController session;
+  final _CompanySection section;
 
   @override
   State<_CompanyView> createState() => _CompanyViewState();
@@ -251,8 +383,15 @@ class _CompanyViewState extends State<_CompanyView> {
   bool _projectRewardFirst = false;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => _buildView(context);
+
+  void _update(VoidCallback action) => setState(action);
+}
+
+extension _CompanyViewBuilder on _CompanyViewState {
+  Widget _buildView(BuildContext context) {
     final session = widget.session;
+    final section = widget.section;
     final state = session.state;
     final service = CompanyService();
     final employees = CompanyService.employeesFor(state);
@@ -268,360 +407,386 @@ class _CompanyViewState extends State<_CompanyView> {
     final lastProject = lastOutcome == null
         ? null
         : CompanyProjectCatalog.byId(lastOutcome.projectId);
-    final projects = CompanyProjectCatalog.projects.where((item) {
-      final query = _projectQuery.trim().toLowerCase();
-      return (_projectCategory == null || item.category == _projectCategory) &&
-          (query.isEmpty ||
-              item.name.toLowerCase().contains(query) ||
-              item.description.toLowerCase().contains(query) ||
-              item.customerType.label.toLowerCase().contains(query));
-    }).toList()
-      ..sort(
-        (left, right) => _projectRewardFirst
-            ? right.reward.compareTo(left.reward)
-            : left.cost.compareTo(right.cost),
-      );
+    final projects =
+        CompanyProjectCatalog.projects.where((item) {
+          final query = _projectQuery.trim().toLowerCase();
+          return (_projectCategory == null ||
+                  item.category == _projectCategory) &&
+              (query.isEmpty ||
+                  item.name.toLowerCase().contains(query) ||
+                  item.description.toLowerCase().contains(query) ||
+                  item.customerType.label.toLowerCase().contains(query));
+        }).toList()..sort(
+          (left, right) => _projectRewardFirst
+              ? right.reward.compareTo(left.reward)
+              : left.cost.compareTo(right.cost),
+        );
     return ListView(
       padding: const EdgeInsets.fromLTRB(18, 8, 18, 28),
       children: [
-        AppInfoCard(
-          accent: AppPalette.primary,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    width: 45,
-                    height: 45,
-                    decoration: BoxDecoration(
-                      color: AppPalette.primary.withValues(alpha: .13),
-                      borderRadius: BorderRadius.circular(14),
+        if (section == _CompanySection.operations) ...[
+          AppInfoCard(
+            accent: AppPalette.primary,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 45,
+                      height: 45,
+                      decoration: BoxDecoration(
+                        color: AppPalette.primary.withValues(alpha: .13),
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: const Icon(
+                        Icons.business_rounded,
+                        color: AppPalette.primary,
+                      ),
                     ),
-                    child: const Icon(
-                      Icons.business_rounded,
-                      color: AppPalette.primary,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Operasyon merkezi',
-                          style: TextStyle(
-                            fontSize: 17,
-                            fontWeight: FontWeight.w900,
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Operasyon merkezi',
+                            style: TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.w900,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Seviye ${state.companyLevel} · ${employees.length}/$capacity çalışan',
-                          style: const TextStyle(
-                            color: AppPalette.textSecondary,
-                            fontSize: 12,
+                          const SizedBox(height: 4),
+                          Text(
+                            'Seviye ${state.companyLevel} · ${employees.length}/$capacity çalışan',
+                            style: const TextStyle(
+                              color: AppPalette.textSecondary,
+                              fontSize: 12,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                  AppPill(
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: AppPill(
                     label: 'Şirket kasası · ₺${state.companyFunds}',
                     color: AppPalette.tertiary,
                   ),
-                ],
-              ),
-              const SizedBox(height: 18),
-              Text(
-                project.name,
-                style: const TextStyle(
-                  color: AppPalette.textSecondary,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 12,
                 ),
-              ),
-              const SizedBox(height: 8),
-              AppProgressLine(
-                value: state.projectProgress / 100,
-                color: AppPalette.primary,
-              ),
-              const SizedBox(height: 7),
-              Row(
-                children: [
-                  Text(
-                    '%${state.projectProgress} tamamlandı',
-                    style: const TextStyle(
-                      color: AppPalette.textMuted,
-                      fontSize: 11,
-                    ),
+                const SizedBox(height: 18),
+                Text(
+                  project.name,
+                  style: const TextStyle(
+                    color: AppPalette.textSecondary,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 12,
                   ),
-                  const Spacer(),
-                  Text(
-                    'Şirket kasasına ₺${project.reward} ödül',
-                    style: const TextStyle(
+                ),
+                const SizedBox(height: 8),
+                AppProgressLine(
+                  value: state.projectProgress / 100,
+                  color: AppPalette.primary,
+                ),
+                const SizedBox(height: 7),
+                Row(
+                  children: [
+                    Text(
+                      '%${state.projectProgress} tamamlandı',
+                      style: const TextStyle(
+                        color: AppPalette.textMuted,
+                        fontSize: 11,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Şirket kasasına ₺${project.reward} ödül',
+                        textAlign: TextAlign.end,
+                        maxLines: 2,
+                        style: const TextStyle(
+                          color: AppPalette.tertiary,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 15),
+                Wrap(
+                  spacing: 7,
+                  runSpacing: 7,
+                  children: [
+                    AppPill(
+                      label:
+                          'Kasaya +₺${service.dailyRevenue(state)}/gün gelir',
+                      color: AppPalette.primary,
+                    ),
+                    AppPill(
+                      label:
+                          'Kasadan -₺${service.dailyPayroll(state)}/gün maaş',
+                      color: AppPalette.warning,
+                    ),
+                    AppPill(
+                      label:
+                          '+${service.dailyProjectProgress(state)} proje/gün',
+                      color: AppPalette.secondary,
+                    ),
+                    AppPill(
+                      label: '%${forecast.successChance} başarı',
+                      color: forecast.successChance >= 70
+                          ? AppPalette.success
+                          : AppPalette.warning,
+                    ),
+                    AppPill(
+                      label: forecast.estimatedDays == 0
+                          ? 'Ekip gerekli'
+                          : '~${forecast.estimatedDays} gün',
+                    ),
+                    AppPill(label: 'Müşteri · ${project.customerType.label}'),
+                    AppPill(
+                      label:
+                          'Teslim · ${state.projectElapsedDays}/${project.deliveryDays} gün',
+                      color: state.projectElapsedDays > project.deliveryDays
+                          ? AppPalette.warning
+                          : AppPalette.secondary,
+                    ),
+                    AppPill(
+                      label: '%${forecast.delayChance} gecikme riski',
+                      color: forecast.delayChance <= 25
+                          ? AppPalette.success
+                          : AppPalette.warning,
+                    ),
+                    AppPill(
+                      label:
+                          'Beklenen kalite · ${forecast.expectedQuality.label}',
                       color: AppPalette.tertiary,
+                    ),
+                  ],
+                ),
+                if (lastOutcome != null && lastProject != null) ...[
+                  const SizedBox(height: 13),
+                  Text(
+                    'Son sonuç · ${lastProject.name} · ${lastOutcome.quality.label} kalite · '
+                    '${lastOutcome.delayed ? 'Gecikmeli' : 'Zamanında'}',
+                    style: TextStyle(
+                      color: lastOutcome.succeeded
+                          ? AppPalette.success
+                          : AppPalette.warning,
                       fontSize: 11,
                       fontWeight: FontWeight.w800,
                     ),
                   ),
                 ],
-              ),
-              const SizedBox(height: 15),
-              Wrap(
-                spacing: 7,
-                runSpacing: 7,
-                children: [
-                  AppPill(
-                    label: 'Kasaya +₺${service.dailyRevenue(state)}/gün gelir',
-                    color: AppPalette.primary,
-                  ),
-                  AppPill(
-                    label: 'Kasadan -₺${service.dailyPayroll(state)}/gün maaş',
-                    color: AppPalette.warning,
-                  ),
-                  AppPill(
-                    label: '+${service.dailyProjectProgress(state)} proje/gün',
-                    color: AppPalette.secondary,
-                  ),
-                  AppPill(
-                    label: '%${forecast.successChance} başarı',
-                    color: forecast.successChance >= 70
-                        ? AppPalette.success
-                        : AppPalette.warning,
-                  ),
-                  AppPill(
-                    label: forecast.estimatedDays == 0
-                        ? 'Ekip gerekli'
-                        : '~${forecast.estimatedDays} gün',
-                  ),
-                  AppPill(label: 'Müşteri · ${project.customerType.label}'),
-                  AppPill(
-                    label:
-                        'Teslim · ${state.projectElapsedDays}/${project.deliveryDays} gün',
-                    color: state.projectElapsedDays > project.deliveryDays
-                        ? AppPalette.warning
-                        : AppPalette.secondary,
-                  ),
-                  AppPill(
-                    label: '%${forecast.delayChance} gecikme riski',
-                    color: forecast.delayChance <= 25
-                        ? AppPalette.success
-                        : AppPalette.warning,
-                  ),
-                  AppPill(
-                    label:
-                        'Beklenen kalite · ${forecast.expectedQuality.label}',
-                    color: AppPalette.tertiary,
-                  ),
-                ],
-              ),
-              if (lastOutcome != null && lastProject != null) ...[
-                const SizedBox(height: 13),
-                Text(
-                  'Son sonuç · ${lastProject.name} · ${lastOutcome.quality.label} kalite · '
-                  '${lastOutcome.delayed ? 'Gecikmeli' : 'Zamanında'}',
-                  style: TextStyle(
-                    color: lastOutcome.succeeded
-                        ? AppPalette.success
-                        : AppPalette.warning,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
               ],
-            ],
-          ),
-        ),
-        const SizedBox(height: 12),
-        CompanyTreasuryPanel(session: session),
-        const SizedBox(height: 12),
-        CompanyDecisionPanel(session: session),
-        const SizedBox(height: 12),
-        CompanyBudgetPanel(session: session),
-        const SizedBox(height: 25),
-        CompanyProjectTeamPanel(session: session, project: project),
-        const SizedBox(height: 12),
-        if (state.companyLevel < CompanyService.maxCompanyLevel) ...[
-          Align(
-            alignment: Alignment.centerLeft,
-            child: AppPill(
-              label: InvestmentReturnService.summary(
-                InvestmentType.companyUpgrade,
-                InvestmentReturnService.companyUpgradeDays(state.companyLevel),
-              ),
-              color: AppPalette.success,
-              icon: Icons.savings_outlined,
             ),
           ),
-          const SizedBox(height: 9),
+          const SizedBox(height: 12),
+          CompanyTreasuryPanel(session: session),
+          const SizedBox(height: 12),
+          CompanyDecisionPanel(session: session),
+          const SizedBox(height: 12),
+          CompanyBudgetPanel(session: session),
+          const SizedBox(height: 25),
         ],
-        Row(
-          children: [
-            if (state.companyLevel < CompanyService.maxCompanyLevel) ...[
-              Expanded(
-                child: FilledButton.tonalIcon(
-                  onPressed:
-                      session.checkCompanyUpgrade().isEligible &&
-                          !session.isBusy
-                      ? () => _upgrade(context)
-                      : null,
-                  icon: const Icon(Icons.trending_up_rounded, size: 18),
-                  label: Text(
-                    'Kasa · ₺${CompanyService.upgradeCost(state.companyLevel)}',
+        if (section == _CompanySection.projects) ...[
+          CompanyProjectTeamPanel(session: session, project: project),
+          const SizedBox(height: 25),
+        ],
+        if (section == _CompanySection.operations) ...[
+          if (state.companyLevel < CompanyService.maxCompanyLevel) ...[
+            Align(
+              alignment: Alignment.centerLeft,
+              child: AppPill(
+                label: InvestmentReturnService.summary(
+                  InvestmentType.companyUpgrade,
+                  InvestmentReturnService.companyUpgradeDays(
+                    state.companyLevel,
                   ),
                 ),
+                color: AppPalette.success,
+                icon: Icons.savings_outlined,
               ),
-              const SizedBox(width: 9),
-            ],
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: session.isBusy
-                    ? null
-                    : () => Navigator.of(context).push(
-                        MaterialPageRoute<void>(
-                          builder: (_) => GameAccountRoute(
-                            session: session,
-                            child: CompanyBranchesPage(session: session),
+            ),
+            const SizedBox(height: 9),
+          ],
+          Row(
+            children: [
+              if (state.companyLevel < CompanyService.maxCompanyLevel) ...[
+                Expanded(
+                  child: FilledButton.tonalIcon(
+                    onPressed:
+                        session.checkCompanyUpgrade().isEligible &&
+                            !session.isBusy
+                        ? () => _upgrade(context)
+                        : null,
+                    icon: const Icon(Icons.trending_up_rounded, size: 18),
+                    label: Text(
+                      'Kasa · ₺${CompanyService.upgradeCost(state.companyLevel)}',
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 9),
+              ],
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: session.isBusy
+                      ? null
+                      : () => Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) => GameAccountRoute(
+                              session: session,
+                              child: CompanyBranchesPage(session: session),
+                            ),
                           ),
                         ),
-                      ),
-                icon: const Icon(Icons.storefront_rounded, size: 18),
-                label: const Text('Bayiler'),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 25),
-        CompanyStagePanel(state: state),
-        const SizedBox(height: 25),
-        CompanyExpansionPanel(session: session),
-        const SizedBox(height: 25),
-        const AppSectionHeader(
-          title: 'Proje portföyü',
-          caption: 'Şirketinin bir sonraki büyüme hamlesini seç.',
-        ),
-        const SizedBox(height: 12),
-        TextField(
-          key: const ValueKey('project-search'),
-          onChanged: (value) => setState(() => _projectQuery = value),
-          decoration: InputDecoration(
-            hintText: 'Proje veya müşteri ara',
-            prefixIcon: const Icon(Icons.search_rounded),
-            suffixIcon: IconButton(
-              tooltip: _projectRewardFirst
-                  ? 'Getiriye göre sıralı'
-                  : 'Maliyete göre sıralı',
-              onPressed: () => setState(
-                () => _projectRewardFirst = !_projectRewardFirst,
-              ),
-              icon: Icon(
-                _projectRewardFirst
-                    ? Icons.trending_up_rounded
-                    : Icons.payments_outlined,
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 9),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            children: [
-              ChoiceChip(
-                label: const Text('Tümü'),
-                selected: _projectCategory == null,
-                onSelected: (_) => setState(() => _projectCategory = null),
-              ),
-              for (final category in CompanyProjectCategory.values) ...[
-                const SizedBox(width: 7),
-                ChoiceChip(
-                  label: Text(category.label),
-                  selected: _projectCategory == category,
-                  onSelected: (_) =>
-                      setState(() => _projectCategory = category),
+                  icon: const Icon(Icons.storefront_rounded, size: 18),
+                  label: const Text('Bayiler'),
                 ),
-              ],
+              ),
             ],
           ),
-        ),
-        const SizedBox(height: 7),
-        Text(
-          '${projects.length}/${CompanyProjectCatalog.projects.length} proje · ${_projectRewardFirst ? "getiri" : "maliyet"} sırası',
-          style: const TextStyle(color: AppPalette.textMuted, fontSize: 11),
-        ),
-        if (projects.isEmpty) ...[
-          const SizedBox(height: 10),
-          const AppEmptyState(
-            icon: Icons.search_off_rounded,
-            title: 'Proje bulunamadı',
-            message: 'Arama metnini veya kategori filtresini değiştir.',
-          ),
+          const SizedBox(height: 25),
         ],
-        for (final category in CompanyProjectCategory.values.where(
-          (category) => projects.any((item) => item.category == category),
-        )) ...[
-          const SizedBox(height: 12),
-          AppSectionHeader(
-            title: category.label,
-            caption:
-                '${projects.where((item) => item.category == category).length} proje',
-          ),
-          const SizedBox(height: 8),
-          for (final item in projects.where(
-            (item) => item.category == category,
-          )) ...[
-            _ProjectCard(project: item, session: session),
-            const SizedBox(height: 9),
-          ],
-          const SizedBox(height: 8),
+        if (section == _CompanySection.growth) ...[
+          CompanyStagePanel(state: state),
+          const SizedBox(height: 25),
+          CompanyExpansionPanel(session: session),
+          const SizedBox(height: 25),
         ],
-        const SizedBox(height: 17),
-        CompanyGrowthPanel(state: state),
-        const SizedBox(height: 25),
-        CompanyMarketPanel(state: state),
-        const SizedBox(height: 25),
-        CompanySeasonEventPanel(state: state),
-        const SizedBox(height: 25),
-        CompanyRivalProfilesPanel(state: state),
-        const SizedBox(height: 25),
-        CompanyStrategyPanel(session: session),
-        const SizedBox(height: 25),
-        CompanyCompetitionPanel(state: state),
-        const SizedBox(height: 25),
-        CompanySeasonRewardPanel(state: state),
-        const SizedBox(height: 25),
-        CompanyTrophyPanel(state: state),
-        const SizedBox(height: 25),
-        AppSectionHeader(
-          title: 'Ekip',
-          caption: '${employees.length}/$capacity kapasite dolu',
-        ),
-        const SizedBox(height: 12),
-        for (final employee in employees) ...[
-          _EmployeeCard(employee: employee, session: session),
-          const SizedBox(height: 9),
-        ],
-        if (employees.length < capacity && candidates.isNotEmpty) ...[
-          const SizedBox(height: 10),
+        if (section == _CompanySection.projects) ...[
           const AppSectionHeader(
-            title: 'Aday havuzu',
-            caption: 'Ekibine katabileceğin kişiler',
+            title: 'Proje portföyü',
+            caption: 'Şirketinin bir sonraki büyüme hamlesini seç.',
           ),
           const SizedBox(height: 12),
-          EmployeeFilterBar(
-            value: _candidateFilter,
-            onChanged: (filter) => setState(() => _candidateFilter = filter),
+          TextField(
+            key: const ValueKey('project-search'),
+            onChanged: (value) => _update(() => _projectQuery = value),
+            decoration: InputDecoration(
+              hintText: 'Proje veya müşteri ara',
+              prefixIcon: const Icon(Icons.search_rounded),
+              suffixIcon: IconButton(
+                tooltip: _projectRewardFirst
+                    ? 'Getiriye göre sıralı'
+                    : 'Maliyete göre sıralı',
+                onPressed: () =>
+                    _update(() => _projectRewardFirst = !_projectRewardFirst),
+                icon: Icon(
+                  _projectRewardFirst
+                      ? Icons.trending_up_rounded
+                      : Icons.payments_outlined,
+                ),
+              ),
+            ),
           ),
           const SizedBox(height: 9),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                ChoiceChip(
+                  label: const Text('Tümü'),
+                  selected: _projectCategory == null,
+                  onSelected: (_) => _update(() => _projectCategory = null),
+                ),
+                for (final category in CompanyProjectCategory.values) ...[
+                  const SizedBox(width: 7),
+                  ChoiceChip(
+                    label: Text(category.label),
+                    selected: _projectCategory == category,
+                    onSelected: (_) =>
+                        _update(() => _projectCategory = category),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          const SizedBox(height: 7),
           Text(
-            '${candidates.length}/${allCandidates.length} aday gösteriliyor',
+            '${projects.length}/${CompanyProjectCatalog.projects.length} proje · ${_projectRewardFirst ? "getiri" : "maliyet"} sırası',
             style: const TextStyle(color: AppPalette.textMuted, fontSize: 11),
           ),
-          const SizedBox(height: 8),
-          for (final employee in candidates) ...[
-            _CandidateCard(employee: employee, session: session),
+          if (projects.isEmpty) ...[
+            const SizedBox(height: 10),
+            const AppEmptyState(
+              icon: Icons.search_off_rounded,
+              title: 'Proje bulunamadı',
+              message: 'Arama metnini veya kategori filtresini değiştir.',
+            ),
+          ],
+          for (final category in CompanyProjectCategory.values.where(
+            (category) => projects.any((item) => item.category == category),
+          )) ...[
+            const SizedBox(height: 12),
+            AppSectionHeader(
+              title: category.label,
+              caption:
+                  '${projects.where((item) => item.category == category).length} proje',
+            ),
+            const SizedBox(height: 8),
+            for (final item in projects.where(
+              (item) => item.category == category,
+            )) ...[
+              _ProjectCard(project: item, session: session),
+              const SizedBox(height: 9),
+            ],
+            const SizedBox(height: 8),
+          ],
+          const SizedBox(height: 17),
+        ],
+        if (section == _CompanySection.growth) ...[
+          CompanyGrowthPanel(state: state),
+          const SizedBox(height: 25),
+          CompanyMarketPanel(state: state),
+          const SizedBox(height: 25),
+          CompanySeasonEventPanel(state: state),
+          const SizedBox(height: 25),
+          CompanyRivalProfilesPanel(state: state),
+          const SizedBox(height: 25),
+          CompanyStrategyPanel(session: session),
+          const SizedBox(height: 25),
+          CompanyCompetitionPanel(state: state),
+          const SizedBox(height: 25),
+          CompanySeasonRewardPanel(state: state),
+          const SizedBox(height: 25),
+          CompanyTrophyPanel(state: state),
+        ],
+        if (section == _CompanySection.team) ...[
+          AppSectionHeader(
+            title: 'Ekip',
+            caption: '${employees.length}/$capacity kapasite dolu',
+          ),
+          const SizedBox(height: 12),
+          for (final employee in employees) ...[
+            _EmployeeCard(employee: employee, session: session),
             const SizedBox(height: 9),
+          ],
+          if (employees.length < capacity && candidates.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            const AppSectionHeader(
+              title: 'Aday havuzu',
+              caption: 'Ekibine katabileceğin kişiler',
+            ),
+            const SizedBox(height: 12),
+            EmployeeFilterBar(
+              value: _candidateFilter,
+              onChanged: (filter) => _update(() => _candidateFilter = filter),
+            ),
+            const SizedBox(height: 9),
+            Text(
+              '${candidates.length}/${allCandidates.length} aday gösteriliyor',
+              style: const TextStyle(color: AppPalette.textMuted, fontSize: 11),
+            ),
+            const SizedBox(height: 8),
+            for (final employee in candidates) ...[
+              _CandidateCard(employee: employee, session: session),
+              const SizedBox(height: 9),
+            ],
           ],
         ],
       ],
@@ -793,7 +958,8 @@ class _ProjectCard extends StatelessWidget {
       summary: AppTransactionPreview(
         account: 'Şirket kasası',
         cost: '-₺${project.cost}',
-        returnSummary: '+₺${project.reward} · %${forecast.successChance} başarı',
+        returnSummary:
+            '+₺${project.reward} · %${forecast.successChance} başarı',
         duration: forecast.estimatedDays == 0
             ? 'Ekip ataması gerekli'
             : '~${forecast.estimatedDays} gün',

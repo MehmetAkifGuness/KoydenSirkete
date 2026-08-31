@@ -167,6 +167,20 @@ class GameSessionApplicationService {
   final PersonalEventService _personalEventService;
   final PersonalFinanceService _personalFinanceService;
 
+  Future<PlayerState> _persist(PlayerState state) async {
+    final recovered = _energyRecoveryService.recover(state);
+    final settled = _livingCostService.settle(recovered);
+    final normalized = settled.money >= 0 && !settled.isBankrupt
+        ? settled.copyWith(negativeMoneyHours: 0)
+        : settled;
+    final progressed = _companyStageService.evaluate(normalized);
+    final evaluated = _achievementService.evaluate(progressed).state;
+    await _repository.save(evaluated);
+    return evaluated;
+  }
+}
+
+extension GameSessionCoreApplication on GameSessionApplicationService {
   PersonalEvent? personalEvent(PlayerState state) =>
       _personalEventService.currentEvent(state);
 
@@ -176,9 +190,12 @@ class GameSessionApplicationService {
   ) => _persist(_personalEventService.resolve(state, choice));
 
   Future<PlayerState> load() async {
-    final loaded =
+    var loaded =
         await _repository.load() ??
         PlayerState.initial.copyWith(randomSeed: _newRandomSeed());
+    if (!loaded.isOnboarded && loaded.tutorialCompleted) {
+      loaded = await _persist(loaded.copyWith(isOnboarded: true));
+    }
     if (loaded.employment == null && loaded.currentJobId != null) {
       final job = JobCatalog.findById(loaded.currentJobId);
       if (job != null) {
@@ -413,8 +430,8 @@ class GameSessionApplicationService {
       final companyFundsAmount = companyFundsDelta.abs();
       messages.add(
         companyFundsDelta > 0
-            ? 'Şirket kasasına +$companyFundsDelta TL girdi.'
-            : 'Şirket kasasından $companyFundsAmount TL çıktı.',
+            ? 'Şirket kasasına +₺$companyFundsDelta girdi.'
+            : 'Şirket kasasından ₺$companyFundsAmount çıktı.',
       );
     }
     final moneyDelta = saved.money - state.money;
@@ -431,17 +448,5 @@ class GameSessionApplicationService {
       dayChanged: clock.dayChanged,
       message: messages.isEmpty ? null : messages.join(' · '),
     );
-  }
-
-  Future<PlayerState> _persist(PlayerState state) async {
-    final recovered = _energyRecoveryService.recover(state);
-    final settled = _livingCostService.settle(recovered);
-    final normalized = settled.money >= 0 && !settled.isBankrupt
-        ? settled.copyWith(negativeMoneyHours: 0)
-        : settled;
-    final progressed = _companyStageService.evaluate(normalized);
-    final evaluated = _achievementService.evaluate(progressed).state;
-    await _repository.save(evaluated);
-    return evaluated;
   }
 }

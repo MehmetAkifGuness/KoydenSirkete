@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../app/theme/app_palette.dart';
+import '../../../../core/utils/app_formatters.dart';
 import '../../../../core/widgets/app_feedback.dart';
 import '../../../../core/widgets/app_page.dart';
 import '../../../../core/widgets/game_account_bar.dart';
@@ -132,7 +133,7 @@ class EmploymentPage extends StatelessWidget {
                     AppProgressLine(value: state.performance / 100),
                     const SizedBox(height: 12),
                     Text(
-                      'Gün ${state.day} · Şehir maaşı x${salaryMultiplier.toStringAsFixed(2)} · Bugün ${state.workSessionsToday} görev · Son görev günü ${employment.lastTaskDay}',
+                      'Gün ${state.day} · Şehir maaşı x${AppFormatters.decimal(salaryMultiplier)} · Bugün ${state.workSessionsToday} görev · Son görev günü ${employment.lastTaskDay}',
                       style: const TextStyle(
                         color: AppPalette.textMuted,
                         fontSize: 11,

@@ -228,16 +228,18 @@ class GameSessionController extends ChangeNotifier {
     );
   }
 
-  Future<void> completeOnboarding(EconomyDifficulty difficulty) async {
+  Future<bool> completeOnboarding(EconomyDifficulty difficulty) async {
     if (_isBusy) {
-      return;
+      return false;
     }
     _isBusy = true;
     notifyListeners();
     try {
       _state = await _applicationService.completeOnboarding(_state, difficulty);
+      return _state.isOnboarded;
     } catch (_) {
       _errorMessage = 'Onboarding bilgisi kaydedilemedi. Lütfen tekrar dene.';
+      return false;
     } finally {
       _isBusy = false;
       notifyListeners();

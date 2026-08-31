@@ -147,6 +147,16 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
+    expect(find.textContaining('Kazanç ekranındaki'), findsNothing);
+    expect(
+      tester.getSize(find.byType(AppInfoCard).last).height,
+      lessThanOrEqualTo(240),
+    );
+    await tester.tap(find.byTooltip('Adım açıklamasını göster'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Kazanç ekranındaki'), findsOneWidget);
+    await tester.tap(find.byTooltip('Açıklamayı kapat'));
+    await tester.pumpAndSettle();
     await tester.tap(find.byTooltip('Rehberi küçült'));
     await tester.pumpAndSettle();
     expect(find.byTooltip('Rehberi büyüt'), findsOneWidget);

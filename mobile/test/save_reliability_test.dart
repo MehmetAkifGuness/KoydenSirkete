@@ -70,59 +70,51 @@ void main() {
       expect(state?.money, 725);
       expect(state?.day, 4);
       expect(state?.tutorialCompleted, isTrue);
-      expect(
-        (await store.listSlots()).singleWhere((slot) => slot.slot == 1).hasSave,
-        isTrue,
-      );
       await _repository(store).save(state!);
       await store.close();
 
       final migrated = await databaseFactoryFfi.openDatabase(databasePath);
-      expect(await migrated.getVersion(), 39);
-      final columns =
-          (await migrated.rawQuery('PRAGMA table_info(player_state)'))
-              .map((row) => row['name'])
-              .toSet();
+      expect(await migrated.getVersion(), 41);
+      final columns = (await migrated.rawQuery(
+        'PRAGMA table_info(player_state)',
+      )).map((row) => row['name']).toSet();
       expect(
         columns,
-        containsAll(['data_checksum', 'save_revision', 'updated_at']),
+        isNot(containsAll(['data_checksum', 'save_revision', 'updated_at'])),
       );
       expect(
         await migrated.rawQuery(
           "SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'save_metadata'",
         ),
-        isNotEmpty,
+        isEmpty,
       );
       await migrated.close();
     },
   );
 
-  test(
-    'bozulan son kayıt otomatik olarak son sağlam yerel yedekten açılır',
-    () async {
-      var store = AppDatabase(
-        databasePath: databasePath,
-        factory: databaseFactoryFfi,
-      );
-      var repository = _repository(store);
-      await repository.save(PlayerState.initial.copyWith(money: 100));
-      await repository.save(PlayerState.initial.copyWith(money: 200));
-      await store.close();
+  test('tek SQLite kaydı son yazılan ilerlemeyle yeniden açılır', () async {
+    var store = AppDatabase(
+      databasePath: databasePath,
+      factory: databaseFactoryFfi,
+    );
+    var repository = _repository(store);
+    await repository.save(PlayerState.initial.copyWith(money: 100));
+    await repository.save(PlayerState.initial.copyWith(money: 200));
+    await store.close();
 
-      final raw = await databaseFactoryFfi.openDatabase(databasePath);
-      await raw.update('player_state', {'money': 999}, where: 'id = 1');
-      await raw.close();
+    store = AppDatabase(
+      databasePath: databasePath,
+      factory: databaseFactoryFfi,
+    );
+    repository = _repository(store);
+    expect((await repository.load())?.money, 200);
+    await store.close();
 
-      store = AppDatabase(
-        databasePath: databasePath,
-        factory: databaseFactoryFfi,
-      );
-      repository = _repository(store);
-      expect((await repository.load())?.money, 100);
-      expect((await repository.load())?.money, 100);
-      await store.close();
-    },
-  );
+    final raw = await databaseFactoryFfi.openDatabase(databasePath);
+    expect(await raw.query('player_state'), hasLength(1));
+    expect((await raw.query('player_state', columns: ['id'])).single['id'], 1);
+    await raw.close();
+  });
 
   test(
     'yarım kalan atomik işlem ödülü veya satışı ikinci kez uygulamaz',
@@ -173,32 +165,54 @@ void main() {
     },
   );
 
-  test(
-    'üç yuva bağımsızdır ve dışa/içe aktarma bütünlüğü doğrulanır',
-    () async {
-      final store = AppDatabase(
-        databasePath: databasePath,
-        factory: databaseFactoryFfi,
-      );
-      final repository = _repository(store);
-      await repository.save(PlayerState.initial.copyWith(money: 321, day: 7));
-      final exported = await store.exportSlot(1);
+  test('eski kayıt kalıntıları tek SQLite satırına indirilir', () async {
+    var store = AppDatabase(
+      databasePath: databasePath,
+      factory: databaseFactoryFfi,
+    );
+    await _repository(
+      store,
+    ).save(PlayerState.initial.copyWith(money: 321, day: 7));
+    await store.close();
 
-      await store.switchSlot(3);
-      await repository.save(PlayerState.initial.copyWith(money: 987, day: 12));
-      await store.importSlot(exported, slot: 2);
+    final legacy = await databaseFactoryFfi.openDatabase(databasePath);
+    await legacy.execute('''
+        CREATE TABLE save_metadata (
+          key TEXT PRIMARY KEY NOT NULL,
+          value TEXT NOT NULL
+        )
+      ''');
+    await legacy.insert('save_metadata', {'key': 'active_slot', 'value': '3'});
+    final selected =
+        Map<String, Object?>.from(
+            (await legacy.query('player_state', where: 'id = 1')).single,
+          )
+          ..['id'] = 3
+          ..['money'] = 987
+          ..['day'] = 12;
+    await legacy.insert('player_state', selected);
+    await legacy.setVersion(40);
+    await legacy.close();
 
-      expect(store.activeSlot, 2);
-      expect((await repository.load())?.money, 321);
-      await store.switchSlot(3);
-      expect((await repository.load())?.money, 987);
-      expect(
-        (await store.listSlots()).where((slot) => slot.hasSave),
-        hasLength(3),
-      );
-      await store.close();
-    },
-  );
+    store = AppDatabase(
+      databasePath: databasePath,
+      factory: databaseFactoryFfi,
+    );
+    final state = await _repository(store).load();
+    expect(state?.money, 987);
+    expect(state?.day, 12);
+    await store.close();
+
+    final migrated = await databaseFactoryFfi.openDatabase(databasePath);
+    expect(await migrated.query('player_state'), hasLength(1));
+    expect(
+      await migrated.rawQuery(
+        "SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'save_metadata'",
+      ),
+      isEmpty,
+    );
+    await migrated.close();
+  });
 }
 
 LocalPlayerStateRepository _repository(AppDatabase store) =>

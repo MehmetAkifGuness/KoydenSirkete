@@ -1,5 +1,52 @@
 # Changelog
 
+## 2.54.2
+
+- Öğreticide şirket kuruluşu gerçek kariyer seviyesi kontrolünden ayrıldı; kuruluş onayı doğrudan öğreticiye özel demo şirketini oluşturur.
+
+## 2.54.1
+
+- Uygulamalı eğitimde şirket, varlık ve diğer işlemlerin demo koşulları otomatik hazırlanarak ilerlemeyi durduran seviye, enerji ve bütçe engelleri kaldırıldı.
+- Öğretici kartı kompaktlaştırıldı; uzun açıklamalar gerektiğinde açılan ayrı bilgi sayfasına taşındı.
+- Sistem yazı tipi zorlaması kaldırılarak Türkçe karakterlerin cihazın yerel yazı tipiyle doğru çizilmesi sağlandı.
+
+## 2.54.0
+
+- İlk açılış tanıtımı, temel oyun ekranlarını ve işlevlerini gerçek düğmelerle öğreten 16 adımlı uygulamalı eğitime dönüştürüldü.
+- Her adımın görevi tamamlanmadan ilerleme kapatıldı; yarım kalan eğitim SQLite üzerinden kaldığı adımdan devam eder.
+- Finans, varlıklar ve şirket alt sayfaları ile hız, iş, eğitim, spor, şehir ve geri bildirim kontrolleri eğitim akışına bağlandı.
+
+## 2.53.0
+
+- Şirket, finans ve varlık ana ekranları sade özet merkezlerine dönüştürüldü; yoğun içerikler konu bazlı alt sayfalara ayrıldı.
+- Tüm alt sayfalara görünür geri dönüş eylemi ve ortak yönlendirme kartları eklendi.
+
+## 2.52.0
+
+- Kayıt yuvası ve yerel yedek altyapısı tamamen kaldırıldı; oyun doğrudan tek `player_state` SQLite satırını okur ve yazar.
+- Güncellemede eski metadata, yuva ve yedek satırları temizlenerek yalnızca mevcut ilerleme `id=1` kaydında bırakılır.
+
+## 2.51.0
+
+- Kayıt yuvası seçimi ve dışa/içe aktarma kaldırıldı; ilerleme tek SQLite kaydında tutulur ve son sağlam yerel yedekle korunur.
+- Önceki sürümde seçili olan kayıt yuvası güncellemede veri kaybetmeden ana kayda taşınır.
+- Oyuncu test raporu, örnek sonuçları ve yayın kapısı kaldırıldı.
+
+## 2.50.0
+
+- Uygulama yeniden açıldığında başlangıca döndüren tutarsız onboarding kaydı otomatik onarılır; başarısız ilk kayıt artık öğreticiyi başlatmaz.
+- Android yayın adı, sürümü, zorunlu upload imzası, gizlilik politikası ve Türkçe Google Play metin/görsel paketi tamamlandı.
+- Temiz kurulum, önceki APK'dan veri koruyan güncelleme ve çevrimdışı gerçek cihaz senaryoları otomatik yayın kapısına bağlandı.
+- Türkçe sayı, para, ondalık ve tarih biçimleri ortaklaştırıldı; ilk şirket, şube, sezon ve geç oyun süreleri oynanış raporuna eklendi.
+- Düşük, orta ve yüksek profilli üç fiziksel Android cihaz ile en az 10 anonim gerçek oyuncu kanıtını zorunlu tutan yayın kapıları oluşturuldu.
+
+## 2.49.0
+
+- Domain servis sözleşmeleri normal, sınır ve hata senaryolarıyla; ekonomi ve rekabet kuralları tohumlu özellik/fuzz testleriyle güvenceye alındı.
+- Panel, finans ve şirket ekranlarına golden regresyon testleri; büyük kayıt, açılış, kaydırma ve animasyon sürelerine fiziksel Android performans testi eklendi.
+- Finans hareketleri tek geçişli özetlenerek büyük kayıtlardaki tekrar hesaplamalar kaldırıldı; tüm sınıflar 300 satır sınırına çekildi ve katman sorumlulukları ayrıştırıldı.
+- Kullanılmayan kaynak, bağımlılık ve varlık denetimi ile analiz, tüm testler ve fiziksel cihaz ölçümünü zorunlu tutan sürüm kapısı eklendi.
+
 ## 2.48.0
 
 - Üç bağımsız yerel kayıt yuvası ile panoya güvenli dışa/içe aktarma ekranı eklendi.

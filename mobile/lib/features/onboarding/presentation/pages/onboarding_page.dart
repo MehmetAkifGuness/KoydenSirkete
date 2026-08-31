@@ -6,16 +6,10 @@ import '../../../economy/domain/entities/economy_difficulty.dart';
 import '../../../game/presentation/state/game_session_controller.dart';
 
 class OnboardingPage extends StatefulWidget {
-  const OnboardingPage({
-    required this.session,
-    this.onStart,
-    this.onSkip,
-    super.key,
-  });
+  const OnboardingPage({required this.session, this.onStart, super.key});
 
   final GameSessionController session;
   final VoidCallback? onStart;
-  final VoidCallback? onSkip;
 
   @override
   State<OnboardingPage> createState() => _OnboardingPageState();
@@ -72,11 +66,45 @@ class _OnboardingPageState extends State<OnboardingPage> {
                   ),
                   const SizedBox(height: 8),
                   const Text(
-                    'Yönlendirmeli turda gerçek Panel, Kazanç, Eğitim, Kariyer, İşim, Finans ve Şirket ekranlarını kullanacaksın. Turdaki işlemler ayrı bir demo kaydında kalır.',
+                    'Bu eğitim yalnızca uygulamayı anlatmaz; gerçek ekranlarda butonlara dokunarak her temel sistemi güvenli bir demo kaydında denetir.',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: AppPalette.textSecondary,
                       height: 1.45,
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+                  const AppInfoCard(
+                    accent: AppPalette.secondary,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '16 adımda yaparak öğren',
+                          style: TextStyle(fontWeight: FontWeight.w800),
+                        ),
+                        SizedBox(height: 12),
+                        _TourPoint(
+                          icon: Icons.touch_app_outlined,
+                          text:
+                              'Hız, kısayol, kazanç, eğitim, spor, iş ve çalışma düğmelerini kullan.',
+                        ),
+                        _TourPoint(
+                          icon: Icons.account_balance_wallet_outlined,
+                          text:
+                              'Finans, şehir ve varlık işlemlerini alt sayfalarıyla birlikte dene.',
+                        ),
+                        _TourPoint(
+                          icon: Icons.business_outlined,
+                          text:
+                              'Şirket kur; operasyon, proje, büyüme ve ekip alanlarını ayrı ayrı aç.',
+                        ),
+                        _TourPoint(
+                          icon: Icons.shield_outlined,
+                          text:
+                              'Demo işlemleri gerçek kariyerini ve SQLite kaydını değiştirmez.',
+                        ),
+                      ],
                     ),
                   ),
                   const SizedBox(height: 22),
@@ -88,7 +116,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                         const Text(
                           'Ekonomi zorluğu',
                           textAlign: TextAlign.center,
-                          style: TextStyle(fontWeight: FontWeight.w900),
+                          style: TextStyle(fontWeight: FontWeight.w800),
                         ),
                         const SizedBox(height: 12),
                         Wrap(
@@ -125,15 +153,15 @@ class _OnboardingPageState extends State<OnboardingPage> {
                   FilledButton.icon(
                     onPressed: _difficulty == null || _isStarting
                         ? null
-                        : () => _finish(startTutorial: true),
+                        : _finish,
                     icon: const Icon(Icons.explore_outlined),
-                    label: const Text('Gerçek ekranlarda demoyu başlat'),
+                    label: const Text('16 adımlı uygulamalı eğitimi başlat'),
                   ),
-                  TextButton(
-                    onPressed: _difficulty == null || _isStarting
-                        ? null
-                        : () => _finish(startTutorial: false),
-                    child: const Text('Öğreticiyi atla'),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'İlk kurulumda her zorunlu görev tamamlanınca sonraki adım açılır.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: AppPalette.textMuted, fontSize: 11),
                   ),
                 ],
               ),
@@ -144,18 +172,47 @@ class _OnboardingPageState extends State<OnboardingPage> {
     );
   }
 
-  Future<void> _finish({required bool startTutorial}) async {
+  Future<void> _finish() async {
     final difficulty = _difficulty;
     if (_isStarting || difficulty == null) return;
     setState(() => _isStarting = true);
     if (!widget.session.state.isOnboarded) {
-      await widget.session.completeOnboarding(difficulty);
+      final saved = await widget.session.completeOnboarding(difficulty);
+      if (!saved) {
+        if (mounted) setState(() => _isStarting = false);
+        return;
+      }
     }
     if (!mounted) return;
-    if (startTutorial) {
-      widget.onStart?.call();
-    } else {
-      (widget.onSkip ?? widget.onStart)?.call();
-    }
+    widget.onStart?.call();
   }
+}
+
+class _TourPoint extends StatelessWidget {
+  const _TourPoint({required this.icon, required this.text});
+
+  final IconData icon;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(bottom: 10),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, color: AppPalette.secondary, size: 18),
+        const SizedBox(width: 9),
+        Expanded(
+          child: Text(
+            text,
+            style: const TextStyle(
+              color: AppPalette.textSecondary,
+              fontSize: 12,
+              height: 1.35,
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
 }

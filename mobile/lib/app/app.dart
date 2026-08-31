@@ -16,6 +16,7 @@ import '../core/widgets/app_state_view.dart';
 import '../features/career/presentation/pages/career_page.dart';
 import '../features/assets/presentation/pages/assets_page.dart';
 import '../features/cities/presentation/pages/cities_page.dart';
+import '../features/company/domain/services/company_service.dart';
 import '../features/company/presentation/pages/company_page.dart';
 import '../features/dashboard/presentation/pages/dashboard_page.dart';
 import '../features/earning/presentation/pages/earning_page.dart';
@@ -30,6 +31,7 @@ import '../features/game/presentation/state/foreground_clock_ticker.dart';
 import '../features/game/presentation/state/game_session_controller.dart';
 import '../features/jobs/presentation/pages/jobs_page.dart';
 import '../features/onboarding/data/onboarding_demo_repository.dart';
+import '../features/onboarding/presentation/models/guided_tutorial_step.dart';
 import '../features/onboarding/presentation/pages/onboarding_page.dart';
 import '../features/onboarding/presentation/widgets/game_tutorial_overlay.dart';
 import '../features/profile/presentation/pages/profile_page.dart';
@@ -80,57 +82,10 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
   bool _clockPaused = false;
   int? _tutorialStep;
   bool _tutorialCollapsed = false;
-
-  static const _tutorialSteps = <({String title, String description, String task})>[
-    (
-      title: 'Panelini tanı',
-      description:
-          'Para, enerji, bilgi ve devam eden işlemler burada özetlenir. Hızlı erişim kartları diğer oyun alanlarına götürür.',
-      task: 'Günlük özetini ve hızlı erişim kartlarını incele.',
-    ),
-    (
-      title: 'İlk sermayeni kazan',
-      description:
-          'Kazanç ekranındaki refleks oyununu deneyebilirsin. Sonuç demo cüzdanına ve enerji değerine gerçek kurallarla uygulanır.',
-      task: 'Refleks oyununu tamamlayıp bir kazanç aktivitesi başlat.',
-    ),
-    (
-      title: 'Bilgine yatırım yap',
-      description:
-          'Bir eğitimi başlatmayı dene. Süre, enerji, ücret ve kazanacağın bilgi kartın üzerinde birlikte gösterilir.',
-      task: 'Listeden hedeflerine uygun bir eğitim başlat.',
-    ),
-    (
-      title: 'Kariyer yolunu izle',
-      description:
-          'Seviye koşullarını, bir sonraki hedefini ve şirket kurmaya uzanan ilerleme yolunu bu ekrandan takip edersin.',
-      task: 'Bir sonraki kariyer seviyesinin koşullarını incele.',
-    ),
-    (
-      title: 'İş fırsatını seç',
-      description:
-          'İlanları koşullarına göre karşılaştır ve uygun bir role başvur. Başvurunun sonucu gerçek oyun kurallarıyla demo kaydına işlenir.',
-      task: 'Koşullarını karşıladığın bir iş ilanına başvur.',
-    ),
-    (
-      title: 'Paranın akışını planla',
-      description:
-          'Gelir-gider dengesi, hareket geçmişi ve gelecek tahminleri Finans ekranında karar vermene yardım eder.',
-      task: 'Hesap hareketlerini ve yaklaşan gider tahminini incele.',
-    ),
-    (
-      title: 'Kendi şirketini kur',
-      description:
-          'Demo hesabında şirket kurmaya yetecek sermaye ve kariyer seviyesi hazır. Kuruluş akışını gerçek ekran üzerinden deneyebilirsin.',
-      task: 'Demo sermayesiyle şirket kuruluş akışını tamamla.',
-    ),
-    (
-      title: 'Artık sıra sende',
-      description:
-          'Tur boyunca ayrı bir demo kaydı kullandın. Turu bitirdiğinde seçtiğin zorluktaki gerçek kariyerin Panel ekranından başlayacak.',
-      task: 'Turu bitirip gerçek kariyerine dön.',
-    ),
-  ];
+  final Set<String> _tutorialInteractions = <String>{};
+  final Set<String> _tutorialFinanceSections = <String>{};
+  final Set<String> _tutorialAssetSections = <String>{};
+  final Set<String> _tutorialCompanySections = <String>{};
 
   @override
   void initState() {
@@ -232,11 +187,7 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
           return _shellTransition(
             context,
             'welcome',
-            OnboardingPage(
-              session: _session,
-              onStart: _enterGameWithTutorial,
-              onSkip: _skipTutorial,
-            ),
+            OnboardingPage(session: _session, onStart: _enterGameWithTutorial),
           );
         }
         final tutorialStep = _tutorialStep;
@@ -250,18 +201,24 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
           Scaffold(
             body: Column(
               children: [
-                IgnorePointer(
-                  ignoring: tutorialStep != null,
-                  child: GameTopBar(
-                    state: activeSession.state,
-                    speed: _gameSpeed,
-                    isRunning:
-                        tutorialStep == null &&
-                        !_clockPaused &&
-                        _clockTicker.isRunning,
-                    onSpeedChanged: _changeGameSpeed,
-                    onToggleRunning: _toggleClock,
-                  ),
+                GameTopBar(
+                  state: activeSession.state,
+                  speed: _gameSpeed,
+                  isRunning: tutorialStep == null
+                      ? !_clockPaused && _clockTicker.isRunning
+                      : !_clockPaused,
+                  onSpeedChanged: (speed) {
+                    _changeGameSpeed(speed);
+                    if (tutorialStep != null) {
+                      _markTutorialInteraction('topbar-speed');
+                    }
+                  },
+                  onToggleRunning: () {
+                    _toggleClock();
+                    if (tutorialStep != null) {
+                      _markTutorialInteraction('topbar-toggle');
+                    }
+                  },
                 ),
                 Expanded(
                   child: Stack(
@@ -299,15 +256,20 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
                       if (tutorialStep != null)
                         GameTutorialOverlay(
                           step: tutorialStep,
-                          totalSteps: _tutorialSteps.length,
-                          title: _tutorialSteps[tutorialStep].title,
-                          description: _tutorialSteps[tutorialStep].description,
-                          task: _tutorialSteps[tutorialStep].task,
+                          totalSteps: guidedTutorialSteps.length,
+                          title: guidedTutorialSteps[tutorialStep].title,
+                          description:
+                              guidedTutorialSteps[tutorialStep].description,
+                          task: guidedTutorialSteps[tutorialStep].task,
                           taskCompleted: _tutorialTaskCompleted(tutorialStep),
+                          canAcknowledge:
+                              guidedTutorialSteps[tutorialStep].canAcknowledge,
+                          onAcknowledge: () =>
+                              _markTutorialInteraction('ack-$tutorialStep'),
                           collapsed: _tutorialCollapsed,
-                          onNext: _advanceTutorial,
+                          onNext: () => unawaited(_advanceTutorial()),
                           onBack: tutorialStep == 0 ? null : _backTutorial,
-                          onToggleCollapsed: () => setState(
+                          onToggleCollapsed: () => _update(
                             () => _tutorialCollapsed = !_tutorialCollapsed,
                           ),
                           onExit: _requestTutorialExit,
@@ -327,6 +289,10 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
     );
   }
 
+  void _update(VoidCallback action) => setState(action);
+}
+
+extension _AppShellActions on _AppShellState {
   Widget _shellTransition(BuildContext context, String key, Widget child) {
     return AnimatedSwitcher(
       duration: _motionDuration(context, AppMotion.slow),
@@ -349,46 +315,60 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
     3 => CompanyPage(session: _session),
     _ => ProfilePage(
       session: _session,
-      saveSlotStore: _playerStateStore is SaveSlotStore
-          ? _playerStateStore
-          : null,
-      onSlotSelected: _reloadSelectedSlot,
       onStartTutorial: _enterGameWithTutorial,
     ),
   };
 
-  Future<void> _reloadSelectedSlot(int _) async {
-    _clockTicker.stop();
-    await _session.initialize();
-    final error = _session.errorMessage;
-    if (error != null) throw SaveDataException(error);
-    if (!_clockPaused && _session.isReady && _session.state.isOnboarded) {
-      _clockTicker.start();
-    }
+  Widget _tutorialPage(int step) {
+    final destination = guidedTutorialSteps[step].destination;
+    return switch (destination) {
+      GuidedTutorialDestination.dashboard => DashboardPage(
+        session: _demoSession,
+        onFeatureTap: (_) => _markTutorialInteraction('dashboard-shortcut'),
+      ),
+      GuidedTutorialDestination.earning => EarningPage(session: _demoSession),
+      GuidedTutorialDestination.training => TrainingPage(session: _demoSession),
+      GuidedTutorialDestination.skills => SkillsPage(session: _demoSession),
+      GuidedTutorialDestination.sport => SportPage(session: _demoSession),
+      GuidedTutorialDestination.jobs => JobsPage(session: _demoSession),
+      GuidedTutorialDestination.employment => EmploymentPage(
+        session: _demoSession,
+      ),
+      GuidedTutorialDestination.career => CareerPage(session: _demoSession),
+      GuidedTutorialDestination.finance => FinancePage(
+        session: _demoSession,
+        onSectionOpened: (section) =>
+            _markTutorialSection(_tutorialFinanceSections, section),
+      ),
+      GuidedTutorialDestination.cities => CitiesPage(session: _demoSession),
+      GuidedTutorialDestination.assets => AssetsPage(
+        session: _demoSession,
+        onSectionOpened: (section) =>
+            _markTutorialSection(_tutorialAssetSections, section),
+      ),
+      GuidedTutorialDestination.company => CompanyPage(
+        session: _demoSession,
+        establishmentCheckOverride: const CompanyCheck(
+          isEligible: true,
+          reason: 'Öğretici demosunda seviye ve sermaye koşulları hazır.',
+        ),
+        onEstablishCompany: _establishTutorialCompany,
+        onSectionOpened: (section) =>
+            _markTutorialSection(_tutorialCompanySections, section),
+      ),
+      GuidedTutorialDestination.profile => ProfilePage(session: _demoSession),
+    };
   }
 
-  Widget _tutorialPage(int step) => switch (step) {
-    0 || 7 => DashboardPage(session: _demoSession, onFeatureTap: (_) {}),
-    1 => EarningPage(session: _demoSession),
-    2 => TrainingPage(session: _demoSession),
-    3 => CareerPage(session: _demoSession),
-    4 => JobsPage(session: _demoSession),
-    5 => FinancePage(session: _demoSession),
-    _ => CompanyPage(session: _demoSession),
-  };
-
-  int _tutorialNavigationIndex(int step) => switch (step) {
-    3 => 1,
-    4 => 2,
-    6 => 3,
-    _ => 0,
-  };
-
-  void _enterGame() {
-    if (!mounted) return;
-    setState(() => _showWelcome = false);
-    unawaited(_resumeGame());
-  }
+  int _tutorialNavigationIndex(int step) =>
+      switch (guidedTutorialSteps[step].destination) {
+        GuidedTutorialDestination.career => 1,
+        GuidedTutorialDestination.jobs ||
+        GuidedTutorialDestination.employment => 2,
+        GuidedTutorialDestination.company => 3,
+        GuidedTutorialDestination.profile => 4,
+        _ => 0,
+      };
 
   void _enterGameWithTutorial() {
     _startTutorialAt(0);
@@ -398,25 +378,39 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
     if (!mounted) return;
     _clockTicker.stop();
     _demoRepository.reset(_session.state.economyDifficulty);
+    _demoRepository.prepareForStep(step);
+    _tutorialInteractions.clear();
+    _tutorialFinanceSections.clear();
+    _tutorialAssetSections.clear();
+    _tutorialCompanySections.clear();
+    _gameSpeed = 1;
+    _clockPaused = false;
     _navigation.select(0);
-    setState(() {
+    _update(() {
       _showWelcome = false;
-      _tutorialStep = step.clamp(0, _tutorialSteps.length - 1);
+      _tutorialStep = step.clamp(0, guidedTutorialSteps.length - 1);
       _tutorialCollapsed = false;
     });
     unawaited(_demoSession.initialize());
   }
 
-  void _advanceTutorial() {
+  Future<void> _advanceTutorial() async {
     final step = _tutorialStep;
-    if (step == null) return;
-    if (step == _tutorialSteps.length - 1) {
+    if (step == null || !_tutorialTaskCompleted(step)) return;
+    if (step == guidedTutorialSteps.length - 1) {
       _finishTutorial();
       return;
     }
-    unawaited(_demoSession.tick(hours: 3));
+    await _demoSession.tick(hours: 3);
+    if (guidedTutorialSteps[step].taskType ==
+            GuidedTutorialTask.jobApplication &&
+        _demoSession.state.employment == null) {
+      _demoRepository.prepareEmployment();
+    }
     final nextStep = step + 1;
-    setState(() {
+    _demoRepository.prepareForStep(nextStep);
+    await _demoSession.initialize();
+    _update(() {
       _tutorialStep = nextStep;
       _tutorialCollapsed = false;
     });
@@ -429,7 +423,7 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
     final step = _tutorialStep;
     if (step == null || step == 0) return;
     final previousStep = step - 1;
-    setState(() {
+    _update(() {
       _tutorialStep = previousStep;
       _tutorialCollapsed = false;
     });
@@ -444,17 +438,60 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
     final state = _demoSession.state;
     bool hasActivity(String type) =>
         state.activeActivities.any((activity) => activity.type.name == type);
-    return switch (step) {
-      1 => state.totalEarned > 0 || hasActivity('earning'),
-      2 => state.totalTrainingSessions > 0 || hasActivity('training'),
-      4 => state.employment != null || hasActivity('jobApplication'),
-      6 => state.companyLevel > 0,
-      _ => true,
+    return switch (guidedTutorialSteps[step].taskType) {
+      GuidedTutorialTask.topBar =>
+        _tutorialInteractions.contains('topbar-speed') &&
+            _tutorialInteractions.contains('topbar-toggle'),
+      GuidedTutorialTask.dashboardShortcut => _tutorialInteractions.contains(
+        'dashboard-shortcut',
+      ),
+      GuidedTutorialTask.earning =>
+        state.totalEarned > 0 || hasActivity('earning'),
+      GuidedTutorialTask.training =>
+        state.totalTrainingSessions > 0 || hasActivity('training'),
+      GuidedTutorialTask.acknowledge => _tutorialInteractions.contains(
+        'ack-$step',
+      ),
+      GuidedTutorialTask.sport => hasActivity('sport'),
+      GuidedTutorialTask.jobApplication =>
+        state.employment != null || hasActivity('jobApplication'),
+      GuidedTutorialTask.work =>
+        state.totalWorkSessions > 0 || hasActivity('work'),
+      GuidedTutorialTask.finance =>
+        _tutorialFinanceSections.length == 3 &&
+            (state.personalFinance.hasDebt ||
+                state.personalFinance.hasInvestment),
+      GuidedTutorialTask.cityMove => state.currentCityId != 1,
+      GuidedTutorialTask.assets =>
+        _tutorialAssetSections.length == 2 &&
+            (state.ownedHomeIds.isNotEmpty || state.ownedCarId != null),
+      GuidedTutorialTask.companyEstablishment => state.companyLevel > 0,
+      GuidedTutorialTask.companySections =>
+        _tutorialCompanySections.length == 4,
+      GuidedTutorialTask.feedbackPreferences =>
+        !state.soundEffectsEnabled && !state.hapticsEnabled,
+      GuidedTutorialTask.finish => true,
     };
   }
 
+  void _markTutorialInteraction(String key) {
+    if (!mounted || !_tutorialInteractions.add(key)) return;
+    _update(() {});
+  }
+
+  void _markTutorialSection(Set<String> sections, String section) {
+    if (!mounted || !sections.add(section)) return;
+    _update(() {});
+  }
+
+  Future<String?> _establishTutorialCompany() async {
+    _demoRepository.establishTutorialCompany();
+    await _demoSession.initialize();
+    return 'Demo şirketin kuruldu.';
+  }
+
   Future<void> _requestTutorialExit() async {
-    final skip = await showDialog<bool>(
+    final close = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: const Text('Uygulamalı turdan çıkılsın mı?'),
@@ -467,31 +504,20 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
             child: const Text('Tura dön'),
           ),
           TextButton(
-            onPressed: () => Navigator.pop(dialogContext, false),
-            child: const Text('Sonra devam et'),
-          ),
-          FilledButton(
             onPressed: () => Navigator.pop(dialogContext, true),
-            child: const Text('Öğreticiyi atla'),
+            child: const Text('Sonra devam et'),
           ),
         ],
       ),
     );
-    if (skip == null || !mounted) return;
-    if (skip && !_session.state.tutorialCompleted) {
-      await _session.setTutorialProgress(
-        step: _tutorialStep ?? 0,
-        completed: true,
-      );
-    }
-    _closeTutorial();
+    if (close == true && mounted) _closeTutorial();
   }
 
   void _finishTutorial() {
     if (!_session.state.tutorialCompleted) {
       unawaited(
         _session.setTutorialProgress(
-          step: _tutorialSteps.length - 1,
+          step: guidedTutorialSteps.length - 1,
           completed: true,
         ),
       );
@@ -502,31 +528,22 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
   void _closeTutorial() {
     if (!mounted) return;
     _navigation.select(0);
-    setState(() => _tutorialStep = null);
+    _update(() => _tutorialStep = null);
     if (!_clockPaused) unawaited(_resumeGame());
-  }
-
-  void _skipTutorial() {
-    unawaited(_completeTutorialSkip());
-  }
-
-  Future<void> _completeTutorialSkip() async {
-    await _session.setTutorialProgress(step: 0, completed: true);
-    _enterGame();
   }
 
   Future<void> _initializeSession() async {
     await _session.initialize();
     if (!mounted || !_session.isReady) return;
     if (!_session.state.isOnboarded) {
-      setState(() => _showWelcome = true);
+      _update(() => _showWelcome = true);
       return;
     }
     if (!_session.state.tutorialCompleted) {
       _startTutorialAt(_session.state.tutorialStep);
       return;
     }
-    setState(() => _showWelcome = false);
+    _update(() => _showWelcome = false);
     if (!_clockPaused) unawaited(_resumeGame());
   }
 
@@ -534,13 +551,13 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
     if (_gameSpeed == speed) {
       return;
     }
-    setState(() => _gameSpeed = speed);
+    _update(() => _gameSpeed = speed);
     _clockTicker.updateInterval(GameClockService.intervalForSpeed(speed));
   }
 
   void _toggleClock() {
     if (_clockPaused) {
-      setState(() => _clockPaused = false);
+      _update(() => _clockPaused = false);
       if (_session.isReady &&
           _session.state.isOnboarded &&
           !_showWelcome &&
@@ -549,7 +566,7 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
       }
       return;
     }
-    setState(() => _clockPaused = true);
+    _update(() => _clockPaused = true);
     _clockTicker.stop();
   }
 
@@ -577,7 +594,7 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
     _clockTicker.stop();
     await _session.resetGame();
     if (!mounted) return;
-    setState(() {
+    _update(() {
       _showWelcome = true;
       _clockPaused = false;
       _gameSpeed = 1;

@@ -1,4 +1,5 @@
-storePassword=replace-with-keystore-password
-keyPassword=replace-with-key-password
-keyAlias=release
-storeFile=release-upload-keystore.jks
+# Bu dosyayı key.properties adıyla kopyalayın; gerçek sırları repoya eklemeyin.
+storePassword=CHANGE_ME
+keyPassword=CHANGE_ME
+keyAlias=upload
+storeFile=../keystores/mudurum-upload.jks

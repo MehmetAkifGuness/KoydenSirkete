@@ -33,7 +33,7 @@ abstract final class EsnafWheelRewardCatalog {
     EsnafWheelReward(
       type: EsnafWheelRewardType.bigTender,
       title: 'İhale',
-      description: '1.000 TL kazandın.',
+      description: '₺1.000 kazandın.',
       isMajor: true,
     ),
     EsnafWheelReward(
@@ -45,26 +45,26 @@ abstract final class EsnafWheelRewardCatalog {
     ),
     EsnafWheelReward(
       type: EsnafWheelRewardType.tipRain,
-      title: '100 TL',
-      description: '100 TL kazandın.',
+      title: '₺100',
+      description: '₺100 kazandın.',
       isMajor: false,
     ),
     EsnafWheelReward(
       type: EsnafWheelRewardType.smallTip,
-      title: '50 TL',
-      description: '50 TL kazandın.',
+      title: '₺50',
+      description: '₺50 kazandın.',
       isMajor: false,
     ),
     EsnafWheelReward(
       type: EsnafWheelRewardType.customerPenalty,
-      title: '-50 TL',
-      description: '50 TL kaybettin.',
+      title: '-₺50',
+      description: '₺50 kaybettin.',
       isMajor: false,
     ),
     EsnafWheelReward(
       type: EsnafWheelRewardType.majorPenalty,
-      title: '-100 TL',
-      description: '100 TL kaybettin.',
+      title: '-₺100',
+      description: '₺100 kaybettin.',
       isMajor: false,
     ),
   ];

@@ -25,7 +25,7 @@ class PersonalFinanceService {
     }
     if (amount < 1000 || amount > creditLimit(state)) {
       throw GameRuleException(
-        'Kredi 1.000 TL ile ${creditLimit(state)} TL arasında olmalı.',
+        'Kredi ₺1.000 ile ₺${creditLimit(state)} arasında olmalı.',
       );
     }
     final totalDebt = (amount * (100 + loanInterestPercent) / 100).ceil();
@@ -84,7 +84,7 @@ class PersonalFinanceService {
     final maximum = (state.money - 500).clamp(0, 50000).toInt();
     if (amount < minimumInvestment || amount > maximum) {
       throw GameRuleException(
-        'Yatırım 500 TL ile $maximum TL arasında olmalı; 500 TL nakit yedek kalır.',
+        'Yatırım ₺500 ile ₺$maximum arasında olmalı; ₺500 nakit yedek kalır.',
       );
     }
     return state.copyWith(

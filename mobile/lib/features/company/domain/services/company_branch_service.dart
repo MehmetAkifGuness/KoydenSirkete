@@ -314,7 +314,9 @@ class CompanyBranchService {
       ],
     );
   }
+}
 
+extension CompanyBranchDailyOperations on CompanyBranchService {
   CompanyBranchOperationResult processDailyOperations(
     PlayerState state, {
     int days = 1,

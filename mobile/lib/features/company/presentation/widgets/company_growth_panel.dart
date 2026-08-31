@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../app/theme/app_palette.dart';
+import '../../../../core/utils/app_formatters.dart';
 import '../../../../core/widgets/app_page.dart';
 import '../../../game/domain/entities/player_state.dart';
 import '../../domain/services/company_growth_service.dart';
@@ -38,7 +39,7 @@ class CompanyGrowthPanel extends StatelessWidget {
               ),
               AppPill(
                 label:
-                    'Pazar %${service.marketShare(state).toStringAsFixed(1)}',
+                    'Pazar %${AppFormatters.decimal(service.marketShare(state), fractionDigits: 1)}',
                 color: AppPalette.secondary,
               ),
               AppPill(

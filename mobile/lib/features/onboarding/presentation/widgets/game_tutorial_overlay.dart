@@ -16,6 +16,8 @@ class GameTutorialOverlay extends StatelessWidget {
     required this.onBack,
     required this.onToggleCollapsed,
     required this.onExit,
+    this.canAcknowledge = false,
+    this.onAcknowledge,
     super.key,
   });
 
@@ -30,6 +32,8 @@ class GameTutorialOverlay extends StatelessWidget {
   final VoidCallback? onBack;
   final VoidCallback onToggleCollapsed;
   final VoidCallback onExit;
+  final bool canAcknowledge;
+  final VoidCallback? onAcknowledge;
 
   bool get _isLast => step == totalSteps - 1;
 
@@ -70,7 +74,7 @@ class GameTutorialOverlay extends StatelessWidget {
           '${step + 1}/$totalSteps · $title',
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: const TextStyle(fontWeight: FontWeight.w900),
+          style: const TextStyle(fontWeight: FontWeight.w800),
         ),
       ),
       IconButton(
@@ -83,7 +87,7 @@ class GameTutorialOverlay extends StatelessWidget {
 
   Widget _expandedContent(BuildContext context) => ConstrainedBox(
     constraints: BoxConstraints(
-      maxHeight: MediaQuery.sizeOf(context).height * .58,
+      maxHeight: (MediaQuery.sizeOf(context).height * .34).clamp(150.0, 200.0),
     ),
     child: SingleChildScrollView(
       child: Column(
@@ -98,10 +102,15 @@ class GameTutorialOverlay extends StatelessWidget {
                   style: const TextStyle(
                     color: AppPalette.primary,
                     fontSize: 10,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: .5,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
+              ),
+              IconButton(
+                onPressed: () => _showDetails(context),
+                tooltip: 'Adım açıklamasını göster',
+                visualDensity: VisualDensity.compact,
+                icon: const Icon(Icons.info_outline_rounded, size: 20),
               ),
               IconButton(
                 onPressed: onToggleCollapsed,
@@ -125,24 +134,17 @@ class GameTutorialOverlay extends StatelessWidget {
               backgroundColor: AppPalette.track,
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
           Text(
             title,
-            style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w900),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
           ),
-          const SizedBox(height: 4),
-          Text(
-            description,
-            style: const TextStyle(
-              color: AppPalette.textSecondary,
-              fontSize: 12,
-              height: 1.35,
-            ),
-          ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 7),
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.all(10),
+            padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               color: (taskCompleted ? AppPalette.success : AppPalette.primary)
                   .withValues(alpha: .09),
@@ -173,12 +175,23 @@ class GameTutorialOverlay extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 10),
+          if (canAcknowledge && !taskCompleted) ...[
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: onAcknowledge,
+                icon: const Icon(Icons.visibility_outlined),
+                label: const Text('İnceledim ve anladım'),
+              ),
+            ),
+          ],
+          const SizedBox(height: 7),
           LayoutBuilder(
             builder: (context, constraints) {
               final largeText = MediaQuery.textScalerOf(context).scale(1) > 1.4;
               final nextButton = FilledButton.icon(
-                onPressed: onNext,
+                onPressed: taskCompleted ? onNext : null,
                 icon: Icon(
                   _isLast ? Icons.check_rounded : Icons.arrow_forward_rounded,
                   size: 18,
@@ -188,7 +201,7 @@ class GameTutorialOverlay extends StatelessWidget {
                       ? 'Turu bitir'
                       : taskCompleted
                       ? 'Devam'
-                      : 'Bu adımı geç',
+                      : 'Önce görevi tamamla',
                 ),
               );
               if (largeText || constraints.maxWidth < 300) {
@@ -223,6 +236,55 @@ class GameTutorialOverlay extends StatelessWidget {
             },
           ),
         ],
+      ),
+    ),
+  );
+
+  Future<void> _showDetails(BuildContext context) => showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: AppPalette.surface,
+    builder: (context) => SafeArea(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    '${step + 1}/$totalSteps · $title',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  onPressed: () => Navigator.pop(context),
+                  tooltip: 'Açıklamayı kapat',
+                  icon: const Icon(Icons.close_rounded),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              description,
+              style: const TextStyle(
+                color: AppPalette.textSecondary,
+                fontSize: 14,
+                height: 1.45,
+              ),
+            ),
+            const SizedBox(height: 14),
+            Text(
+              'Görev · $task',
+              style: const TextStyle(fontWeight: FontWeight.w800, height: 1.4),
+            ),
+          ],
+        ),
       ),
     ),
   );

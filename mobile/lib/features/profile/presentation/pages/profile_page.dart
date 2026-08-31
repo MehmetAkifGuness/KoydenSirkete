@@ -1,10 +1,8 @@
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../../../../app/theme/app_palette.dart';
 import '../../../../core/accessibility/app_feedback_preferences.dart';
-import '../../../../core/database/player_state_store.dart';
 import '../../../../core/widgets/app_page.dart';
 import '../../../../core/widgets/app_transaction_preview.dart';
 import '../../../../core/widgets/game_account_bar.dart';
@@ -12,21 +10,15 @@ import '../../../assets/presentation/pages/assets_page.dart';
 import '../../../game/presentation/pages/developer_data_page.dart';
 import '../../../game/presentation/state/game_session_controller.dart';
 import '../../../progress/presentation/pages/progress_page.dart';
-import '../../../game/domain/services/playtest_metrics_service.dart';
-import 'save_management_page.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({
     required this.session,
-    this.saveSlotStore,
-    this.onSlotSelected,
     this.onStartTutorial,
     super.key,
   });
 
   final GameSessionController session;
-  final SaveSlotStore? saveSlotStore;
-  final Future<void> Function(int slot)? onSlotSelected;
   final VoidCallback? onStartTutorial;
 
   @override
@@ -40,7 +32,6 @@ class ProfilePage extends StatelessWidget {
           soundEffects: state.soundEffectsEnabled,
           haptics: state.hapticsEnabled,
         );
-        const metrics = PlaytestMetricsService();
         return AppPage(
           title: 'Profil',
           subtitle: 'İlerlemeni ve kişisel alanını yönet.',
@@ -123,25 +114,6 @@ class ProfilePage extends StatelessWidget {
                   ),
                 ),
               ),
-              if (saveSlotStore != null && onSlotSelected != null) ...[
-                const SizedBox(height: 9),
-                _ProfileAction(
-                  icon: Icons.save_outlined,
-                  title: 'Kayıt yuvaları ve yedekler',
-                  subtitle: '3 yerel yuvayı aç, dışa aktar veya içe aktar.',
-                  enabled: !session.isBusy,
-                  onTap: session.isBusy
-                      ? null
-                      : () => Navigator.of(context).push(
-                          MaterialPageRoute<void>(
-                            builder: (_) => SaveManagementPage(
-                              store: saveSlotStore!,
-                              onSlotSelected: onSlotSelected!,
-                            ),
-                          ),
-                        ),
-                ),
-              ],
               const SizedBox(height: 9),
               _ProfileAction(
                 icon: Icons.school_outlined,
@@ -222,34 +194,6 @@ class ProfilePage extends StatelessWidget {
               ),
               const SizedBox(height: 28),
               const AppSectionHeader(
-                title: 'Oynanış testi ölçümleri',
-                caption: 'Kişisel veri içermeyen yerel denge sonuçları.',
-              ),
-              const SizedBox(height: 12),
-              AppInfoCard(
-                accent: AppPalette.secondary,
-                padding: const EdgeInsets.all(14),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'İlk şirket: ${metrics.firstCompanyDays(state)?.toString() ?? "Henüz tamamlanmadı"} oyun günü',
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      'Geç oyuna ulaşma: ${metrics.lateGameDays(state)?.toString() ?? "Henüz tamamlanmadı"} oyun günü',
-                    ),
-                    const SizedBox(height: 10),
-                    OutlinedButton.icon(
-                      onPressed: () => _copyPlaytestReport(context, metrics),
-                      icon: const Icon(Icons.copy_rounded),
-                      label: const Text('Raporu kopyala'),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 28),
-              const AppSectionHeader(
                 title: 'Ekonomi zorluğu',
                 caption: 'Gelirleri, giderleri ve enflasyon hızını belirler.',
               ),
@@ -289,7 +233,9 @@ class ProfilePage extends StatelessWidget {
                 title: 'Yeni oyuna başla',
                 subtitle: 'Mevcut ilerlemeyi sıfırla.',
                 enabled: !session.isBusy,
-                onTap: session.isBusy ? null : () => _confirmReset(context),
+                onTap: session.isBusy
+                    ? null
+                    : () => _confirmReset(context, session),
                 destructive: true,
               ),
             ],
@@ -298,51 +244,21 @@ class ProfilePage extends StatelessWidget {
       },
     );
   }
+}
 
-  Future<void> _confirmReset(BuildContext context) async {
-    final confirmed = await showAppConfirmation(
-      context,
-      title: 'Yeni oyun başlatılsın mı?',
-      summary: const Text('Tüm yerel kariyer ve şirket ilerlemesi silinecek.'),
-      confirmLabel: 'Kalıcı olarak sil',
-      irreversibleWarning:
-          'Bu işlem geri alınamaz; para, varlıklar ve başarılar kurtarılamaz.',
-    );
-    if (confirmed == true) await session.resetGame();
-  }
-
-  Future<void> _copyPlaytestReport(
-    BuildContext context,
-    PlaytestMetricsService metrics,
-  ) async {
-    final testerProfile = await showDialog<String>(
-      context: context,
-      builder: (context) => SimpleDialog(
-        title: const Text('Test deneyimini seç'),
-        children: [
-          SimpleDialogOption(
-            onPressed: () => Navigator.pop(context, 'Yeni oyuncu'),
-            child: const Text('Yeni oyuncu'),
-          ),
-          SimpleDialogOption(
-            onPressed: () => Navigator.pop(context, 'Deneyimli oyuncu'),
-            child: const Text('Deneyimli oyuncu'),
-          ),
-        ],
-      ),
-    );
-    if (testerProfile == null) return;
-    await Clipboard.setData(
-      ClipboardData(
-        text: metrics.report(session.state, testerProfile: testerProfile),
-      ),
-    );
-    if (context.mounted) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Ölçüm raporu kopyalandı.')));
-    }
-  }
+Future<void> _confirmReset(
+  BuildContext context,
+  GameSessionController session,
+) async {
+  final confirmed = await showAppConfirmation(
+    context,
+    title: 'Yeni oyun başlatılsın mı?',
+    summary: const Text('Tüm yerel kariyer ve şirket ilerlemesi silinecek.'),
+    confirmLabel: 'Kalıcı olarak sil',
+    irreversibleWarning:
+        'Bu işlem geri alınamaz; para, varlıklar ve başarılar kurtarılamaz.',
+  );
+  if (confirmed == true) await session.resetGame();
 }
 
 class _ProfileAction extends StatelessWidget {

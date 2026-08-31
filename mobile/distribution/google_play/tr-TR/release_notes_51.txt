@@ -1,0 +1,1 @@
+Android yayın paketi, çevrimdışı güncelleme kapısı ve üç cihaz profilli performans testleri eklendi. Türkçe biçimler ortaklaştırıldı; oynanış hedef süreleri gerçek kullanıcı testi için genişletildi.

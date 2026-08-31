@@ -7,6 +7,7 @@ import 'package:kariyerden_sirkete/app/theme/app_theme.dart';
 import 'package:kariyerden_sirkete/core/database/player_state_store.dart';
 import 'package:kariyerden_sirkete/core/widgets/app_gradient_background.dart';
 import 'package:kariyerden_sirkete/core/widgets/app_state_view.dart';
+import 'package:kariyerden_sirkete/core/widgets/feature_card.dart';
 import 'package:kariyerden_sirkete/core/widgets/game_top_bar.dart';
 import 'package:kariyerden_sirkete/features/assets/presentation/pages/assets_page.dart';
 import 'package:kariyerden_sirkete/features/assets/domain/services/asset_service.dart';
@@ -58,27 +59,56 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Kariyerini kur'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('Normal'),
+      250,
+      scrollable: find.byType(Scrollable).first,
+    );
     await tester.tap(find.text('Normal'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Gerçek ekranlarda demoyu başlat'));
+    await tester.scrollUntilVisible(
+      find.text('16 adımlı uygulamalı eğitimi başlat'),
+      250,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(find.text('16 adımlı uygulamalı eğitimi başlat'));
     await tester.pumpAndSettle();
 
     expect(find.byType(GameTutorialOverlay), findsOneWidget);
-    expect(find.text('Panelini tanı'), findsOneWidget);
-    for (final label in [
-      'Devam',
-      'Bu adımı geç',
-      'Bu adımı geç',
-      'Devam',
-      'Bu adımı geç',
-      'Devam',
-      'Bu adımı geç',
-    ]) {
-      await tester.tap(find.widgetWithText(FilledButton, label));
-      await tester.pumpAndSettle();
-    }
-    expect(find.text('Artık sıra sende'), findsOneWidget);
-    await tester.tap(find.widgetWithText(FilledButton, 'Turu bitir'));
+    expect(find.text('Üst durum çubuğunu kullan'), findsOneWidget);
+    expect(
+      tester
+          .widget<FilledButton>(
+            find.widgetWithText(FilledButton, 'Önce görevi tamamla'),
+          )
+          .onPressed,
+      isNull,
+    );
+    await tester.tap(find.text('2x'));
+    await tester.tap(find.byTooltip('Durdur'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(FilledButton, 'Devam'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Panel kısayollarını tanı'), findsOneWidget);
+    await tester.tap(find.byTooltip('Rehberi küçült'));
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.text('Para kazan'),
+      250,
+      scrollable: find.byType(Scrollable).first,
+    );
+    tester.widget<FeatureCard>(find.byType(FeatureCard).first).onTap();
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Rehberi büyüt'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(FilledButton, 'Devam'));
+    await tester.pumpAndSettle();
+    expect(find.text('İlk sermayeni kazan'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Turdan çık'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Sonra devam et'));
     await tester.pumpAndSettle();
 
     expect(find.text('Panel'), findsOneWidget);
@@ -113,8 +143,49 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(GameTutorialOverlay), findsOneWidget);
-    expect(find.text('Paranın akışını planla'), findsOneWidget);
-    expect(find.text('Finans'), findsOneWidget);
+    expect(find.text('Enerji kapasiteni geliştir'), findsWidgets);
+    expect(find.text('Spor'), findsOneWidget);
+  });
+
+  testWidgets('tutorial company step bypasses career level requirement', (
+    tester,
+  ) async {
+    final store = _MemoryPlayerStateStore(
+      const PlayerStateRecord(
+        id: 1,
+        schemaVersion: 41,
+        money: 240,
+        energy: 100,
+        knowledge: 0,
+        experience: 0,
+        day: 1,
+        hour: 8,
+        earningSessionsToday: 0,
+        isOnboarded: true,
+        tutorialStep: 12,
+        careerLevel: 1,
+      ),
+    );
+    await tester.pumpWidget(CareerToCompanyApp(playerStateStore: store));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text('Öğretici demosunda seviye ve sermaye koşulları hazır.'),
+      findsOneWidget,
+    );
+    expect(find.textContaining('kariyer seviyesi 3 olmalı'), findsNothing);
+    await tester.tap(find.byTooltip('Rehberi küçült'));
+    await tester.pumpAndSettle();
+    final establish = find.widgetWithText(
+      FilledButton,
+      'Kişisel cüzdandan şirketimi kur',
+    );
+    tester.widget<FilledButton>(establish).onPressed!.call();
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Şirketi kur').last);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Operasyon ve bütçe'), findsOneWidget);
   });
 
   test('palette keeps small text readable on every surface', () {
@@ -232,8 +303,6 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Evler'), findsOneWidget);
-    await tester.drag(find.byType(ListView), const Offset(0, -700));
-    await tester.pumpAndSettle();
     expect(find.text('Arabalar'), findsOneWidget);
   });
 
@@ -256,6 +325,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
+    await _openSubpage(tester, 'Evler');
 
     await tester.tap(find.widgetWithText(OutlinedButton, 'Sat').first);
     await tester.pumpAndSettle();
@@ -281,6 +351,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
+    await _openSubpage(tester, 'Evler');
 
     await tester.tap(find.widgetWithText(FilledButton, 'Kiraya ver'));
     await tester.pumpAndSettle();
@@ -318,6 +389,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('GÜNLÜK SABİT BÜTÇE'), findsOneWidget);
+    await _openSubpage(tester, 'Bugünkü hareketler');
     expect(find.text('Ek kazanç'), findsOneWidget);
     await tester.scrollUntilVisible(
       find.text('Şirket hareketleri'),
@@ -325,11 +397,15 @@ void main() {
       scrollable: find.byType(Scrollable).first,
     );
     expect(find.text('Şirket operasyon geliri'), findsOneWidget);
-    await tester.scrollUntilVisible(
-      find.text('Son 7 gün'),
-      300,
-      scrollable: find.byType(Scrollable).first,
+    await tester.pumpWidget(
+      MaterialApp(
+        key: const ValueKey('finance-history-test'),
+        theme: AppTheme.dark(),
+        home: AppGradientBackground(child: FinancePage(session: session)),
+      ),
     );
+    await tester.pumpAndSettle();
+    await _openSubpage(tester, '7 günlük özet');
     expect(find.text('Son 7 gün'), findsOneWidget);
     session.dispose();
   });
@@ -352,8 +428,11 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
+    await _openSubpage(tester, 'Operasyon ve bütçe');
 
     expect(find.text('HESAPLAR ARASI AKTARIM'), findsOneWidget);
+    await tester.ensureVisible(find.text('Sermaye aktar'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Sermaye aktar'));
     await tester.pumpAndSettle();
     await tester.tap(find.widgetWithText(FilledButton, 'Aktar'));
@@ -392,6 +471,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
+    await _openSubpage(tester, 'Operasyon ve bütçe');
 
     final marketing = find.byKey(
       const ValueKey('company-budget-marketing-medium'),
@@ -451,6 +531,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
+    await _openSubpage(tester, 'Operasyon ve bütçe');
 
     final choice = find.byKey(const ValueKey('company-decision-people'));
     await tester.ensureVisible(choice);
@@ -620,16 +701,8 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
+      await _openSubpage(tester, 'Projeler');
 
-      await tester.scrollUntilVisible(
-        find.text('Şirket yol haritası'),
-        300,
-        scrollable: find.byType(Scrollable).first,
-      );
-      expect(find.text('Yerel girişim'), findsWidgets);
-      expect(find.text('Bölgesel şirket'), findsOneWidget);
-      expect(find.text('Ulusal marka'), findsOneWidget);
-      expect(find.text('Holding'), findsOneWidget);
       await tester.scrollUntilVisible(
         find.text('Kurumsal çözüm'),
         300,
@@ -657,6 +730,9 @@ void main() {
         scrollable: find.byType(Scrollable).first,
       );
       expect(find.text('Sezon daveti gerekli'), findsOneWidget);
+      Navigator.of(tester.element(find.text('Projeler'))).pop();
+      await tester.pumpAndSettle();
+      await _openSubpage(tester, 'Büyüme ve pazar');
       await tester.scrollUntilVisible(
         find.text('Piyasa ve rekabet'),
         500,
@@ -695,6 +771,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
+    await _openSubpage(tester, 'Projeler');
 
     final checkbox = find.byKey(
       ValueKey('project-team-checkbox-${employee.id}'),
@@ -742,6 +819,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
+    await _openSubpage(tester, 'Ekip ve adaylar');
     final action = find.text('Kasa ₺$cost');
     await tester.scrollUntilVisible(
       action,
@@ -787,6 +865,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
+    await _openSubpage(tester, 'Büyüme ve pazar');
 
     final action = find.byKey(ValueKey('complete-company-deal-${deal.id}'));
     await tester.scrollUntilVisible(
@@ -833,6 +912,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
+    await _openSubpage(tester, 'Büyüme ve pazar');
 
     final title = find.text('Kupa geçmişi ve avantajlar');
     await tester.scrollUntilVisible(
@@ -869,6 +949,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
+    await _openSubpage(tester, 'Büyüme ve pazar');
 
     final section = find.text('Rekabet stratejisi');
     await tester.scrollUntilVisible(
@@ -1024,6 +1105,19 @@ void main() {
     await tester.tap(find.text('4x'));
     expect(selectedSpeed, 4);
   });
+}
+
+Future<void> _openSubpage(WidgetTester tester, String title) async {
+  final target = find.text(title);
+  if (target.evaluate().isEmpty) {
+    await tester.scrollUntilVisible(
+      target,
+      250,
+      scrollable: find.byType(Scrollable).first,
+    );
+  }
+  await tester.tap(target.first);
+  await tester.pumpAndSettle();
 }
 
 Future<GameSessionController> _readySession([PlayerState? initial]) async {

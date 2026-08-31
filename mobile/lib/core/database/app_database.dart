@@ -2,12 +2,10 @@ import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
 import 'player_state_store.dart';
-import 'sqlite_save_support.dart';
 
 const _databaseName = 'career_to_company.db';
 const _tableName = 'player_state';
-const _metadataTable = 'save_metadata';
-const _currentDatabaseVersion = 39;
+const _currentDatabaseVersion = 41;
 
 class AppDatabase extends SqlitePlayerStateStore {
   AppDatabase({String? databasePath, DatabaseFactory? factory})
@@ -18,6 +16,18 @@ class AppDatabase extends SqlitePlayerStateStore {
   final DatabaseFactory? _factory;
   Database? _database;
 
+  @override
+  Future<Database> get database => _open();
+
+  @override
+  Future<void> close() async {
+    final database = _database;
+    _database = null;
+    await database?.close();
+  }
+}
+
+extension _AppDatabaseOpening on AppDatabase {
   Future<Database> _open() async {
     final existing = _database;
     if (existing != null) {
@@ -109,13 +119,9 @@ class AppDatabase extends SqlitePlayerStateStore {
             tutorial_step INTEGER NOT NULL DEFAULT 0,
             economy_difficulty TEXT NOT NULL DEFAULT 'normal',
             sound_effects_enabled INTEGER NOT NULL DEFAULT 1,
-            haptics_enabled INTEGER NOT NULL DEFAULT 1,
-            data_checksum TEXT,
-            save_revision INTEGER NOT NULL DEFAULT 0,
-            updated_at INTEGER
+            haptics_enabled INTEGER NOT NULL DEFAULT 1
           )
         ''');
-          await _createMetadataTable(database);
         },
         onUpgrade: (database, oldVersion, _) async {
           if (oldVersion < 2) {
@@ -379,60 +385,61 @@ class AppDatabase extends SqlitePlayerStateStore {
               'ALTER TABLE $_tableName ADD COLUMN tutorial_step INTEGER NOT NULL DEFAULT 0',
             );
           }
-          if (oldVersion < 39) {
-            await database.execute(
-              'ALTER TABLE $_tableName ADD COLUMN data_checksum TEXT',
-            );
-            await database.execute(
-              'ALTER TABLE $_tableName ADD COLUMN save_revision INTEGER NOT NULL DEFAULT 0',
-            );
-            await database.execute(
-              'ALTER TABLE $_tableName ADD COLUMN updated_at INTEGER',
-            );
-            await _createMetadataTable(database);
+          if (oldVersion < 41) {
+            await _restoreSinglePlayerState(database);
           }
         },
       ),
     );
   }
-
-  static Future<void> _createMetadataTable(Database database) async {
-    await database.execute('''
-      CREATE TABLE IF NOT EXISTS $_metadataTable (
-        key TEXT PRIMARY KEY NOT NULL,
-        value TEXT NOT NULL
-      )
-    ''');
-    await database.insert(_metadataTable, {
-      'key': 'active_slot',
-      'value': '1',
-    }, conflictAlgorithm: ConflictAlgorithm.ignore);
-  }
-
-  @override
-  Future<Database> get database => _open();
-
-  @override
-  Future<void> close() async {
-    final database = _database;
-    _database = null;
-    await database?.close();
-  }
 }
 
-abstract class SqlitePlayerStateStore implements SaveSlotStore {
+Future<void> _restoreSinglePlayerState(Database database) async {
+  final metadataTable = await database.rawQuery(
+    "SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'save_metadata'",
+  );
+  if (metadataTable.isNotEmpty) {
+    final metadata = await database.query(
+      'save_metadata',
+      columns: ['value'],
+      where: 'key = ?',
+      whereArgs: ['active_slot'],
+      limit: 1,
+    );
+    final selectedId = metadata.isEmpty
+        ? 1
+        : int.tryParse(metadata.first['value'] as String? ?? '') ?? 1;
+    if (selectedId != 1) {
+      final selected = await database.query(
+        _tableName,
+        where: 'id = ?',
+        whereArgs: [selectedId],
+        limit: 1,
+      );
+      if (selected.isNotEmpty) {
+        await database.insert(
+          _tableName,
+          Map<String, Object?>.from(selected.first)..['id'] = 1,
+          conflictAlgorithm: ConflictAlgorithm.replace,
+        );
+      }
+    }
+  }
+  await database.delete(_tableName, where: 'id <> 1');
+  await database.execute('DROP TABLE IF EXISTS save_metadata');
+}
+
+abstract class SqlitePlayerStateStore implements PlayerStateStore {
   Future<Database> get database;
-
-  late final SqliteSaveSupport _saveSupport = SqliteSaveSupport(() => database);
-
-  @override
-  int get activeSlot => _saveSupport.activeSlot;
 
   @override
   Future<PlayerStateRecord?> readPlayerState() async {
-    final row = await _saveSupport.readActiveRow();
-    if (row == null) return null;
-    return _recordFromRow(row);
+    final rows = await (await database).query(
+      _tableName,
+      where: 'id = 1',
+      limit: 1,
+    );
+    return rows.isEmpty ? null : _recordFromRow(rows.first);
   }
 
   PlayerStateRecord _recordFromRow(Map<String, Object?> row) {
@@ -515,7 +522,11 @@ abstract class SqlitePlayerStateStore implements SaveSlotStore {
 
   @override
   Future<void> savePlayerState(PlayerStateRecord record) async {
-    await _saveSupport.saveActiveRow(_rowFromRecord(record));
+    await (await database).insert(
+      _tableName,
+      _rowFromRecord(record)..['id'] = 1,
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
   }
 
   Map<String, Object?> _rowFromRecord(PlayerStateRecord record) => {
@@ -592,19 +603,6 @@ abstract class SqlitePlayerStateStore implements SaveSlotStore {
     'sound_effects_enabled': record.soundEffectsEnabled ? 1 : 0,
     'haptics_enabled': record.hapticsEnabled ? 1 : 0,
   };
-
-  @override
-  Future<List<SaveSlotInfo>> listSlots() => _saveSupport.listSlots();
-
-  @override
-  Future<void> switchSlot(int slot) => _saveSupport.switchSlot(slot);
-
-  @override
-  Future<String> exportSlot(int slot) => _saveSupport.exportSlot(slot);
-
-  @override
-  Future<void> importSlot(String data, {required int slot}) =>
-      _saveSupport.importSlot(data, slot: slot);
 
   DateTime? _dateTimeFromMillis(int? value) => value == null || value <= 0
       ? null
