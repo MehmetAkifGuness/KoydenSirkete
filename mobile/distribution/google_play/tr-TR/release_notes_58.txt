@@ -1,0 +1,5 @@
+• Ayrıntılı ve uygulamalı başlangıç eğitimi eklendi.
+• Uzun şirket ekranları daha erişilebilir alt sayfalara ayrıldı.
+• Yönetim otomasyonu, zor moda özel projeler ve kriz ödülleri eklendi.
+• Holding kariyer finali ve serbest oyun seçeneği eklendi.
+• Yerel SQLite kayıt güvenilirliği ve Türkçe metinler iyileştirildi.

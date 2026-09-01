@@ -1,6 +1,6 @@
 # Müdür Gizlilik Politikası
 
-Son güncelleme: 30 Ağustos 2026
+Son güncelleme: 31 Ağustos 2026
 
 Müdür, internetsiz çalışan tek oyunculu bir kariyer ve şirket simülasyonudur.
 
@@ -10,11 +10,11 @@ Uygulama geliştiricisi kişisel veri, cihaz tanımlayıcısı, konum, kişi lis
 
 ## Cihazda tutulan veriler
 
-Oyun ilerlemesi, tercihler ve kayıt yedekleri yalnızca kullanıcının cihazındaki yerel SQLite veritabanında saklanır. Kullanıcı isterse kayıt metnini panoya kopyalayarak kendi seçtiği bir kanaldan dışa aktarabilir; bu aktarım uygulama tarafından bir sunucuya gönderilmez.
+Oyun ilerlemesi, tercihler ve şirket verileri yalnızca uygulamanın Android tarafından korunan yerel alanındaki SQLite veritabanında saklanır. Uygulama bu kayıtları bir sunucuya yüklemez.
 
 ## Veri paylaşımı ve saklama
 
-Veriler geliştiriciye veya üçüncü taraflara aktarılmaz. Kayıtlar, uygulama içindeki kayıt silme seçeneğiyle ya da Android üzerinden uygulama verileri temizlenerek silinebilir. Uygulamanın kaldırılması Android davranışına göre yerel verileri kaldırır.
+Veriler geliştiriciye veya üçüncü taraflara aktarılmaz. Yerel kayıt, kullanıcı uygulama içinden **Yeni oyuna başla** seçeneğini uygulayana, Android ayarlarından uygulama verilerini temizleyene veya uygulamayı kaldırana kadar cihazda kalır.
 
 ## Çocukların gizliliği
 
@@ -22,4 +22,6 @@ Uygulama çocuklardan bilerek kişisel veri toplamaz; hiçbir kullanıcıdan ki�
 
 ## Değişiklikler ve iletişim
 
-Bu politika değişirse tarih ve metin bu dosyada güncellenir. Sorular için [proje sorun takipçisi](https://github.com/MehmetAkifGuness/KoydenSirkete/issues) kullanılabilir.
+Geliştirici: **Mehmet Akif Güneş**
+
+Bu politika değişirse tarih ve metin bu dosyada güncellenir. Sorular ve gizlilik talepleri için [proje sorun takipçisi](https://github.com/MehmetAkifGuness/KoydenSirkete/issues) kullanılabilir.

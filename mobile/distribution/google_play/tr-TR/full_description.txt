@@ -20,4 +20,6 @@ Güvenli ve çevrimdışı
 • Kayıtlar yalnızca cihazında tutulur.
 • İlerlemeniz doğrudan tek bir yerel SQLite kaydında tutulur.
 
+Oyundaki para, kredi ve yatırım sistemlerinin tamamı kurgusaldır; gerçek para veya finansal hizmet içermez.
+
 Köyden başlayan yolculuğunu doğru kararlarla büyük bir şirkete dönüştür.

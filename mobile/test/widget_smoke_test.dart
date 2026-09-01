@@ -43,6 +43,7 @@ import 'package:kariyerden_sirkete/features/jobs/presentation/pages/jobs_page.da
 import 'package:kariyerden_sirkete/features/onboarding/presentation/pages/onboarding_page.dart';
 import 'package:kariyerden_sirkete/features/onboarding/presentation/widgets/game_tutorial_overlay.dart';
 import 'package:kariyerden_sirkete/features/profile/presentation/pages/profile_page.dart';
+import 'package:kariyerden_sirkete/features/profile/presentation/pages/privacy_policy_page.dart';
 import 'package:kariyerden_sirkete/features/progress/presentation/pages/progress_page.dart';
 import 'package:kariyerden_sirkete/features/progress/presentation/pages/career_final_page.dart';
 import 'package:kariyerden_sirkete/features/skills/presentation/pages/skills_page.dart';
@@ -1115,6 +1116,19 @@ void main() {
     expect(find.text('Çevrimdışı mod'), findsNothing);
     expect(find.text('Offline · SQLite'), findsNothing);
     session.dispose();
+  });
+
+  testWidgets('privacy policy is available inside the app', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.dark(),
+        home: const AppGradientBackground(child: PrivacyPolicyPage()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Gizlilik politikası'), findsOneWidget);
+    expect(find.text('TAMAMEN ÇEVRİMDIŞI'), findsOneWidget);
   });
 
   testWidgets('clock speed controls expose 2x, 4x and pause', (tester) async {

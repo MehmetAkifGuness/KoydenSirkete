@@ -10,6 +10,7 @@ import '../../../assets/presentation/pages/assets_page.dart';
 import '../../../game/presentation/pages/developer_data_page.dart';
 import '../../../game/presentation/state/game_session_controller.dart';
 import '../../../progress/presentation/pages/progress_page.dart';
+import 'privacy_policy_page.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({
@@ -225,6 +226,17 @@ class ProfilePage extends StatelessWidget {
                       ),
                     ),
                   ],
+                ),
+              ),
+              const SizedBox(height: 9),
+              _ProfileAction(
+                icon: Icons.privacy_tip_outlined,
+                title: 'Gizlilik politikası',
+                subtitle: 'Yerel kayıt ve veri işleme açıklamalarını incele.',
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => const PrivacyPolicyPage(),
+                  ),
                 ),
               ),
               const SizedBox(height: 9),
